@@ -1,0 +1,18 @@
+/**
+ * Light Mode Theme Variables
+ * Light theme for admin dashboard
+ */
+
+body.light-mode {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6c757d;
+    --accent-color: #4ecdc4;
+    --accent-hover: #3a9d96;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --chart-grid: #e9ecef;
+}

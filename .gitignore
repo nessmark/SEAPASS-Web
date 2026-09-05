@@ -1,0 +1,51 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Environment
+/.env
+/.env.backup
+/.env.production
+
+# Logs
+/logs
+*.log
+
+# Laravel storage & cache
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/scheduler/*
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/views/.gitignore
+!/storage/framework/scheduler/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# Runtime
+/bootstrap/cache/*.php
+/bootstrap/cache/*.tmp
+
+# Testing
+/phpunit.xml.bak
+/.phpunit.result.cache
+
+# OS files
+.DS_Store
+
+# IDE
+/.idea/
+/.vscode/
+*.swp
+*.swo
+
+# Compressed assets
+*.zip
+*.rar
+
+# Build
+*.apk
+*.exe
+*.dll

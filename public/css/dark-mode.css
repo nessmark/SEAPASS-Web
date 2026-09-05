@@ -1,0 +1,19 @@
+/**
+ * Dark Mode Theme Variables
+ * Default theme for admin dashboard
+ */
+
+:root {
+    /* Dark theme (default) */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #3a3a3a;
+    --text-primary: #ffffff;
+    --text-secondary: #888;
+    --accent-color: #4ecdc4;
+    --accent-hover: #3a9d96;
+    --card-bg: #2d2d2d;
+    --border-color: #3a3a3a;
+    --input-bg: #2d2d2d;
+    --chart-grid: #3a3a3a;
+}

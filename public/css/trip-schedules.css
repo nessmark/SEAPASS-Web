@@ -1,0 +1,638 @@
+/**
+ * Trip & Schedule Management Styles
+ */
+
+.trip-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.trip-button {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.trip-button:hover {
+    background: var(--accent-hover);
+}
+
+/* Tabs */
+.trip-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.trip-tab {
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-bottom: -2px;
+}
+
+.trip-tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+}
+
+.trip-tab.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+}
+
+.trip-tab-content {
+    display: none;
+}
+
+.trip-tab-content.active {
+    display: block;
+}
+
+/* Trip Grid */
+.trip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 400px));
+    gap: 24px;
+    justify-content: start;
+}
+
+.trip-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.trip-card-active {
+    border-left: 4px solid #4ecdc4;
+}
+
+.trip-card-completed {
+    opacity: 0.8;
+    border-left: 4px solid #28a745;
+}
+
+.trip-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.trip-card-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.trip-route {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.trip-boat {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.trip-status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-departed {
+    background: #4ecdc4;
+    color: var(--bg-primary);
+}
+
+.status-arrived {
+    background: #28a745;
+    color: white;
+}
+
+.trip-card-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.trip-action-btn {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.trip-action-btn:hover {
+    filter: brightness(1.1);
+    transform: scale(1.05);
+}
+
+.trip-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.trip-info-row {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+    align-items: center;
+}
+
+.trip-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.trip-value {
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.trip-status-form {
+    display: inline-block;
+}
+
+.trip-status-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.trip-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+/* Modal Styles */
+.trip-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.trip-modal {
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    padding: 24px 28px;
+    width: min(700px, 100% - 32px);
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.seat-map-modal {
+    width: min(900px, 100% - 32px);
+}
+
+.trip-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.trip-modal-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.trip-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.trip-modal-close:hover {
+    background: var(--bg-tertiary);
+}
+
+.trip-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.trip-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
+}
+
+.trip-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.trip-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.trip-field label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.trip-field input,
+.trip-field select,
+.trip-field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.trip-field textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.trip-field small {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.trip-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.trip-modal-cancel {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.trip-modal-cancel:hover {
+    filter: brightness(1.1);
+}
+
+.trip-modal-save {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.trip-modal-save:hover {
+    background: var(--accent-hover);
+}
+
+/* Seat Map Styles */
+.seat-map-container {
+    padding: 20px;
+}
+
+.seat-map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.seat-item {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid var(--border-color);
+}
+
+.seat-item.available {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.seat-item.booked {
+    background: #e91e63;
+    color: white;
+    border-color: #c2185b;
+    cursor: not-allowed;
+}
+
+.seat-item:hover:not(.booked) {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.seat-map-info {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.seat-map-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.seat-map-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.seat-map-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.seat-map-legend-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.seat-map-legend-box.available {
+    background: #ffffff;
+    border: 1.5px solid #64b5f6;
+    color: #1976d2;
+}
+
+.seat-map-legend-box.booked {
+    background: #e0e0e0;
+    border: 1.5px solid #bdbdbd;
+    color: #757575;
+}
+
+/* Cabin Outline for Schedule View Modal */
+.modal-vessel-cabin {
+    max-width: 320px;
+    margin: 0 auto;
+    background: var(--card-bg, #ffffff);
+    border-radius: 52px 52px 18px 18px;
+    border: 1.5px solid var(--border-color, #d0d7de);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    padding: 16px 12px 18px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-vessel-bow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 16px;
+    border-radius: 20px;
+    background: var(--bg-secondary, #f1f5f9);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary, #64748b);
+    letter-spacing: 1px;
+}
+
+.modal-vessel-bow .bow-arrow {
+    color: #00bfa5;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.modal-vessel-exit-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary, #94a3b8);
+    margin-top: 12px;
+    padding: 0 8px;
+    letter-spacing: 0.5px;
+}
+
+.modal-vessel-exit-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border-color, #e2e8f0);
+    margin: 6px 0 10px 0;
+}
+
+.modal-vessel-rows-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.modal-vessel-seat-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.modal-vessel-bank {
+    display: flex;
+    gap: 6px;
+}
+
+.modal-vessel-aisle {
+    width: 32px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary, #94a3b8);
+    user-select: none;
+}
+
+.modal-seat-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+.modal-seat-box.available {
+    background: var(--card-bg, #ffffff);
+    border: 1.5px solid #64b5f6;
+    color: #1976d2;
+}
+
+.modal-seat-box.booked {
+    background: #e2e8f0;
+    border: 1.5px solid #cbd5e1;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.modal-seat-box.booked .seat-x {
+    font-size: 13px;
+    font-weight: bold;
+    color: #94a3b8;
+    line-height: 1;
+}
+
+.modal-vessel-stern {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary, #94a3b8);
+    letter-spacing: 0.8px;
+    margin-top: 12px;
+    text-align: center;
+    user-select: none;
+}
+
+.seat-map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.seat-map-legend-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 2px solid var(--border-color);
+}
+
+.seat-map-legend-box.available {
+    background: var(--bg-tertiary);
+}
+
+.seat-map-legend-box.booked {
+    background: #e91e63;
+    border-color: #c2185b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .trip-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .trip-modal-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .trip-card-header {
+        flex-direction: column;
+    }
+    
+    .trip-card-actions {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 640px) {
+    .trip-header {
+        flex-direction: column;
+    }
+    
+    .trip-button {
+        width: 100%;
+    }
+    
+    .trip-tabs {
+        overflow-x: auto;
+    }
+    
+    .trip-tab {
+        white-space: nowrap;
+    }
+}
