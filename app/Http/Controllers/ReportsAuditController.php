@@ -21,8 +21,6 @@ class ReportsAuditController extends Controller
         $routes = [
             'Surigao → San Jose(Dinagat)',
             'San Jose(Dinagat) → Surigao',
-            'Surigao → Dinagat',
-            'Dinagat → Surigao',
         ];
 
         // Ensure there are audit logs populated for system visibility
@@ -485,7 +483,7 @@ class ReportsAuditController extends Controller
             ]);
         }
 
-        $bookings = Booking::latest()->take(5)->get();
+        $bookings = Booking::with('passenger')->latest()->take(5)->get();
         foreach ($bookings as $b) {
             AuditLog::create([
                 'category' => 'booking',

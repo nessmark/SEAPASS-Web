@@ -6,18 +6,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Dashboard')</title>
     
+    {{-- Favicon / Tab Icon --}}
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/seapass_logo.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/seapass_logo.png') }}">
+    
     {{-- CSS Files --}}
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dark-mode.css') }}">
     <link rel="stylesheet" href="{{ asset('css/light-mode.css') }}">
-    
-    <style>
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-    </style>
     
     {{-- Additional Styles --}}
     @stack('styles')
@@ -31,18 +29,22 @@
 
     {{-- Main Content --}}
     <div class="main-content">
-        {{-- Header --}}
-        <div class="header">
+        {{-- Sticky Top Header --}}
+        <header class="header">
             <div class="header-left">
-                <div class="hamburger" id="sidebarToggle" role="button" tabindex="0" aria-label="Toggle sidebar" aria-expanded="true">☰</div>
+                <button type="button" class="hamburger" id="sidebarToggle" role="button" tabindex="0" aria-label="Toggle sidebar" aria-expanded="true">☰</button>
+                <div class="header-brand">
+                    <span class="header-logo-text">SeaPass</span>
+                    <span class="header-badge">Admin</span>
+                </div>
             </div>
             <div class="header-right">
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark mode">
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark mode">
                     <span id="themeIcon">🌙</span>
                 </button>
-                <button class="icon-btn">🔔</button>
+                <button type="button" class="icon-btn" aria-label="Notifications" title="Notifications">🔔</button>
             </div>
-        </div>
+        </header>
 
         {{-- Page Content --}}
         @yield('content')

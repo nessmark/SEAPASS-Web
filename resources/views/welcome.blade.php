@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TicketingSystem - Login</title>
+    
+    {{-- Favicon / Tab Icon --}}
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/seapass_logo.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/seapass_logo.png') }}">
     <style>
         * {
             margin: 0;

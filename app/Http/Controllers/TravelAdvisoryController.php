@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\TravelAdvisoryBroadcastMail;
+use App\Models\Advisory;
 use App\Models\Passenger;
 use App\Models\TravelAdvisory;
 use App\Models\User;
@@ -52,6 +53,34 @@ class TravelAdvisoryController extends Controller
             'message' => $validated['message'],
         ]);
 
+        // Synchronize to mobile app Advisories table if published
+        if ($validated['status'] === 'Published') {
+            $htmlContent = Advisory::renderEmailHtml([
+                'title' => $validated['title'],
+                'type' => $validated['type'],
+                'route' => $validated['route'],
+                'effectiveFrom' => $validated['effective_from'] ?? 'Immediate',
+                'until' => $validated['until'] ?? 'Until Further Notice',
+                'severity' => ucfirst($validated['severity']),
+                'message' => $validated['message'],
+            ]);
+
+            Advisory::updateOrCreate(
+                ['title' => $validated['title']],
+                [
+                    'content' => $htmlContent,
+                    'severity' => Advisory::normalizeSeverity($validated['severity']),
+                    'type' => $validated['type'],
+                    'affected_route' => $validated['route'],
+                    'route' => $validated['route'],
+                    'effective_from' => $validated['effective_from'] ?? null,
+                    'until' => $validated['until'] ?? null,
+                    'is_published' => 1,
+                    'published_at' => now(),
+                ]
+            );
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Advisory created successfully.',
@@ -70,6 +99,17 @@ class TravelAdvisoryController extends Controller
             $advisory = TravelAdvisory::find($id);
         }
 
+        // If already sent, avoid duplicate broadcast
+        if ($advisory && $advisory->push_status === 'Sent') {
+            return response()->json([
+                'success' => true,
+                'message' => 'This advisory push notification has already been sent.',
+                'already_sent' => true,
+                'push_status' => 'Sent',
+                'advisory_id' => $advisory->id,
+            ]);
+        }
+
         // If not found in DB or called via inline payload, build array from request or record
         $advisoryData = [
             'id' => $advisory ? $advisory->id : $request->input('id'),
@@ -82,6 +122,21 @@ class TravelAdvisoryController extends Controller
             'status' => $advisory ? $advisory->status : $request->input('status', 'Published'),
             'message' => $advisory ? $advisory->message : $request->input('message', 'Please stay tuned for official schedule updates.'),
         ];
+
+        // Deduplication lock to prevent multiple rapid clicks from spamming email dispatch
+        $lockKey = 'advisory_push_broadcast_' . md5(($advisoryData['title'] ?? '') . '_' . ($advisoryData['route'] ?? '') . '_' . date('Y-m-d'));
+        if (\Illuminate\Support\Facades\Cache::has($lockKey)) {
+            if ($advisory) {
+                $advisory->update(['push_status' => 'Sent', 'status' => 'Published']);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification was already broadcasted recently. Duplicate dispatch prevented.',
+                'already_sent' => true,
+                'push_status' => 'Sent',
+            ]);
+        }
+        \Illuminate\Support\Facades\Cache::put($lockKey, true, now()->addMinutes(15));
 
         // 1. Gather all registered recipient emails from Passengers, Users tables, and configured MAIL_FROM_ADDRESS
         $passengerEmails = Passenger::whereNotNull('email')
@@ -114,6 +169,25 @@ class TravelAdvisoryController extends Controller
                 'status' => 'Published',
             ]);
         }
+
+        // 4. Synchronize immediately to mobile app Advisories table!
+        $htmlContent = Advisory::renderEmailHtml($advisoryData);
+        $severityNorm = Advisory::normalizeSeverity($advisoryData['severity'] ?? 'info');
+
+        Advisory::updateOrCreate(
+            ['title' => $advisoryData['title']],
+            [
+                'content' => $htmlContent,
+                'severity' => $severityNorm,
+                'type' => $advisoryData['type'] ?? 'General Advisory',
+                'affected_route' => $advisoryData['route'] ?? 'All Routes',
+                'route' => $advisoryData['route'] ?? 'All Routes',
+                'effective_from' => $advisoryData['effectiveFrom'] ?? null,
+                'until' => $advisoryData['until'] ?? null,
+                'is_published' => 1,
+                'published_at' => now(),
+            ]
+        );
 
         return response()->json([
             'success' => true,

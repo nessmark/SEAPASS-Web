@@ -35,6 +35,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Open Recurring Rule Modal button
+    const openRecurringModalBtn = document.getElementById('openRecurringModalBtn');
+    const recurrenceSelect = document.getElementById('schedule_recurrence_type');
+    if (openRecurringModalBtn && scheduleModal) {
+        openRecurringModalBtn.addEventListener('click', () => {
+            resetScheduleForm();
+            if (recurrenceSelect) {
+                recurrenceSelect.value = 'daily';
+                applyRecurrenceVisibility('daily');
+            }
+            scheduleModal.style.display = 'flex';
+        });
+    }
+
+    // Recurrence pattern change listener
+    if (recurrenceSelect) {
+        recurrenceSelect.addEventListener('change', function() {
+            applyRecurrenceVisibility(this.value);
+        });
+    }
+
+    // Ensure form action is correctly set on submission for recurring rule edits
+    if (scheduleForm) {
+        scheduleForm.addEventListener('submit', function() {
+            const templateId = document.getElementById('schedule_template_id')?.value;
+            const methodInput = document.querySelector('#scheduleFormMethod input[name="_method"]');
+            if (templateId && methodInput && methodInput.value === 'PUT') {
+                this.action = `/admin/recurring-schedules/${templateId}`;
+            }
+        });
+    }
+
+    // Auto-select tab from URL ?tab=recurring
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedTab = urlParams.get('tab');
+    if (requestedTab) {
+        const tabBtn = document.querySelector(`.trip-tab[data-tab="${requestedTab}"]`);
+        if (tabBtn) {
+            tabBtn.click();
+        }
+    }
+
     if (closeScheduleBtn) {
         closeScheduleBtn.addEventListener('click', closeScheduleModal);
     }
@@ -127,12 +169,85 @@ function updateCapacityDisplay(boatSelectElem) {
     }
 }
 
+function applyRecurrenceVisibility(recurrenceType) {
+    const singleDateContainer = document.getElementById('singleDateContainer');
+    const daysOfWeekContainer = document.getElementById('daysOfWeekContainer');
+    const recurringDateContainer = document.getElementById('recurringDateContainer');
+    const departureDateInput = document.getElementById('schedule_departure_date');
+    const submitBtn = document.querySelector('#scheduleForm .trip-modal-save');
+    const modalTitle = document.getElementById('scheduleModalTitle');
+    const form = document.getElementById('scheduleForm');
+
+    // Check if the form is currently in Edit mode (single schedule or recurring rule)
+    const isEditMode = Boolean(
+        form && (
+            form.action.includes('/admin/trip-schedules/') ||
+            form.action.includes('/admin/recurring-schedules/') ||
+            document.querySelector('#scheduleFormMethod input[name="_method"]')
+        )
+    );
+
+    if (recurrenceType === 'weekly') {
+        if (singleDateContainer) singleDateContainer.style.display = 'none';
+        if (departureDateInput) {
+            departureDateInput.required = false;
+            departureDateInput.value = '';
+        }
+        if (daysOfWeekContainer) daysOfWeekContainer.style.display = 'block';
+        if (recurringDateContainer) recurringDateContainer.style.display = 'block';
+        if (submitBtn) submitBtn.textContent = isEditMode ? 'Update Recurring Rule' : 'Save Recurring Rule';
+        if (modalTitle && !modalTitle.textContent.includes('Edit')) {
+            modalTitle.textContent = 'Add Recurring Schedule Rule';
+        }
+        if (form && !isEditMode) {
+            form.action = '/admin/recurring-schedules';
+        }
+    } else if (recurrenceType === 'daily') {
+        if (singleDateContainer) singleDateContainer.style.display = 'none';
+        if (departureDateInput) {
+            departureDateInput.required = false;
+            departureDateInput.value = '';
+        }
+        if (daysOfWeekContainer) daysOfWeekContainer.style.display = 'none';
+        if (recurringDateContainer) recurringDateContainer.style.display = 'block';
+        if (submitBtn) submitBtn.textContent = isEditMode ? 'Update Recurring Rule' : 'Save Recurring Rule';
+        if (modalTitle && !modalTitle.textContent.includes('Edit')) {
+            modalTitle.textContent = 'Add Recurring Schedule Rule';
+        }
+        if (form && !isEditMode) {
+            form.action = '/admin/recurring-schedules';
+        }
+    } else {
+        // 'single'
+        if (singleDateContainer) singleDateContainer.style.display = 'block';
+        if (departureDateInput) {
+            departureDateInput.required = true;
+        }
+        if (daysOfWeekContainer) daysOfWeekContainer.style.display = 'none';
+        if (recurringDateContainer) recurringDateContainer.style.display = 'none';
+        if (submitBtn) submitBtn.textContent = isEditMode ? 'Update Schedule' : 'Save Schedule';
+        if (modalTitle && !modalTitle.textContent.includes('Edit')) {
+            modalTitle.textContent = 'Add Trip Schedule';
+        }
+        if (form && !isEditMode) {
+            form.action = '/admin/trip-schedules';
+        }
+    }
+}
+
 function resetScheduleForm() {
     const form = document.getElementById('scheduleForm');
     const formMethod = document.getElementById('scheduleFormMethod');
     const modalTitle = document.getElementById('scheduleModalTitle');
     const boatCapacityInfo = document.getElementById('boat_capacity_info');
     const capacityVal = document.getElementById('capacity_val');
+    const recurrenceSelect = document.getElementById('schedule_recurrence_type');
+    const recurrenceField = recurrenceSelect ? recurrenceSelect.closest('.trip-field') : null;
+    const templateIdInput = document.getElementById('schedule_template_id');
+
+    if (templateIdInput) {
+        templateIdInput.value = '';
+    }
     
     if (form) {
         form.action = '/admin/trip-schedules';
@@ -147,6 +262,26 @@ function resetScheduleForm() {
         modalTitle.textContent = 'Add Trip Schedule';
     }
 
+    if (recurrenceField) {
+        recurrenceField.style.display = 'block';
+    }
+
+    if (recurrenceSelect) {
+        recurrenceSelect.value = 'single';
+    }
+
+    // Uncheck any day pills
+    document.querySelectorAll('.day-pill-input').forEach(cb => {
+        cb.checked = false;
+    });
+
+    const untilInput = document.getElementById('schedule_effective_until');
+    if (untilInput) untilInput.value = '';
+    const arrTimeInput = document.getElementById('schedule_arrival_time');
+    if (arrTimeInput) arrTimeInput.value = '';
+
+    applyRecurrenceVisibility('single');
+
     if (boatCapacityInfo) {
         boatCapacityInfo.textContent = 'Fleet Seat Capacity: —';
     }
@@ -160,6 +295,13 @@ function openEditScheduleModal(id, boatId, route, departureDate, departureSlot, 
     const scheduleForm = document.getElementById('scheduleForm');
     const formMethod = document.getElementById('scheduleFormMethod');
     const modalTitle = document.getElementById('scheduleModalTitle');
+    const recurrenceSelect = document.getElementById('schedule_recurrence_type');
+    const recurrenceField = recurrenceSelect ? recurrenceSelect.closest('.trip-field') : null;
+    const templateIdInput = document.getElementById('schedule_template_id');
+
+    if (templateIdInput) {
+        templateIdInput.value = '';
+    }
     
     if (scheduleForm) {
         scheduleForm.action = `/admin/trip-schedules/${id}`;
@@ -172,6 +314,15 @@ function openEditScheduleModal(id, boatId, route, departureDate, departureSlot, 
     if (modalTitle) {
         modalTitle.textContent = 'Edit Trip Schedule';
     }
+
+    // Hide recurrence option when editing an existing single trip
+    if (recurrenceField) {
+        recurrenceField.style.display = 'none';
+    }
+    if (recurrenceSelect) {
+        recurrenceSelect.value = 'single';
+    }
+    applyRecurrenceVisibility('single');
     
     // Populate form fields
     document.getElementById('schedule_boat_id').value = boatId;
@@ -190,6 +341,109 @@ function openEditScheduleModal(id, boatId, route, departureDate, departureSlot, 
         scheduleModal.style.display = 'flex';
     }
 }
+
+function openEditRecurringModal(data) {
+    const scheduleModal = document.getElementById('scheduleModalBackdrop');
+    const scheduleForm = document.getElementById('scheduleForm');
+    const formMethod = document.getElementById('scheduleFormMethod');
+    const modalTitle = document.getElementById('scheduleModalTitle');
+    const recurrenceSelect = document.getElementById('schedule_recurrence_type');
+    const recurrenceField = recurrenceSelect ? recurrenceSelect.closest('.trip-field') : null;
+    const submitBtn = document.querySelector('#scheduleForm .trip-modal-save');
+    const templateIdInput = document.getElementById('schedule_template_id');
+
+    if (templateIdInput) {
+        templateIdInput.value = data.id;
+    }
+    
+    if (formMethod) {
+        formMethod.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+    }
+    
+    if (scheduleForm) {
+        scheduleForm.action = `/admin/recurring-schedules/${data.id}`;
+    }
+    
+    if (modalTitle) {
+        modalTitle.textContent = 'Edit Recurring Schedule Rule';
+    }
+
+    if (submitBtn) {
+        submitBtn.textContent = 'Update Recurring Rule';
+    }
+
+    if (recurrenceField) {
+        recurrenceField.style.display = 'block';
+    }
+
+    const recType = data.recurrence_type || 'daily';
+    if (recurrenceSelect) {
+        recurrenceSelect.value = recType;
+    }
+    applyRecurrenceVisibility(recType);
+
+    // Explicitly guarantee form action points to /admin/recurring-schedules/{id}
+    if (scheduleForm) {
+        scheduleForm.action = `/admin/recurring-schedules/${data.id}`;
+    }
+
+    // Populate form fields
+    if (document.getElementById('schedule_boat_id')) {
+        document.getElementById('schedule_boat_id').value = data.boat_id;
+    }
+    if (document.getElementById('schedule_route')) {
+        document.getElementById('schedule_route').value = data.route;
+    }
+    if (document.getElementById('schedule_departure_time_slot')) {
+        const timeSelect = document.getElementById('schedule_departure_time_slot');
+        const formattedTime = (data.departure_time || '').substring(0, 5);
+        let exists = false;
+        for (let opt of timeSelect.options) {
+            if (opt.value === formattedTime) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists && formattedTime) {
+            const newOpt = document.createElement('option');
+            newOpt.value = formattedTime;
+            newOpt.textContent = formattedTime;
+            timeSelect.appendChild(newOpt);
+        }
+        timeSelect.value = formattedTime;
+    }
+    if (document.getElementById('schedule_arrival_time')) {
+        document.getElementById('schedule_arrival_time').value = data.arrival_time ? (data.arrival_time.substring(0, 5)) : '';
+    }
+    if (document.getElementById('schedule_effective_until')) {
+        document.getElementById('schedule_effective_until').value = data.effective_until || '';
+    }
+    if (document.getElementById('schedule_available_seats')) {
+        document.getElementById('schedule_available_seats').value = data.available_seats;
+    }
+    if (document.getElementById('schedule_notes')) {
+        document.getElementById('schedule_notes').value = data.notes || '';
+    }
+
+    // Set day checkboxes
+    document.querySelectorAll('.day-pill-input').forEach(cb => {
+        cb.checked = Array.isArray(data.days_of_week) && data.days_of_week.includes(cb.value);
+    });
+
+    const boatSelect = document.getElementById('schedule_boat_id');
+    updateCapacityDisplay(boatSelect);
+    if (document.getElementById('schedule_available_seats')) {
+        document.getElementById('schedule_available_seats').value = data.available_seats;
+    }
+
+    if (scheduleModal) {
+        scheduleModal.style.display = 'flex';
+    }
+}
+
+window.openEditScheduleModal = openEditScheduleModal;
+window.openEditRecurringModal = openEditRecurringModal;
+window.applyRecurrenceVisibility = applyRecurrenceVisibility;
 
 function viewSeatMap(tripId) {
     const seatMapModal = document.getElementById('seatMapModalBackdrop');

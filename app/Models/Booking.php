@@ -19,18 +19,34 @@ class Booking extends Model
         'departure_time_slot',
         'seat_numbers',
         'seat_breakdown',
+        'discount_id_photos',
         'status',
+        'is_boarded',
+        'boarded_at',
+        'boarded_by',
         'qr_code',
         'payment_method',
         'amount_collected',
+        'paymongo_checkout_session_id',
+        'paymongo_payment_intent_id',
+        'paymongo_payment_id',
+        'paymongo_refund_id',
+        'refund_status',
+        'refund_amount',
+        'refund_reason',
+        'rejection_reason',
         'notes',
     ];
 
     protected $casts = [
         'trip_date' => 'date',
+        'is_boarded' => 'boolean',
+        'boarded_at' => 'datetime',
         'seat_numbers' => 'array',
         'seat_breakdown' => 'array',
+        'discount_id_photos' => 'array',
         'amount_collected' => 'decimal:2',
+        'refund_amount' => 'decimal:2',
     ];
 
     protected $appends = [
@@ -49,45 +65,26 @@ class Booking extends Model
     }
 
     /**
-     * Get the registered account mobile number of the user who booked the trip.
+     * Get the registered contact number without triggering in-loop database queries (N+1 safe).
      */
     public function getRegisteredContactNumberAttribute(): string
     {
-        if (!empty($this->passenger?->phone)) {
+        // Fast Path 1: Use eager-loaded passenger relationship
+        if ($this->relationLoaded('passenger') && !empty($this->passenger?->phone)) {
             return $this->passenger->phone;
         }
 
-        if (!empty($this->passenger_id)) {
-            $phone = Passenger::where('id', $this->passenger_id)->value('phone');
-            if (!empty($phone)) {
-                return $phone;
-            }
-        }
-
-        if (!empty($this->email)) {
-            $phone = Passenger::where('email', $this->email)->value('phone');
-            if (!empty($phone)) {
-                return $phone;
-            }
-        }
-
-        if (!empty($this->passenger_name)) {
-            $phone = Passenger::where('name', $this->passenger_name)->whereNotNull('phone')->value('phone');
-            if (!empty($phone)) {
-                return $phone;
-            }
-        }
-
+        // Fast Path 2: Use direct contact_number column on bookings table
         if (!empty($this->contact_number) && $this->contact_number !== '-') {
             return $this->contact_number;
         }
 
+        // Fast Path 3: In-memory parse from notes attribute (zero DB queries)
         if (!empty($this->notes) && preg_match('/(?:Contact:.*?|\b)(\+?[0-9]{10,15})\b/', $this->notes, $matches)) {
             return $matches[1];
         }
 
-        $fallbackPhone = Passenger::whereNotNull('phone')->where('phone', '!=', '')->value('phone');
-        return $fallbackPhone ?: '-';
+        return '-';
     }
 
     /**
@@ -251,6 +248,7 @@ class Booking extends Model
                     'seat_display' => $formatSeatDisplay($pSeat),
                     'category' => $pCat,
                     'individual_fare' => $pFare,
+                    'id_photo_url' => !empty($item['id_photo_url']) ? url($item['id_photo_url']) : null,
                     'qr_payload' => json_encode($qrPayload),
                 ];
             }
@@ -395,5 +393,53 @@ class Booking extends Model
             'tickets' => $this->passenger_tickets,
         ];
     }
+
+    /**
+     * Check if this booking contains any discounted passengers (Student, Senior, PWD).
+     */
+    public function hasDiscounts(): bool
+    {
+        // 1. Check seat breakdown for any non-regular category
+        if (is_array($this->seat_breakdown) && !empty($this->seat_breakdown)) {
+            foreach ($this->seat_breakdown as $item) {
+                $cat = strtolower(trim((string) ($item['category'] ?? '')));
+                if (str_contains($cat, 'student') || str_contains($cat, 'senior') || str_contains($cat, 'pwd')) {
+                    return true;
+                }
+            }
+        }
+
+        // 2. Check if discount ID photos are attached
+        if (is_array($this->discount_id_photos) && !empty($this->discount_id_photos)) {
+            return true;
+        }
+
+        // 3. Check notes for discount mentions
+        if (!empty($this->notes)) {
+            if (preg_match('/\b(student|senior|pwd)\b/i', $this->notes)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the booking is awaiting admin verification for discounted tickets.
+     */
+    public function isToBeConfirmed(): bool
+    {
+        return strtolower(trim((string) $this->status)) === 'to_be_confirmed';
+    }
+
+    /**
+     * Check if the booking is in a pending/unconfirmed verification state.
+     */
+    public function isPendingVerification(): bool
+    {
+        $st = strtolower(trim((string) $this->status));
+        return $st === 'to_be_confirmed' || $st === 'pending';
+    }
 }
+
 

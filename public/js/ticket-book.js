@@ -1595,6 +1595,28 @@ function openPassengerDetailsModal(info) {
                     ? `<span class="passenger-item-fare">₱${parseFloat(p.individual_fare).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`
                     : '';
 
+                // Discount ID Verification Photo
+                let idPhotoHtml = '';
+                const isDiscounted = catRaw.includes('student') || catRaw.includes('senior') || catRaw.includes('pwd');
+                if (isDiscounted) {
+                    if (p.id_photo_url) {
+                        idPhotoHtml = `
+                            <button type="button" class="passenger-id-preview-btn" onclick="event.stopPropagation(); openIdPhotoLightbox('${escapeHtml(p.id_photo_url)}', '${escapeHtml(name)}', '${escapeHtml(catText)}')">
+                                <span class="id-thumb-wrap">
+                                    <img src="${escapeHtml(p.id_photo_url)}" alt="ID" class="id-micro-thumb" onerror="this.style.display='none'; this.parentElement.innerHTML='🪪';" />
+                                </span>
+                                <span>View ID</span>
+                            </button>
+                        `;
+                    } else {
+                        idPhotoHtml = `
+                            <span class="passenger-id-missing-badge" title="No ID photo attached for this discounted passenger">
+                                ⚠️ No ID Uploaded
+                            </span>
+                        `;
+                    }
+                }
+
                 return `
                     <div class="passenger-item-card">
                         <div class="passenger-item-left">
@@ -1613,11 +1635,30 @@ function openPassengerDetailsModal(info) {
                                 <span>${catIcon}</span>
                                 <span>${escapeHtml(catText)}</span>
                             </span>
+                            ${idPhotoHtml}
                             ${fareHtml}
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+    }
+
+    // Configure approve & reject buttons inside passenger details modal
+    const approveBtn = document.getElementById('modalApproveBtn');
+    const rejectBtn = document.getElementById('modalRejectBtn');
+    if (approveBtn && rejectBtn) {
+        if (info.isToBeConfirmed === '1' || info.status === 'to_be_confirmed' || info.status === 'pending') {
+            approveBtn.style.display = 'inline-block';
+            rejectBtn.style.display = 'inline-block';
+            approveBtn.dataset.bookingId = info.bookingId || '';
+            approveBtn.dataset.bookingRef = info.ref || '';
+            rejectBtn.dataset.bookingId = info.bookingId || '';
+            rejectBtn.dataset.bookingRef = info.ref || '';
+            rejectBtn.dataset.amount = info.totalAmount || '₱0.00';
+        } else {
+            approveBtn.style.display = 'none';
+            rejectBtn.style.display = 'none';
         }
     }
 
@@ -1634,9 +1675,163 @@ function closePassengerDetailsModal() {
     document.body.style.overflow = '';
 }
 
+async function handleApproveBooking(bookingId, bookingRef) {
+    if (!bookingId) return;
+    const confirmed = confirm(`Approve discounted booking #${bookingRef}? This will verify the passenger's discount ID, issue the official boarding pass QR code, and notify the passenger via Email & Push Notification.`);
+    if (!confirmed) return;
+
+    const csrfToken = getCsrfToken();
+    try {
+        const response = await fetch(`/admin/bookings/${bookingId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to approve booking.');
+        }
+        alert(data.message || 'Booking approved successfully!');
+        window.location.reload();
+    } catch (err) {
+        console.error('Approval error:', err);
+        alert(err.message || 'An error occurred while approving the booking.');
+    }
+}
+
+function openRejectionRefundModal(bookingId, bookingRef, amount) {
+    const modal = document.getElementById('rejection_refund_modal');
+    if (!modal) return;
+    const idInput = document.getElementById('rejectBookingId');
+    const refEl = document.getElementById('rejectBookingRefDisplay');
+    const amountEl = document.getElementById('rejectRefundAmountDisplay');
+    const presetEl = document.getElementById('rejectPresetReason');
+    const customEl = document.getElementById('rejectCustomReason');
+
+    if (idInput) idInput.value = bookingId;
+    if (refEl) refEl.textContent = '#' + (bookingRef || 'SP-0000');
+    if (amountEl) amountEl.textContent = amount || '₱0.00';
+    if (presetEl) presetEl.value = 'Uploaded ID photo is unreadable or blurry.';
+    if (customEl) {
+        customEl.style.display = 'none';
+        customEl.value = '';
+    }
+
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeRejectionRefundModal() {
+    const modal = document.getElementById('rejection_refund_modal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+    }
+}
+
+async function handleRejectionRefundSubmit(e) {
+    e.preventDefault();
+    const bookingId = document.getElementById('rejectBookingId')?.value;
+    if (!bookingId) return;
+
+    const preset = document.getElementById('rejectPresetReason')?.value;
+    const custom = document.getElementById('rejectCustomReason')?.value?.trim();
+    const reason = (preset === 'custom' ? custom : preset) || 'Discount ID could not be verified.';
+
+    if (preset === 'custom' && !custom) {
+        alert('Please specify the custom reason for rejection.');
+        return;
+    }
+
+    const submitBtn = document.getElementById('confirmRejectRefundBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Processing Refund via PayMongo...</span>';
+    }
+
+    const csrfToken = getCsrfToken();
+    try {
+        const response = await fetch(`/admin/bookings/${bookingId}/reject-refund`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ reason: reason }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to reject and refund booking.');
+        }
+        alert(data.message || 'Booking rejected and automated refund initiated.');
+        window.location.reload();
+    } catch (err) {
+        console.error('Rejection & Refund error:', err);
+        alert(err.message || 'An error occurred while rejecting and refunding the booking.');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Confirm Rejection &amp; Refund</span>';
+        }
+    }
+}
+
+function openIdPhotoLightbox(imageUrl, passengerName, category) {
+    const lightbox = document.getElementById('id_photo_lightbox_modal');
+    if (!lightbox) return;
+
+    const imgEl = document.getElementById('idLightboxImage');
+    const nameEl = document.getElementById('idLightboxPassengerName');
+    const catEl = document.getElementById('idLightboxCategory');
+    const linkEl = document.getElementById('idLightboxFullLink');
+
+    if (imgEl) imgEl.src = imageUrl;
+    if (nameEl) nameEl.textContent = passengerName || 'Passenger ID';
+    if (catEl) catEl.textContent = category || 'Discount Verification';
+    if (linkEl) linkEl.href = imageUrl;
+
+    lightbox.style.display = 'flex';
+    lightbox.setAttribute('aria-hidden', 'false');
+}
+
+function closeIdPhotoLightbox() {
+    const lightbox = document.getElementById('id_photo_lightbox_modal');
+    if (lightbox) {
+        lightbox.style.display = 'none';
+        lightbox.setAttribute('aria-hidden', 'true');
+        const imgEl = document.getElementById('idLightboxImage');
+        if (imgEl) imgEl.src = '';
+    }
+}
+
+// Expose lightbox methods globally
+window.openIdPhotoLightbox = openIdPhotoLightbox;
+window.closeIdPhotoLightbox = closeIdPhotoLightbox;
+
 // Global Event Listeners for Print & Passenger Modal Actions
 document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeIdPhotoLightbox();
+            closePassengerDetailsModal();
+        }
+    });
+
     document.addEventListener('click', (event) => {
+        // 0. Lightbox Modal Close
+        if (event.target.closest('#closeIdLightbox') || event.target.closest('#cancelIdLightbox') || event.target.closest('.id-lightbox-close')) {
+            closeIdPhotoLightbox();
+            return;
+        }
+        const idLightboxModal = document.getElementById('id_photo_lightbox_modal');
+        if (idLightboxModal && event.target === idLightboxModal) {
+            closeIdPhotoLightbox();
+            return;
+        }
+
         // 1. Passenger Details Modal Trigger
         const passengerBtn = event.target.closest('.btn-view-passengers');
         if (passengerBtn) {
@@ -1644,12 +1839,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const passengersJson = passengerBtn.getAttribute('data-passengers');
                 const passengers = passengersJson ? JSON.parse(passengersJson) : [];
                 const info = {
+                    bookingId: passengerBtn.getAttribute('data-booking-id'),
                     ref: passengerBtn.getAttribute('data-booking-ref'),
                     route: passengerBtn.getAttribute('data-route'),
                     tripDate: passengerBtn.getAttribute('data-trip-date'),
                     tripTime: passengerBtn.getAttribute('data-trip-time'),
                     vessel: passengerBtn.getAttribute('data-vessel'),
                     totalAmount: passengerBtn.getAttribute('data-total-amount'),
+                    amount: passengerBtn.getAttribute('data-amount'),
+                    isToBeConfirmed: passengerBtn.getAttribute('data-is-to-be-confirmed'),
+                    status: passengerBtn.getAttribute('data-status'),
                     passengers: passengers
                 };
                 openPassengerDetailsModal(info);
@@ -1672,7 +1871,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 3. Print Ticket Actions
+        // 3. Approve Booking (From Table or Passenger Modal)
+        const approveBtn = event.target.closest('.btn-approve-booking-action') || event.target.closest('#modalApproveBtn');
+        if (approveBtn) {
+            const bId = approveBtn.dataset.bookingId;
+            const bRef = approveBtn.dataset.bookingRef;
+            if (bId) {
+                handleApproveBooking(bId, bRef);
+            }
+            return;
+        }
+
+        // 4. Reject & Refund Booking (From Table or Passenger Modal)
+        const rejectBtn = event.target.closest('.btn-reject-refund-action') || event.target.closest('#modalRejectBtn');
+        if (rejectBtn) {
+            const bId = rejectBtn.dataset.bookingId;
+            const bRef = rejectBtn.dataset.bookingRef;
+            const bAmt = rejectBtn.dataset.amount || '₱0.00';
+            if (bId) {
+                openRejectionRefundModal(bId, bRef, bAmt);
+            }
+            return;
+        }
+
+        // 5. Close Rejection Modal
+        if (event.target.closest('#closeRejectionModal') || event.target.closest('#cancelRejectionModal')) {
+            closeRejectionRefundModal();
+            return;
+        }
+        const rejModal = document.getElementById('rejection_refund_modal');
+        if (rejModal && event.target === rejModal) {
+            closeRejectionRefundModal();
+            return;
+        }
+
+        // 6. Print Ticket Actions
         const printBtn = event.target.closest('.btn-print-ticket-action');
         if (printBtn) {
             try {
@@ -1713,11 +1946,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Rejection reason preset change
+    const presetSelect = document.getElementById('rejectPresetReason');
+    const customTextarea = document.getElementById('rejectCustomReason');
+    if (presetSelect && customTextarea) {
+        presetSelect.addEventListener('change', function () {
+            if (this.value === 'custom') {
+                customTextarea.style.display = 'block';
+                customTextarea.focus();
+            } else {
+                customTextarea.style.display = 'none';
+            }
+        });
+    }
+
+    // Rejection form submission
+    const rejForm = document.getElementById('rejectionRefundForm');
+    if (rejForm) {
+        rejForm.addEventListener('submit', handleRejectionRefundSubmit);
+    }
+
     // Escape key to close any open modal
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             closeTicketPrintModal();
             closePassengerDetailsModal();
+            closeRejectionRefundModal();
         }
     });
 });

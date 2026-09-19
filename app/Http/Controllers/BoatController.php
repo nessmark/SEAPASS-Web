@@ -65,7 +65,6 @@ class BoatController extends Controller
             'boat_number' => ['nullable', 'string', 'max:50'],
             'license_number' => ['nullable', 'string', 'max:100'],
             'passenger_capacity' => ['nullable', 'integer', 'min:0'],
-            'vehicle_capacity' => ['nullable', 'integer', 'min:0'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'status' => ['required', 'in:Active,Under Maintenance,Out of Service'],
         ]);
@@ -89,7 +88,6 @@ class BoatController extends Controller
             'boat_number' => ['nullable', 'string', 'max:50'],
             'license_number' => ['nullable', 'string', 'max:100'],
             'passenger_capacity' => ['nullable', 'integer', 'min:0'],
-            'vehicle_capacity' => ['nullable', 'integer', 'min:0'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'status' => ['required', 'in:Active,Under Maintenance,Out of Service'],
         ]);

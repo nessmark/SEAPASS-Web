@@ -190,7 +190,7 @@
             <p class="command-subtitle">Real-time maritime passenger ticketing, vessel schedules, and port security overview.</p>
         </div>
         <div class="command-actions">
-            <a href="{{ route('admin.tickets') }}" class="cmd-btn">
+            <a href="{{ route('admin.tickets.index') }}" class="cmd-btn">
                 🎟️ Counter Booking
             </a>
             <a href="{{ route('admin.travel-advisory') }}" class="cmd-btn cmd-btn-secondary">
@@ -247,7 +247,7 @@
                     <div class="card-title" style="margin-bottom: 4px;">Recent Booking Activity</div>
                     <div class="card-subtitle" style="margin-bottom: 0;">Latest bookings submitted via mobile app &amp; counter desk.</div>
                 </div>
-                <a href="{{ route('admin.tickets') }}" style="font-size: 13px; font-weight: 700; color: #0284C7; text-decoration: none;">View All →</a>
+                <a href="{{ route('admin.tickets.index') }}" style="font-size: 13px; font-weight: 700; color: #0284C7; text-decoration: none;">View All →</a>
             </div>
 
             <table class="table">

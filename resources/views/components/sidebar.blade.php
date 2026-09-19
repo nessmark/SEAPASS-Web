@@ -13,7 +13,7 @@
         <span class="nav-icon">⏰</span>
         <span>Trip & Schedule Management</span>
     </a>
-    <a href="{{ route('admin.tickets') }}" class="nav-item {{ request()->routeIs('admin.tickets') ? 'active' : '' }}">
+    <a href="{{ route('admin.tickets.index') }}" class="nav-item {{ request()->routeIs('admin.tickets*') ? 'active' : '' }}">
         <span class="nav-icon">🎫</span>
         <span>Ticketing &amp; Booking</span>
     </a>
@@ -40,6 +40,10 @@
             <a href="{{ route('admin.user-management.passengers') }}" class="nav-dropdown-item {{ request()->routeIs('admin.user-management.passengers') ? 'active' : '' }}">
                 <span class="nav-icon">👨‍👩‍👧‍👦</span>
                 <span>Passenger List</span>
+            </a>
+            <a href="{{ route('admin.user-management.scanner-staff') }}" class="nav-dropdown-item {{ request()->routeIs('admin.user-management.scanner-staff*') ? 'active' : '' }}">
+                <span class="nav-icon">📷</span>
+                <span>Scanner Staff</span>
             </a>
         </div>
     </div>

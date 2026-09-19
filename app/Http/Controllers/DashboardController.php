@@ -40,7 +40,7 @@ class DashboardController extends Controller
         }
 
         // 2. Recent Bookings (Live)
-        $recentBookings = Booking::with('tripSchedule.boat')
+        $recentBookings = Booking::with(['tripSchedule.boat', 'passenger'])
             ->latest()
             ->take(6)
             ->get();

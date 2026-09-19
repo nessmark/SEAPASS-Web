@@ -67,10 +67,6 @@
                                 <input type="text" name="boat_number" value="{{ old('boat_number') }}" maxlength="50">
                             </div>
                             <div class="boat-field">
-                                <label>Vehicle Capacity</label>
-                                <input type="number" name="vehicle_capacity" value="{{ old('vehicle_capacity') }}" min="0">
-                            </div>
-                            <div class="boat-field">
                                 <label>Image</label>
                                 <input type="file" name="image" accept="image/jpeg,image/png,image/jpg,image/gif">
                                 <small style="color: var(--text-secondary);">Max size: 2MB (JPEG, PNG, JPG, GIF)</small>
@@ -128,10 +124,6 @@
                                 <input type="text" name="boat_number" id="edit_boat_number" maxlength="50">
                             </div>
                             <div class="boat-field">
-                                <label>Vehicle Capacity</label>
-                                <input type="number" name="vehicle_capacity" id="edit_vehicle_capacity" min="0">
-                            </div>
-                            <div class="boat-field">
                                 <label>Image</label>
                                 <input type="file" name="image" accept="image/jpeg,image/png,image/jpg,image/gif">
                                 <small style="color: var(--text-secondary);">Max size: 2MB (JPEG, PNG, JPG, GIF)</small>
@@ -158,7 +150,7 @@
                 @forelse ($boats as $boat)
                     <div class="boat-card">
                         <div class="boat-actions">
-                            <button class="boat-edit" type="button" onclick="openEditModal({{ $boat->id }}, '{{ addslashes($boat->name) }}', '{{ addslashes($boat->license_number ?? '') }}', '{{ $boat->passenger_capacity ?? '' }}', '{{ addslashes($boat->owner ?? '') }}', '{{ addslashes($boat->operator ?? '') }}', '{{ addslashes($boat->boat_number ?? '') }}', '{{ $boat->vehicle_capacity ?? '' }}', '{{ $boat->status ?? 'Active' }}', '{{ $boat->image ? asset('Boats_images/' . $boat->image) : '' }}')" aria-label="Edit {{ $boat->name }}" title="Edit">
+                            <button class="boat-edit" type="button" onclick="openEditModal({{ $boat->id }}, '{{ addslashes($boat->name) }}', '{{ addslashes($boat->license_number ?? '') }}', '{{ $boat->passenger_capacity ?? '' }}', '{{ addslashes($boat->owner ?? '') }}', '{{ addslashes($boat->operator ?? '') }}', '{{ addslashes($boat->boat_number ?? '') }}', '{{ $boat->status ?? 'Active' }}', '{{ $boat->image ? asset('Boats_images/' . $boat->image) : '' }}')" aria-label="Edit {{ $boat->name }}" title="Edit">
                                 ✏️
                             </button>
                             <form method="POST" action="{{ route('admin.boats.destroy', $boat) }}" style="display: inline;">
@@ -209,12 +201,7 @@
                                     <span class="boat-detail-value">{{ $boat->boat_number }}</span>
                                 </div>
                                 @endif
-                                @if($boat->vehicle_capacity)
-                                <div class="boat-detail-row">
-                                    <span class="boat-detail-label">Vehicles:</span>
-                                    <span class="boat-detail-value">{{ $boat->vehicle_capacity }}</span>
-                                </div>
-                                @endif
+
                                 <div class="boat-detail-row boat-status-row">
                                     <span class="boat-detail-label">Status:</span>
                                     <form method="POST"

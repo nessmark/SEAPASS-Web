@@ -40,9 +40,15 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        // Guard for Passenger model (mobile app passengers)
         'sanctum' => [
             'driver' => 'sanctum',
             'provider' => 'passengers',
+        ],
+        // Guard for User model (scanner staff, admin via API)
+        'api' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
         ],
     ],
 

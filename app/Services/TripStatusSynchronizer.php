@@ -128,7 +128,7 @@ class TripStatusSynchronizer
                 ->whereRaw('arrival_time <= ?', [$now]);
         })->orWhere(function (Builder $inner) use ($now) {
             $inner->whereNull('arrival_time')
-                ->whereRaw('DATE_ADD(departure_time, INTERVAL 2 HOUR) <= ?', [$now]);
+                ->whereRaw("departure_time + INTERVAL '2 hours' <= ?::timestamp", [$now]);
         });
     }
 
@@ -139,7 +139,7 @@ class TripStatusSynchronizer
                 ->whereRaw('arrival_time > ?', [$now]);
         })->orWhere(function (Builder $inner) use ($now) {
             $inner->whereNull('arrival_time')
-                ->whereRaw('DATE_ADD(departure_time, INTERVAL 2 HOUR) > ?', [$now]);
+                ->whereRaw("departure_time + INTERVAL '2 hours' > ?::timestamp", [$now]);
         });
     }
 }

@@ -636,3 +636,204 @@
         white-space: nowrap;
     }
 }
+
+/* ── Recurring Schedules UI & Day Pills ── */
+.tab-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 999px;
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.day-pills-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.day-pill-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.day-pill-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.day-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.day-pill-input:checked + .day-pill-btn {
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    border-color: var(--accent-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.day-pill-btn:hover {
+    border-color: var(--accent-color);
+}
+
+/* ── Recurring Rules Tab & Table ── */
+.recurring-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    padding: 14px 18px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.recurring-header-text h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.recurring-header-text p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.recurring-table-container {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+}
+
+.recurring-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    text-align: left;
+}
+
+.recurring-table th {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.recurring-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    color: var(--text-primary);
+}
+
+.recurring-table tr:last-child td {
+    border-bottom: none;
+}
+
+.recurring-table tr:hover {
+    background: var(--bg-tertiary);
+}
+
+.badge-recurrence {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: rgba(2, 132, 199, 0.12);
+    color: #0284c7;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.badge-active-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-active-status.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-active-status.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.action-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.action-mini-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.action-mini-btn:hover {
+    transform: translateY(-1px);
+}
+
+.action-mini-btn.btn-gen-now {
+    background: #0284c7;
+    color: white;
+    border-color: #0284c7;
+}
+
+.action-mini-btn.btn-toggle-deactivate {
+    background: #f59e0b;
+    color: white;
+    border-color: #f59e0b;
+}
+
+.action-mini-btn.btn-toggle-activate {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+.action-mini-btn.btn-delete-rule {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+

@@ -13,3 +13,10 @@ Artisan::command('inspire', function () {
  * Requires the system cron: * * * * * php artisan schedule:run
  */
 Schedule::command('trips:sync-statuses')->everyMinute();
+
+/*
+ * Generate upcoming ferry trips automatically based on recurring rules (Alarm-Clock Engine).
+ * Pre-populates rolling 90-day (at least 3 months) lookahead window.
+ */
+Schedule::command('schedules:generate-recurring --days=90')->dailyAt('00:00');
+

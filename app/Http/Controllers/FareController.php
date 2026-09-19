@@ -110,7 +110,6 @@ class FareController extends Controller
             'student_fare' => $student,
             'senior_pwd_fare' => $senior,
         ])
-            ->header('Access-Control-Allow-Origin', '*')
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 

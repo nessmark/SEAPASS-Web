@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SendOtpMail;
 use App\Models\Passenger;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -14,12 +16,20 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     /**
-     * Validate passenger login from the mobile app.
+     * Validate login from the mobile app (supports both Passenger and Scanner Staff accounts).
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function loginPassenger(Request $request)
+    {
+        return $this->loginApi($request);
+    }
+
+    /**
+     * Unified mobile API login for Passengers and Staff/Crew (e.g. Scanners).
+     */
+    public function loginApi(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
@@ -30,31 +40,72 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Validation failed.',
                 'errors' => $validator->errors(),
-            ], 422)->header('Access-Control-Allow-Origin', '*');
+            ], 422);
         }
 
-        $passenger = Passenger::where('email', $request->string('email')->lower()->toString())
-            ->first();
+        $email = $request->string('email')->lower()->toString();
+        $password = $request->string('password')->toString();
 
-        if (!$passenger || !Hash::check($request->string('password')->toString(), $passenger->password)) {
+        // Support interchangeable @seapass.ph and @seapass.com domains
+        $candidateEmails = [$email];
+        if (str_ends_with($email, '@seapass.ph')) {
+            $candidateEmails[] = substr($email, 0, -3) . '.com';
+        } elseif (str_ends_with($email, '@seapass.com')) {
+            $candidateEmails[] = substr($email, 0, -4) . '.ph';
+        }
+
+        // 1. Check Passenger account first
+        $passenger = Passenger::whereIn('email', $candidateEmails)->first();
+
+        if ($passenger && Hash::check($password, $passenger->password)) {
+            $token = $passenger->createToken('seapass-mobile-app')->plainTextToken;
+
             return response()->json([
-                'message' => 'Invalid Email or Password.',
-            ], 401);
+                'message' => 'Login successful.',
+                'token' => $token,
+                'data' => [
+                    'id' => $passenger->id,
+                    'name' => $passenger->name,
+                    'email' => $passenger->email,
+                    'role' => 'passenger',
+                    'phone' => $passenger->phone ?? '',
+                    'token' => $token,
+                ],
+            ]);
         }
 
-        $token = $passenger->createToken('seapass-mobile-app')->plainTextToken;
+        // 2. If not passenger, check User accounts (Scanner Staff, Admin, Crew)
+        $user = User::whereIn('email', $candidateEmails)->first();
+
+        if ($user && Hash::check($password, $user->password)) {
+            // Check if user is active
+            if (isset($user->is_active) && !$user->is_active) {
+                return response()->json([
+                    'message' => 'Your staff account has been deactivated. Please contact your port administrator.',
+                ], 403);
+            }
+
+            $userRole = strtolower($user->role ?: 'staff');
+            $token = $user->createToken('seapass-staff-app')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login successful.',
+                'token' => $token,
+                'data' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $userRole,
+                    'assigned_port' => $user->assigned_port ?: 'Surigao City Port',
+                    'phone' => '',
+                    'token' => $token,
+                ],
+            ]);
+        }
 
         return response()->json([
-            'message' => 'Login successful.',
-            'token' => $token,
-            'data' => [
-                'id' => $passenger->id,
-                'name' => $passenger->name,
-                'email' => $passenger->email,
-                'phone' => $passenger->phone ?? '',
-                'token' => $token,
-            ],
-        ]);
+            'message' => 'Invalid Email or Password.',
+        ], 401);
     }
 
     /**
@@ -85,12 +136,9 @@ class AuthController extends Controller
         // Log OTP code for debugging / local testing
         Log::info("SeaPass OTP generated for {$email}: {$otp}");
 
-        // Send HTML email with embedded SeaPass logo via Mail facade
+        // Dispatch OTP email immediately to recipient
         try {
-            Mail::send('emails.otp', ['otp' => $otp], function ($message) use ($email) {
-                $message->to($email)
-                        ->subject('SeaPass OTP Verification Code');
-            });
+            Mail::to($email)->send(new SendOtpMail($otp));
         } catch (\Throwable $e) {
             Log::error("Failed to send OTP email to {$email}: " . $e->getMessage());
         }
@@ -236,6 +284,30 @@ class AuthController extends Controller
         return back()->withErrors([
             'username' => 'The provided credentials do not match our records.',
         ])->withInput($request->only('username'));
+    }
+
+    /**
+     * Redirect root to login page.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function rootRedirect()
+    {
+        return redirect()->route('login');
+    }
+
+    /**
+     * Show the web admin login view.
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function showLoginForm()
+    {
+        if (Auth::check()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return view('welcome');
     }
 
     /**

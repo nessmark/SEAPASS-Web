@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\SeatUnavailableException;
 use App\Models\TripSchedule;
 use App\Models\Boat;
 use App\Models\Booking;
 use App\Models\AuditLog;
+use App\Services\BookingService;
 use App\Services\TripStatusSynchronizer;
 use App\Support\ManilaClock;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Throwable;
 
 class TripScheduleController extends Controller
 {
@@ -21,11 +24,13 @@ class TripScheduleController extends Controller
     {
         $grouped = $this->tripStatusSynchronizer->groupedForDashboard();
         $boats = Boat::where('status', 'Active')->orderBy('name')->get();
+        $scheduleTemplates = \App\Models\ScheduleTemplate::with('boat')->latest()->get();
 
         return view('admin.trip_sched_dashboard', [
             'scheduledTrips' => $grouped['scheduled'],
             'activeTrips' => $grouped['active'],
             'completedTrips' => $grouped['completed'],
+            'scheduleTemplates' => $scheduleTemplates,
             'boats' => $boats,
             'manilaNow' => $grouped['now'],
             'liveFingerprint' => $this->tabFingerprint(
@@ -83,6 +88,10 @@ class TripScheduleController extends Controller
 
     public function store(Request $request)
     {
+        if (in_array($request->input('recurrence_type'), ['daily', 'weekly'])) {
+            return app(ScheduleTemplateController::class)->store($request);
+        }
+
         $validated = $request->validate([
             'boat_id' => ['required', 'exists:boats,id'],
             'route' => ['required', 'in:Surigao → San Jose(Dinagat),San Jose(Dinagat) → Surigao,Surigao → Dinagat,Dinagat → Surigao'],
@@ -119,7 +128,7 @@ class TripScheduleController extends Controller
 
         // Initialize seat map if not provided
         if (!$request->has('seat_map')) {
-            $validated['seat_map'] = $this->initializeSeatMap($maxSeats);
+            $validated['seat_map'] = $this->initializeSeatMap($maxSeats, (int) $validated['available_seats']);
         }
 
         $trip = TripSchedule::create($validated);
@@ -174,6 +183,8 @@ class TripScheduleController extends Controller
                     ? $trip->arrival_time->copy()->timezone(ManilaClock::TIMEZONE)
                     : $departure->copy()->addHours(2);
 
+                $seatMap = $this->alignSeatMapAvailability($trip);
+
                 return [
                     'id' => $trip->id,
                     'from' => $fromPort,
@@ -184,7 +195,7 @@ class TripScheduleController extends Controller
                     'passenger_capacity' => (int) ($trip->boat?->passenger_capacity ?? 40),
                     'capacity' => (int) ($trip->boat?->passenger_capacity ?? 40),
                     'available_seats' => (int) $trip->available_seats,
-                    'seat_map' => $trip->seat_map ?? [],
+                    'seat_map' => $seatMap,
                     'route' => $trip->route,
                     'route_info' => $boatName.' • '.(int) $trip->available_seats.' seats available',
                     'status' => $trip->status,
@@ -192,7 +203,63 @@ class TripScheduleController extends Controller
                     'arrival_time' => ManilaClock::toIso8601($arrival),
                 ];
             }),
-        ])->header('Access-Control-Allow-Origin', '*');
+        ]);
+    }
+
+    /**
+     * Return distinct dates that have bookable (future, non-cancelled) trips.
+     * GET /api/schedules/available-dates?from=Surigao&to=San+Jose&month=2026-09
+     */
+    public function availableDates(Request $request)
+    {
+        $validated = $request->validate([
+            'from' => ['nullable', 'string', 'max:100'],
+            'to' => ['nullable', 'string', 'max:100'],
+            'month' => ['nullable', 'date_format:Y-m'],
+        ]);
+
+        $this->tripStatusSynchronizer->sync();
+
+        $query = TripSchedule::where('status', '!=', 'Cancelled')
+            ->where('available_seats', '>', 0)
+            ->whereRaw('departure_time > ?', [ManilaClock::nowDb()]);
+
+        if (!empty($validated['month'])) {
+            $start = Carbon::createFromFormat('Y-m', $validated['month'], ManilaClock::TIMEZONE)->startOfMonth();
+            $end = $start->copy()->endOfMonth();
+            $query->whereBetween('departure_time', [$start, $end]);
+        } else {
+            $query->whereRaw('departure_time <= ?', [
+                ManilaClock::now()->addMonths(3)->endOfDay()->format('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $from = $this->normalizePort(trim((string) ($validated['from'] ?? '')));
+        $to = $this->normalizePort(trim((string) ($validated['to'] ?? '')));
+
+        $trips = $query->get();
+
+        if ($from !== '' || $to !== '') {
+            $trips = $trips->filter(function (TripSchedule $trip) use ($from, $to) {
+                [$tripFrom, $tripTo] = $this->splitRoute($trip->route);
+                if ($from !== '' && strcasecmp($tripFrom, $from) !== 0) {
+                    return false;
+                }
+                if ($to !== '' && strcasecmp($tripTo, $to) !== 0) {
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        $dates = $trips->map(function (TripSchedule $t) {
+            return $t->departure_time->copy()->timezone(ManilaClock::TIMEZONE)->format('Y-m-d');
+        })->unique()->sort()->values();
+
+        return response()->json([
+            'timezone' => ManilaClock::TIMEZONE,
+            'available_dates' => $dates,
+        ]);
     }
 
     /**
@@ -214,7 +281,7 @@ class TripScheduleController extends Controller
         if (!$this->tripStatusSynchronizer->isStillBookable($tripSchedule)) {
             return response()->json([
                 'message' => 'This trip has already departed and is no longer open for booking.',
-            ], 422)->header('Access-Control-Allow-Origin', '*');
+            ], 422);
         }
 
         $seatMap = $tripSchedule->seat_map ?? $this->initializeSeatMap($tripSchedule->boat->passenger_capacity ?? 0);
@@ -223,7 +290,7 @@ class TripScheduleController extends Controller
         if ($openSeats->count() < $validated['seat_count']) {
             return response()->json([
                 'message' => 'Not enough available seats for this trip.',
-            ], 422)->header('Access-Control-Allow-Origin', '*');
+            ], 422);
         }
 
         $seatNumbers = $openSeats->take($validated['seat_count'])->map(fn ($n) => (int) $n)->values();
@@ -271,6 +338,7 @@ class TripScheduleController extends Controller
         }
 
         $tripSchedule->update($validated);
+        $this->alignSeatMapAvailability($tripSchedule);
 
         AuditLog::record(
             'schedule',
@@ -343,19 +411,22 @@ class TripScheduleController extends Controller
             ], 404);
         }
 
+        $seatMap = $this->alignSeatMapAvailability($tripSchedule);
+
         return response()->json([
             'trip' => $tripSchedule,
-            'seat_map' => $tripSchedule->seat_map ?? $this->initializeSeatMap($tripSchedule->boat->passenger_capacity ?? 0),
+            'seat_map' => $seatMap,
         ]);
     }
 
     public function viewSeatMap(TripSchedule $tripSchedule)
     {
         $tripSchedule->load('boat');
+        $seatMap = $this->alignSeatMapAvailability($tripSchedule);
         
         return response()->json([
             'trip' => $tripSchedule,
-            'seat_map' => $tripSchedule->seat_map ?? $this->initializeSeatMap($tripSchedule->boat->passenger_capacity ?? 0),
+            'seat_map' => $seatMap,
         ]);
     }
 
@@ -366,20 +437,22 @@ class TripScheduleController extends Controller
     {
         $tripSchedule->load('boat');
         $capacity = (int) ($tripSchedule->boat?->passenger_capacity ?? 40);
+        $seatMap = $this->alignSeatMapAvailability($tripSchedule);
 
         return response()->json([
             'id' => $tripSchedule->id,
             'capacity' => $capacity,
             'available_seats' => (int) $tripSchedule->available_seats,
-            'seat_map' => $tripSchedule->seat_map ?? $this->initializeSeatMap($capacity),
-        ])->header('Access-Control-Allow-Origin', '*');
+            'seat_map' => $seatMap,
+        ]);
     }
 
     /**
-     * Book one or more seats for a given trip schedule.
-     * This updates the seat map and available seat count.
+     * Book one or more seats for a given trip schedule (Admin walk-in flow).
+     * Uses the unified BookingService for pessimistic row locking, strict
+     * availability re-verification, and cross-channel concurrency protection.
      */
-    public function bookSeats(Request $request, TripSchedule $tripSchedule)
+    public function bookSeats(Request $request, TripSchedule $tripSchedule, BookingService $bookingService)
     {
         $validated = $request->validate([
             'seat_numbers' => ['required'],
@@ -391,87 +464,52 @@ class TripScheduleController extends Controller
             'seat_breakdown' => ['nullable'],
         ]);
 
-        $rawSeatNumbers = $validated['seat_numbers'];
-        $seatNumbers = collect(is_array($rawSeatNumbers) ? $rawSeatNumbers : explode(',', (string) $rawSeatNumbers))
-            ->map(static function ($value) {
-                return strtoupper(trim((string) $value));
-            })
-            ->filter(static function ($code) {
-                return !empty($code);
-            })
-            ->unique()
-            ->values();
+        try {
+            $result = $bookingService->reserveSeats([
+                'schedule_id' => $tripSchedule->id,
+                'seat_numbers' => $validated['seat_numbers'],
+                'passenger_name' => $validated['passenger_name'] ?? null,
+                'contact_number' => $validated['contact_number'] ?? null,
+                'payment_method' => $validated['payment_method'] ?? 'Walk-in',
+                'amount_collected' => $validated['amount_collected'] ?? 0,
+                'notes' => $validated['notes'] ?? null,
+                'seat_breakdown' => $validated['seat_breakdown'] ?? null,
+                'status' => 'pending',
+            ]);
 
-        if ($seatNumbers->isEmpty()) {
-            return $request->expectsJson()
-                ? response()->json(['message' => 'No valid seat numbers provided.'], 422)
-                : redirect()->back()->withErrors(['seat_numbers' => 'Please select at least one valid seat.']);
-        }
-
-        $tripSchedule->load('boat');
-
-        $seatMap = $tripSchedule->seat_map ?? $this->initializeSeatMap($tripSchedule->boat->passenger_capacity ?? 0);
-
-        $seatMap = collect($seatMap)->map(function (array $seat) use ($seatNumbers, $validated) {
-            $currentCode = strtoupper((string) ($seat['seat_number'] ?? ''));
-            if ($seatNumbers->contains($currentCode)) {
-                $seat['booked'] = true;
-                $seat['status'] = 'booked';
-                if (!empty($validated['passenger_name'])) {
-                    $seat['passenger_name'] = $validated['passenger_name'];
-                }
-            } else {
-                $seat['status'] = !empty($seat['booked']) ? 'booked' : 'available';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'trip' => $result['trip_schedule'],
+                    'seat_map' => $result['seat_map'],
+                    'booking' => $result['booking'],
+                ]);
             }
 
-            return $seat;
-        })->values()->all();
-
-        $availableSeats = collect($seatMap)->where('booked', false)->count();
-
-        $tripSchedule->update([
-            'seat_map' => $seatMap,
-            'available_seats' => $availableSeats,
-        ]);
-
-        $seatBreakdown = $request->input('seat_breakdown');
-        if (is_string($seatBreakdown)) {
-            $seatBreakdown = json_decode($seatBreakdown, true);
-        }
-
-        $primaryPassenger = $validated['passenger_name'] ?? null;
-        if (empty($primaryPassenger) && !empty($seatBreakdown) && is_array($seatBreakdown)) {
-            $firstP = $seatBreakdown[0]['passenger_name'] ?? null;
-            if ($firstP) {
-                $primaryPassenger = $firstP;
+            return redirect()->route('admin.tickets.index')
+                ->with('success', 'Seats booked successfully.');
+        } catch (SeatUnavailableException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'unavailable_seats' => $e->getUnavailableSeats(),
+                ], 422);
             }
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['seat_numbers' => $e->getMessage()])
+                ->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Failed to book seats: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Booking failed: ' . $e->getMessage());
         }
-
-        // Create a booking record for Manage Bookings
-        Booking::create([
-            'trip_schedule_id' => $tripSchedule->id,
-            'passenger_name' => $primaryPassenger ?? 'Walk-in Passenger',
-            'contact_number' => $validated['contact_number'] ?? null,
-            'route' => $tripSchedule->route,
-            'trip_date' => $tripSchedule->departure_time->toDateString(),
-            'departure_time_slot' => $tripSchedule->departure_time->format('H:i'),
-            'seat_numbers' => $seatNumbers->values()->all(),
-            'seat_breakdown' => $seatBreakdown,
-            'status' => 'pending',
-            'payment_method' => $validated['payment_method'] ?? null,
-            'amount_collected' => $validated['amount_collected'] ?? 0,
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'trip' => $tripSchedule->fresh(),
-                'seat_map' => $seatMap,
-            ])->header('Access-Control-Allow-Origin', '*');
-        }
-
-        return redirect()->route('admin.tickets')
-            ->with('success', 'Seats booked successfully.');
     }
 
     public function updateSeatMap(Request $request, TripSchedule $tripSchedule)
@@ -507,9 +545,10 @@ class TripScheduleController extends Controller
     }
 
     /**
-     * Initialize seat map based on boat capacity with standard cabin row-column coordinates (A..E)
+     * Initialize seat map based on boat capacity with standard cabin row-column coordinates (A..E).
+     * If availableSeats is less than capacity, randomly marks the difference as booked.
      */
-    private function initializeSeatMap(int $capacity): array
+    private function initializeSeatMap(int $capacity, ?int $availableSeats = null): array
     {
         $columns = ['A', 'B', 'C', 'D', 'E'];
         $seatMap = [];
@@ -530,6 +569,90 @@ class TripScheduleController extends Controller
                 ];
             }
         }
+
+        if ($availableSeats !== null && $availableSeats < $capacity && count($seatMap) > 0) {
+            $seatsToBookCount = max(0, min(count($seatMap), $capacity - $availableSeats));
+            $indices = array_keys($seatMap);
+            shuffle($indices);
+            $bookedIndices = array_slice($indices, 0, $seatsToBookCount);
+
+            foreach ($bookedIndices as $idx) {
+                $seatMap[$idx]['status'] = 'booked';
+                $seatMap[$idx]['booked'] = true;
+                $seatMap[$idx]['passenger_name'] = 'Reserved';
+            }
+        }
+
+        return $seatMap;
+    }
+
+    /**
+     * Ensure the number of booked seats in seat_map aligns with (capacity - available_seats).
+     * If there are fewer booked seats than expected, randomly books seats to match the discrepancy.
+     */
+    public function alignSeatMapAvailability(TripSchedule $tripSchedule): array
+    {
+        $tripSchedule->loadMissing('boat');
+        $capacity = (int) ($tripSchedule->boat?->passenger_capacity ?? 0);
+        if ($capacity <= 0) {
+            return $tripSchedule->seat_map ?? [];
+        }
+
+        $availableSeats = (int) $tripSchedule->available_seats;
+        $targetBooked = max(0, $capacity - $availableSeats);
+
+        $seatMap = $tripSchedule->seat_map;
+        if (empty($seatMap) || !is_array($seatMap)) {
+            $seatMap = $this->initializeSeatMap($capacity, $availableSeats);
+            $tripSchedule->update(['seat_map' => $seatMap]);
+            return $seatMap;
+        }
+
+        $currentBookedCount = collect($seatMap)->where('booked', true)->count();
+
+        if ($currentBookedCount < $targetBooked) {
+            $needed = $targetBooked - $currentBookedCount;
+            $unbookedIndices = [];
+            foreach ($seatMap as $idx => $seat) {
+                if (empty($seat['booked']) && ($seat['status'] ?? '') !== 'booked') {
+                    $unbookedIndices[] = $idx;
+                }
+            }
+            shuffle($unbookedIndices);
+            $toBook = array_slice($unbookedIndices, 0, $needed);
+            foreach ($toBook as $idx) {
+                $seatMap[$idx]['booked'] = true;
+                $seatMap[$idx]['status'] = 'booked';
+                $seatMap[$idx]['passenger_name'] = 'Reserved';
+            }
+            $tripSchedule->update(['seat_map' => $seatMap]);
+        } elseif ($currentBookedCount > $targetBooked) {
+            $toReleaseCount = $currentBookedCount - $targetBooked;
+            $reservedIndices = [];
+            foreach ($seatMap as $idx => $seat) {
+                if (!empty($seat['booked']) || ($seat['status'] ?? '') === 'booked') {
+                    if (($seat['passenger_name'] ?? '') === 'Reserved' || empty($seat['passenger_name'])) {
+                        $reservedIndices[] = $idx;
+                    }
+                }
+            }
+            if (count($reservedIndices) < $toReleaseCount) {
+                foreach ($seatMap as $idx => $seat) {
+                    if (!in_array($idx, $reservedIndices) && (!empty($seat['booked']) || ($seat['status'] ?? '') === 'booked')) {
+                        $reservedIndices[] = $idx;
+                    }
+                }
+            }
+            shuffle($reservedIndices);
+            $toRelease = array_slice($reservedIndices, 0, $toReleaseCount);
+            foreach ($toRelease as $idx) {
+                $seatMap[$idx]['booked'] = false;
+                $seatMap[$idx]['status'] = 'available';
+                $seatMap[$idx]['passenger_name'] = null;
+            }
+            $tripSchedule->update(['seat_map' => $seatMap]);
+        }
+
         return $seatMap;
     }
 

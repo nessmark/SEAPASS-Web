@@ -5,7 +5,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/reports-audit.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/ticket-book.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/ticket-book.css') }}?v={{ time() }}">
 @endpush
 
 @section('content')
@@ -371,10 +371,32 @@
             </div>
         </div>
     </div>
+
+    {{-- Discount ID Photo Lightbox Modal --}}
+    <div id="id_photo_lightbox_modal" class="id-lightbox-backdrop" style="display: none;" aria-hidden="true">
+        <div class="id-lightbox-content" role="dialog" aria-modal="true">
+            <div class="id-lightbox-header">
+                <div class="id-lightbox-title-wrap">
+                    <h3 id="idLightboxPassengerName">Discount ID Verification</h3>
+                    <span class="id-lightbox-cat-badge" id="idLightboxCategory">Discount Verification</span>
+                </div>
+                <button type="button" class="id-lightbox-close" id="closeIdLightbox" aria-label="Close ID preview">×</button>
+            </div>
+            <div class="id-lightbox-body">
+                <img id="idLightboxImage" src="" alt="Discount ID Document" />
+            </div>
+            <div class="id-lightbox-footer">
+                <a id="idLightboxFullLink" href="#" target="_blank" rel="noopener noreferrer" class="id-lightbox-ext-link">
+                    <span>↗ Open Full Image</span>
+                </a>
+                <button type="button" class="id-lightbox-btn-close" id="cancelIdLightbox">Close Preview</button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/ticket-book.js') }}"></script>
+    <script src="{{ asset('js/ticket-book.js') }}?v={{ time() }}"></script>
     <script>
         // Expandable sections functionality
         document.querySelectorAll('.expand-toggle').forEach(toggle => {

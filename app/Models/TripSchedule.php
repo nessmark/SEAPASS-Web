@@ -7,11 +7,13 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TripSchedule extends Model
 {
     protected $fillable = [
         'boat_id',
+        'schedule_template_id',
         'route',
         'departure_time',
         'arrival_time',
@@ -85,5 +87,56 @@ class TripSchedule extends Model
     public function boat(): BelongsTo
     {
         return $this->belongsTo(Boat::class);
+    }
+
+    /**
+     * Get the recurring schedule template that generated this trip schedule (if any)
+     */
+    public function scheduleTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ScheduleTemplate::class, 'schedule_template_id');
+    }
+
+    /**
+     * Bookings associated with this trip schedule.
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'trip_schedule_id');
+    }
+
+    /**
+     * Active (non-cancelled) bookings for this trip.
+     */
+    public function activeBookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'trip_schedule_id')
+            ->where('status', '!=', 'cancelled');
+    }
+
+    /**
+     * Whether this trip has any active passenger bookings.
+     */
+    public function hasBookings(): bool
+    {
+        return $this->activeBookings()->exists();
+    }
+
+    /**
+     * Count of actively booked seats for this trip.
+     */
+    public function bookedSeatsCount(): int
+    {
+        $bookings = $this->activeBookings()->get();
+        $count = 0;
+        foreach ($bookings as $b) {
+            $seats = $b->seat_numbers;
+            if (is_array($seats)) {
+                $count += count($seats);
+            } elseif (!empty($seats)) {
+                $count += count(explode(',', (string) $seats));
+            }
+        }
+        return $count;
     }
 }

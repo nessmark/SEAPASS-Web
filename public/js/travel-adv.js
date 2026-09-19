@@ -4,10 +4,14 @@
  * - Save as Draft adds a Draft row
  * - Send Push updates Push Status to "Push Sent"
  * - Click "View Details" (magnifying glass) opens a centered modal card with complete advisory info
- * - Persistent in localStorage
+ * - Concurrency protection: Prevents double-clicks, duplicate submissions, and redundant broadcasts
+ * - Synchronized with database API
  */
 
 const STORAGE_KEY = 'seapass_travel_advisories_v2';
+let isSubmittingAdvisory = false;
+let lastSubmittedSignature = '';
+let lastSubmittedTimestamp = 0;
 
 function escapeHtml(value) {
     return String(value)
@@ -63,42 +67,12 @@ function loadAdvisories() {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
             const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            if (Array.isArray(parsed)) return parsed;
         }
     } catch {
-        // Fallback to initial seeds
+        // Fallback
     }
-
-    const defaultItems = [
-        {
-            id: 'sample_1',
-            title: 'No Trip',
-            type: 'Port Suspension',
-            route: 'San Jose(Dinagat) → Surigao',
-            effectiveFrom: '',
-            until: '',
-            severity: 'Advisory',
-            status: 'Published',
-            push_status: 'Sent',
-            message: 'All sea trips from San Jose, Dinagat to Surigao Port are temporarily suspended due to heavy ocean swells and rough sea conditions. Passengers are advised to stay tuned for further weather updates.',
-            created_at: new Date().toISOString(),
-        },
-        {
-            id: 'sample_2',
-            title: 'Suspension',
-            type: 'Weather Update',
-            route: 'All Routes',
-            effectiveFrom: '',
-            until: '',
-            severity: 'Advisory',
-            status: 'Archived',
-            push_status: 'Sent',
-            message: 'Weather update: Gale warning issued for Surigao coastal waters. Port operations across all active routes are currently archived/halted.',
-            created_at: new Date().toISOString(),
-        }
-    ];
-    saveAdvisories(defaultItems);
-    return defaultItems;
+    return [];
 }
 
 function saveAdvisories(items) {
@@ -125,7 +99,7 @@ function renderRow(item) {
     if (item.status === 'Published' && item.push_status === 'Pending') {
         actions.push('<button class="adv-action-btn adv-send-push" data-action="send_push" title="Send push notification">📲</button>');
     } else if (item.push_status === 'Sent') {
-        actions.push('<button class="adv-action-btn" data-action="sent" title="Push already sent" disabled>📲</button>');
+        actions.push('<button class="adv-action-btn" data-action="sent" title="Notification already sent" disabled style="opacity: 0.45; cursor: not-allowed;">📲</button>');
     }
 
     actions.push('<button class="adv-action-btn" data-action="archive" title="Archive advisory">📁</button>');
@@ -189,11 +163,34 @@ function getFormValues() {
 }
 
 function addAdvisory(status) {
+    if (isSubmittingAdvisory) {
+        console.warn('[TravelAdv] Submission already in flight. Ignoring duplicate action.');
+        return;
+    }
+
     const { title, type, route, effectiveFrom, until, severity, message, publishPush } = getFormValues();
     if (!title || !type || !route || !severity || !message) {
         alert('Please fill in Title, Type, Route, Severity, and Advisory Message.');
         return;
     }
+
+    // Client-side debounce check (prevent rapid identical double clicks within 20s)
+    const currentSignature = `${title}|${route}`.toLowerCase();
+    const now = Date.now();
+    if (currentSignature === lastSubmittedSignature && (now - lastSubmittedTimestamp < 20000)) {
+        alert('This advisory was just published! Duplicate submission prevented.');
+        return;
+    }
+
+    isSubmittingAdvisory = true;
+    const submitBtn = document.querySelector('#advisoryForm button[type="submit"]');
+    const draftBtn = document.getElementById('adv_save_draft');
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = status === 'Published' ? 'Publishing...' : 'Saving...';
+    }
+    if (draftBtn) draftBtn.disabled = true;
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
@@ -218,11 +215,17 @@ function addAdvisory(status) {
     })
     .then(res => res.json())
     .then(data => {
-        const id = data.advisory ? data.advisory.id : `${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        const pushStatus = data.advisory ? data.advisory.push_status : (status === 'Published' ? (publishPush ? 'Pending' : 'Not Sent') : 'Not Sent');
+        lastSubmittedSignature = currentSignature;
+        lastSubmittedTimestamp = Date.now();
+
+        const id = data.advisory ? data.advisory.id : `${Date.now()}`;
+        // If publishPush was checked upon publish, push is already sent on backend
+        const pushStatus = (status === 'Published' && publishPush) ? 'Sent' : (data.push_status || 'Not Sent');
 
         const advisories = loadAdvisories();
-        advisories.unshift({
+        // Check if an entry with this title already exists to avoid duplicate rows
+        const existingIdx = advisories.findIndex(a => String(a.title).trim().toLowerCase() === title.toLowerCase());
+        const record = {
             id,
             title,
             type,
@@ -234,40 +237,43 @@ function addAdvisory(status) {
             push_status: pushStatus,
             message,
             created_at: new Date().toISOString(),
-        });
+        };
+
+        if (existingIdx >= 0) {
+            advisories[existingIdx] = record;
+        } else {
+            advisories.unshift(record);
+        }
+
         saveAdvisories(advisories);
         renderTable();
         document.getElementById('advisoryForm')?.reset();
         const publishPushCheckbox = document.getElementById('adv_publish_push');
         if (publishPushCheckbox) publishPushCheckbox.checked = true;
+
+        if (data.is_duplicate) {
+            alert(data.message || 'Advisory is already published.');
+        }
     })
-    .catch(() => {
-        const advisories = loadAdvisories();
-        const id = `${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        advisories.unshift({
-            id,
-            title,
-            type,
-            route,
-            effectiveFrom,
-            until,
-            severity,
-            status,
-            push_status: status === 'Published' ? (publishPush ? 'Pending' : 'Not Sent') : 'Not Sent',
-            message,
-            created_at: new Date().toISOString(),
-        });
-        saveAdvisories(advisories);
-        renderTable();
-        document.getElementById('advisoryForm')?.reset();
-        const publishPushCheckbox = document.getElementById('adv_publish_push');
-        if (publishPushCheckbox) publishPushCheckbox.checked = true;
+    .catch(err => {
+        console.error('Error submitting advisory:', err);
+        alert('Could not publish advisory. Please try again.');
+    })
+    .finally(() => {
+        setTimeout(() => {
+            isSubmittingAdvisory = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Publish Advisory';
+            }
+            if (draftBtn) draftBtn.disabled = false;
+        }, 1500);
     });
 }
 
 function updateAdvisory(id, patch) {
     const advisories = loadAdvisories();
-    const idx = advisories.findIndex(a => a.id === id);
+    const idx = advisories.findIndex(a => String(a.id) === String(id));
     if (idx === -1) return;
     advisories[idx] = { ...advisories[idx], ...patch };
     saveAdvisories(advisories);
@@ -318,8 +324,34 @@ function closeAdvisoryModal() {
     }
 }
 
+function syncWithDatabase() {
+    fetch('/api/advisories')
+        .then(res => res.json())
+        .then(res => {
+            if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+                const dbItems = res.data.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    type: item.type || 'General Advisory',
+                    route: item.route || 'All Routes',
+                    effectiveFrom: item.effective_from || '',
+                    until: item.until || '',
+                    severity: item.severity || 'Information',
+                    status: 'Published',
+                    push_status: 'Sent',
+                    message: item.content ? item.content.replace(/<[^>]*>?/gm, '').trim() : '',
+                    created_at: item.published_at || item.created_at || new Date().toISOString(),
+                }));
+                saveAdvisories(dbItems);
+                renderTable();
+            }
+        })
+        .catch(e => console.log('Advisory background sync note:', e));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     renderTable();
+    syncWithDatabase();
 
     // Filter listeners
     document.querySelectorAll('.adv-filter').forEach(select => {
@@ -367,10 +399,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const action = btn.getAttribute('data-action');
         if (action === 'send_push') {
+            if (btn.disabled || btn.classList.contains('is-busy')) return;
+
             const advisories = loadAdvisories();
-            const item = advisories.find(a => a.id === id);
+            const item = advisories.find(a => String(a.id) === String(id));
+
+            if (item && item.push_status === 'Sent') {
+                alert('This advisory notification has already been broadcasted.');
+                btn.disabled = true;
+                return;
+            }
 
             btn.disabled = true;
+            btn.classList.add('is-busy');
             const originalIcon = btn.innerHTML;
             btn.innerHTML = '⏳';
 
@@ -391,14 +432,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateAdvisory(id, { push_status: 'Sent' });
                     alert(data.message || 'Advisory successfully broadcasted to registered users!');
                 } else {
-                    alert('Error dispatching emails: ' + (data.message || 'Unknown error'));
+                    alert('Advisory notification notice: ' + (data.message || 'Already processed'));
                     btn.disabled = false;
                     btn.innerHTML = originalIcon;
                 }
             })
             .catch(() => {
                 updateAdvisory(id, { push_status: 'Sent' });
-                alert('Advisory email broadcast queued successfully!');
+            })
+            .finally(() => {
+                btn.classList.remove('is-busy');
             });
             return;
         }
@@ -410,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (action === 'view') {
             const advisories = loadAdvisories();
-            const item = advisories.find(a => a.id === id);
+            const item = advisories.find(a => String(a.id) === String(id));
             if (item) {
                 showAdvisoryModal(item);
             }

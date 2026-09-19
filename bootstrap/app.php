@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust all proxies — required for ngrok tunnel to work correctly.
+        // Without this, Laravel sees HTTP instead of HTTPS and CSRF tokens fail (419).
+        $middleware->trustProxies(at: '*');
         $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Open edit modal and populate form with boat data
  */
-function openEditModal(boatId, name, licenseNumber, passengerCapacity, owner, operator, boatNumber, vehicleCapacity, status, imageUrl) {
+function openEditModal(boatId, name, licenseNumber, passengerCapacity, owner, operator, boatNumber, status, imageUrl) {
     const editBackdrop = document.getElementById('editBoatModalBackdrop');
     const editForm = document.getElementById('editBoatForm');
     const currentImageDiv = document.getElementById('edit_current_image');
@@ -80,7 +80,6 @@ function openEditModal(boatId, name, licenseNumber, passengerCapacity, owner, op
     document.getElementById('edit_owner').value = owner || '';
     document.getElementById('edit_operator').value = operator || '';
     document.getElementById('edit_boat_number').value = boatNumber || '';
-    document.getElementById('edit_vehicle_capacity').value = vehicleCapacity || '';
     document.getElementById('edit_status').value = status || 'Active';
 
     // Show current image if exists
