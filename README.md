@@ -1,59 +1,92 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SeaPass — Web App & API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The **Laravel 12** backend for SeaPass: a RESTful JSON API plus the web admin dashboard for the
+maritime passenger ticketing system (Surigao ⇄ San Jose lancha route).
 
-## About Laravel
+This repository is the `web/` half of the project. The Flutter passenger app lives in
+[nessmark/SEAPASS-Mobile](https://github.com/nessmark/SEAPASS-Mobile); both are split out of the
+[nessmark/seapass](https://github.com/nessmark/seapass) monorepo.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Stack
+- Laravel 12, PHP 8.2+, MySQL 8+ / MariaDB 10.5+
+- Vite for frontend asset bundling
+- Sanctum token authentication for the mobile API
+- PayMongo payments, QR ticket verification, email notifications (OTP, bookings, advisories, reschedules)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
+- **PHP** 8.2 or 8.3 with `pdo_mysql`, `curl`, `mbstring`, `openssl`, `fileinfo`, `sodium`
+- **Composer** 2.6+
+- **MySQL** 8.0+ / MariaDB 10.5+
+- **Node.js** LTS (v18 or v20+)
+- Windows 10/11 is the documented host OS; the app itself runs anywhere PHP does.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Setup
 
-## Learning Laravel
+```powershell
+composer install
+npm install
+npm run build
+Copy-Item .env.example .env   # then edit DB credentials
+php artisan key:generate
+php artisan migrate
+php artisan serve --host=0.0.0.0 --port=8000
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+`.env` database block:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=seapass_db
+DB_USERNAME=root
+DB_PASSWORD=your_mysql_password
+```
 
-## Laravel Sponsors
+Bind with `--host=0.0.0.0` so Android phones on the same Wi-Fi can reach the API on port 8000.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+> `php artisan migrate --seed` only creates 2 accounts (`admin@gmail.com` / `admin123`,
+> `test@example.com` / `password`) and 2 fare rows. No boats, trips or bookings are seeded — a demo
+> starts on an empty dashboard until they are entered in the admin panel or added to `DatabaseSeeder`.
 
-### Premium Partners
+## Windows helper scripts (`scripts/`)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Script | What it does |
+|---|---|
+| `setup_firewall.bat` | Run as Administrator once — opens inbound TCP 8000 in Windows Defender Firewall. |
+| `start_server.bat` | Frees port 8000, sets `adb reverse tcp:8000 tcp:8000` for a USB-connected phone, starts an **ngrok** tunnel on the project's free domain, then runs `php artisan serve` on 127.0.0.1:8000. |
+| `connect_usb.bat` | Just the `adb reverse tcp:8000 tcp:8000` step, for a phone plugged in after the server started. |
 
-## Contributing
+> `start_server.bat` depends on `ngrok` being installed and in PATH, and on that free ngrok domain
+> staying alive. For a LAN-only run, skip it and use `php artisan serve --host=0.0.0.0 --port=8000`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Background workers
 
-## Code of Conduct
+Two things do **not** run inside `artisan serve` and need their own processes:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```powershell
+php artisan queue:work        # advisory / booking / OTP emails are queued
+php artisan schedule:work     # trip status sync + recurring schedule generation
+```
 
-## Security Vulnerabilities
+On a server, `schedule:work` is replaced by the usual one-line cron entry for `schedule:run`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Tests
 
-## License
+```powershell
+php artisan test
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The suite runs on SQLite in memory, so the `pdo_sqlite` / `php-sqlite3` extension must be enabled.
+
+## Structure
+
+- `app/Http/Controllers/` — API + admin controllers
+- `app/Services/` — booking, PayMongo, recurring-schedule, and trip-status services
+- `app/Models/` — Eloquent models
+- `database/migrations/` — schema migrations
+- `resources/views/` — admin dashboard Blade views + emails
+- `routes/api.php` — mobile API endpoints; `routes/web.php` — admin panel routes
+- `scripts/` — Windows helper batch files (above)
+
+See [MODULAR_STRUCTURE.md](MODULAR_STRUCTURE.md) for the module-by-module breakdown.
