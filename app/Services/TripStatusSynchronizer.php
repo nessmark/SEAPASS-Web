@@ -18,6 +18,9 @@ use Illuminate\Support\Collection;
  */
 class TripStatusSynchronizer
 {
+    /** Hours a trip is assumed to take when arrival_time was left blank. */
+    private const ASSUMED_TRIP_HOURS = 2;
+
     /**
      * Write-through status updates so tabs stay correct even with no open browser.
      *
@@ -36,7 +39,7 @@ class TripStatusSynchronizer
 
         $departed = TripSchedule::query()
             ->where('status', 'Scheduled')
-            ->whereRaw('departure_time <= ?', [$now])
+            ->where('departure_time', '<=', $now)
             ->where(function (Builder $q) use ($now) {
                 $this->whereStillEnRoute($q, $now);
             })
@@ -59,12 +62,12 @@ class TripStatusSynchronizer
         $now = ManilaClock::nowDb();
 
         $scheduled = $this->visibleTrips()
-            ->whereRaw('departure_time > ?', [$now])
+            ->where('departure_time', '>', $now)
             ->orderBy('departure_time')
             ->get();
 
         $active = $this->visibleTrips()
-            ->whereRaw('departure_time <= ?', [$now])
+            ->where('departure_time', '<=', $now)
             ->where(function (Builder $q) use ($now) {
                 $this->whereStillEnRoute($q, $now);
             })
@@ -98,7 +101,7 @@ class TripStatusSynchronizer
         return TripSchedule::with('boat')
             ->where('status', '!=', 'Cancelled')
             ->whereDate('departure_time', $date)
-            ->whereRaw('departure_time > ?', [ManilaClock::nowDb()])
+            ->where('departure_time', '>', ManilaClock::nowDb())
             ->orderBy('departure_time');
     }
 
@@ -123,23 +126,37 @@ class TripStatusSynchronizer
 
     private function whereArrivalReached(Builder $q, string $now): void
     {
+        $fallbackCutoff = $this->assumedArrivalCutoff($now);
+
         $q->where(function (Builder $inner) use ($now) {
             $inner->whereNotNull('arrival_time')
-                ->whereRaw('arrival_time <= ?', [$now]);
-        })->orWhere(function (Builder $inner) use ($now) {
+                ->where('arrival_time', '<=', $now);
+        })->orWhere(function (Builder $inner) use ($fallbackCutoff) {
             $inner->whereNull('arrival_time')
-                ->whereRaw("departure_time + INTERVAL '2 hours' <= ?::timestamp", [$now]);
+                ->where('departure_time', '<=', $fallbackCutoff);
         });
     }
 
     private function whereStillEnRoute(Builder $q, string $now): void
     {
+        $fallbackCutoff = $this->assumedArrivalCutoff($now);
+
         $q->where(function (Builder $inner) use ($now) {
             $inner->whereNotNull('arrival_time')
-                ->whereRaw('arrival_time > ?', [$now]);
-        })->orWhere(function (Builder $inner) use ($now) {
+                ->where('arrival_time', '>', $now);
+        })->orWhere(function (Builder $inner) use ($fallbackCutoff) {
             $inner->whereNull('arrival_time')
-                ->whereRaw("departure_time + INTERVAL '2 hours' > ?::timestamp", [$now]);
+                ->where('departure_time', '>', $fallbackCutoff);
         });
+    }
+
+    /**
+     * A trip with no arrival_time is assumed to land 2 hours after departure.
+     * Comparing departure_time against (now - 2 hours) keeps that rule identical
+     * while staying valid SQL on MySQL, PostgreSQL and SQLite alike.
+     */
+    private function assumedArrivalCutoff(string $now): string
+    {
+        return ManilaClock::parseLocal($now)->subHours(self::ASSUMED_TRIP_HOURS)->format('Y-m-d H:i:s');
     }
 }
