@@ -5,7 +5,9 @@
 
 // Helper function to get CSS variable value
 function getCSSVariable(variable) {
-    return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+    // Light mode is declared on body.light-mode, dark on :root — read body first.
+    return getComputedStyle(document.body).getPropertyValue(variable).trim()
+        || getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 }
 
 // Chart instances

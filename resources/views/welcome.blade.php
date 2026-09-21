@@ -3,149 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TicketingSystem - Login</title>
+    <title>Sign in · SeaPass</title>
     
     {{-- Favicon / Tab Icon --}}
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/seapass_logo.png') }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/seapass_logo.png') }}">
+    <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { height: 100%; }
+        body {
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            grid-template-rows: 100%;
+            background: var(--canvas);
+            color: var(--text);
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            min-height: 100vh;
+        /* Left: the port, as a full-bleed image with a brand wash over it */
+        .stage {
+            position: relative;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
+            padding: var(--s-9);
             background-image: url('{{ asset("background_images/Port.jpg") }}');
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            padding: 20px;
-            position: relative;
+            overflow: hidden;
         }
-
-        /* Overlay for better readability */
-        body::before {
+        .stage::after {
             content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
-            z-index: 0;
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(to top, rgba(10, 48, 55, .92) 0%, rgba(10, 48, 55, .55) 45%, rgba(10, 48, 55, .28) 100%);
+        }
+        .stage-copy { position: relative; z-index: 1; max-width: 30ch; }
+        .stage-mark {
+            width: 58px; height: 58px;
+            border-radius: var(--r-md);
+            background: rgba(255,255,255,.14) url('{{ asset("images/brand/seapass-logo.svg") }}') center/34px no-repeat;
+            backdrop-filter: blur(8px);
+            margin-bottom: var(--s-6);
+        }
+        .stage-title {
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: -0.028em;
+            line-height: 1.12;
+            color: #fff;
+            margin-bottom: var(--s-3);
+        }
+        .stage-sub {
+            font-size: 16px;
+            line-height: 1.5;
+            color: rgba(255,255,255,.72);
         }
 
-        .container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 450px;
+        /* Right: the form */
+        .panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--s-7);
+            background: var(--surface);
         }
+        .login-card { width: 100%; max-width: 372px; }
 
-        .title {
-            text-align: center;
-            color: #ffffff;
-            font-size: 32px;
-            font-weight: 400;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .title .system {
+        .login-eyebrow {
+            font-size: 11.5px;
             font-weight: 600;
-            color: #ffffff;
+            letter-spacing: 0.045em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            margin-bottom: var(--s-3);
         }
-
-        .login-card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 40px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            width: 100%;
-        }
-
         .login-heading {
-            text-align: center;
-            color: #6c757d;
-            font-size: 14px;
-            margin-bottom: 25px;
-            font-weight: 400;
+            font-size: 27px;
+            font-weight: 700;
+            letter-spacing: -0.022em;
+            color: var(--text);
+            margin-bottom: var(--s-2);
         }
+        .login-note { font-size: 15px; color: var(--text-2); margin-bottom: var(--s-7); }
 
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
+        .form-group { position: relative; margin-bottom: var(--s-3); }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 550;
+            color: var(--text-2);
+            margin-bottom: 6px;
         }
-
         .form-input {
             width: 100%;
-            padding: 12px 40px 12px 15px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-            background-color: #ffffff;
+            height: 46px;
+            padding: 0 var(--s-4) 0 42px;
+            background: var(--surface-2);
+            border: none;
+            border-radius: var(--r-md);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 15px;
+            transition: box-shadow 160ms var(--ease), background-color 160ms var(--ease);
         }
-
+        .form-input::placeholder { color: var(--text-3); }
         .form-input:focus {
             outline: none;
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            background: var(--surface);
+            box-shadow: inset 0 0 0 2px var(--accent);
         }
-
-        .form-input::placeholder {
-            color: #6c757d;
-        }
-
         .input-icon {
             position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
+            left: 14px;
+            bottom: 14px;
             width: 18px;
             height: 18px;
+            fill: none;
+            stroke: var(--text-3);
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
             pointer-events: none;
         }
 
         .btn-login {
             width: 100%;
-            padding: 12px;
-            background-color: #5a6c7d;
-            color: #ffffff;
+            height: 46px;
+            margin-top: var(--s-4);
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: var(--r-md);
+            background: var(--accent);
+            color: var(--on-accent);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 10px;
+            transition: background-color 160ms var(--ease), transform 120ms var(--ease);
+        }
+        .btn-login:hover { background: var(--accent-strong); }
+        .btn-login:active { transform: scale(.985); }
+
+        .login-error {
+            display: flex;
+            gap: var(--s-2);
+            align-items: flex-start;
+            background: var(--danger-tint);
+            color: var(--danger-fg);
+            padding: 11px var(--s-3);
+            border-radius: var(--r-md);
+            margin-bottom: var(--s-4);
+            font-size: 13.5px;
+            line-height: 1.45;
         }
 
-        .btn-login:hover {
-            background-color: #4a5a6a;
+        .login-foot {
+            margin-top: var(--s-7);
+            font-size: 12.5px;
+            color: var(--text-3);
         }
 
-        .btn-login:active {
-            background-color: #3a4a5a;
-        }
-
-        /* SVG Icons */
-        .icon-user {
-            fill: #6c757d;
-        }
-
-        .icon-lock {
-            fill: #6c757d;
+        @media (max-width: 900px) {
+            body { grid-template-columns: 1fr; }
+            .stage { min-height: 34vh; padding: var(--s-6); justify-content: flex-end; }
+            body { grid-template-rows: auto 1fr; height: auto; }
+            .stage-title { font-size: 28px; }
+            .stage-mark { width: 46px; height: 46px; margin-bottom: var(--s-4); background-size: 28px; }
+            .panel { padding: var(--s-6) var(--s-5) var(--s-8); align-items: flex-start; }
         }
     </style>
     <script>
@@ -165,61 +197,57 @@
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">
-            <div>
-                <span class="system">San Jose Port</span>
-            </div>
-                <span class="system">SeaPass Ticketing System</span>
-        </h1>
-        
+    <section class="stage">
+        <div class="stage-copy">
+            <div class="stage-mark" role="img" aria-label="SeaPass"></div>
+            <h1 class="stage-title">San Jose Port ticketing, in one place.</h1>
+            <p class="stage-sub">Schedules, seats, boarding passes and daily sales for the Surigao ⇄ San Jose lancha route.</p>
+        </div>
+    </section>
+
+    <main class="panel">
         <div class="login-card">
-            <p class="login-heading">Sign in to start your session</p>
-            
+            <p class="login-eyebrow">SeaPass Admin</p>
+            <h2 class="login-heading">Sign in</h2>
+            <p class="login-note">Use your port staff account to continue.</p>
+
             @if ($errors->any())
-                <div style="background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-size: 14px;">
-                    {{ $errors->first('username') }}
+                <div class="login-error" role="alert">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                    <span>{{ $errors->first('username') }}</span>
                 </div>
             @endif
 
             <form method="POST" action="{{ route('login.post') }}" autocomplete="off">
                 @csrf
-                
+
                 <div class="form-group">
-                    <input 
-                        type="text" 
-                        name="username" 
-                        id="username" 
-                        class="form-input @error('username') is-invalid @enderror" 
-                        placeholder="Username" 
-                        required 
-                        autocomplete="off"
-                        value="{{ old('username') }}"
-                    >
-                    <svg class="input-icon icon-user" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" name="username" id="username"
+                           class="form-input @error('username') is-invalid @enderror"
+                           placeholder="you@seapass.ph" required autocomplete="off"
+                           value="{{ old('username') }}">
+                    <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M17 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-3A3.5 3.5 0 0 0 7 18.5V20"/>
+                        <circle cx="12" cy="8" r="3.4"/>
                     </svg>
                 </div>
-                
+
                 <div class="form-group">
-                    <input 
-                        type="password" 
-                        name="password" 
-                        id="password" 
-                        class="form-input" 
-                        placeholder="Password" 
-                        required 
-                        autocomplete="new-password"
-                        value=""
-                    >
-                    <svg class="input-icon icon-lock" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" name="password" id="password" class="form-input"
+                           placeholder="••••••••" required autocomplete="new-password" value="">
+                    <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/>
+                        <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/>
                     </svg>
                 </div>
-                
-                <button type="submit" class="btn-login">Log In</button>
+
+                <button type="submit" class="btn-login">Log in</button>
             </form>
+
+            <p class="login-foot">SeaPass Ticketing System · San Jose Port, Dinagat Islands</p>
         </div>
-    </div>
+    </main>
 </body>
 </html>

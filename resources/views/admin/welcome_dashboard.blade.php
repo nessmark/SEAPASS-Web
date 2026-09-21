@@ -399,15 +399,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-                || getComputedStyle(document.body).getPropertyValue(name).trim();
+            // Light mode is declared on body.light-mode, dark on :root — read body first.
+            const css = (name) => getComputedStyle(document.body).getPropertyValue(name).trim()
+                || getComputedStyle(document.documentElement).getPropertyValue(name).trim();
             const ctx = document.getElementById('weeklyRevenueChart');
             if (ctx) {
                 const weeklyData = @json($weeklyData ?? []);
                 const labels = weeklyData.map(item => item.day);
                 const revenues = weeklyData.map(item => item.revenue);
 
-                new Chart(ctx, {
+                const chart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: labels,
@@ -459,6 +460,19 @@
                             }
                         }
                     }
+                });
+
+                window.addEventListener('themeChanged', () => {
+                    const ds = chart.data.datasets[0];
+                    ds.backgroundColor = css('--accent');
+                    ds.hoverBackgroundColor = css('--accent-strong');
+                    chart.options.scales.x.ticks.color = css('--text-3');
+                    chart.options.scales.y.ticks.color = css('--text-3');
+                    chart.options.scales.y.grid.color = css('--chart-grid');
+                    chart.options.plugins.tooltip.backgroundColor = css('--surface-3');
+                    chart.options.plugins.tooltip.titleColor = css('--text');
+                    chart.options.plugins.tooltip.bodyColor = css('--text-2');
+                    chart.update('none');
                 });
             }
         });
