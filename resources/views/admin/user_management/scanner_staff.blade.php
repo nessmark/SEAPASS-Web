@@ -95,11 +95,10 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="boats-header">
                 <div>
                     <div class="card-title">Scanner Staff Accounts</div>
-                    <div class="card-subtitle">Manage gate scanners and boarding verification personnel for ports &amp; vessels</div>
                 </div>
                 <button class="boats-button" type="button" id="openScannerModal">
                     <span>+ Add Scanner Staff</span>

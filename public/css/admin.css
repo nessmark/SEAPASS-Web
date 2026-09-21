@@ -365,6 +365,16 @@ button.primary, .action-btn {
 }
 
 /* Cards (the class most pages already use) */
+/* A PAGE IS NOT A CARD. Page-level wrappers carry layout, never a surface -
+   otherwise the real cards inside end up white-on-white in light mode and
+   near-black-on-near-black in dark. main-content already supplies the padding. */
+.page-body {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+}
+
 .card, .content-card, .panel, .dashboard-card, .section-card, .widget, .stat-card {
     background: var(--surface);
     border: none;
@@ -533,8 +543,9 @@ select {
 }
 .btn .ic, .cmd-btn .ic, .action-btn .ic { width: 1.1em; height: 1.1em; }
 
-/* Icon-only action buttons that sit on cards (edit / seats / delete) */
-.icon-action, .card-action, .trip-action {
+/* Icon-only action buttons that sit on cards (edit / seats / delete).
+   Trip cards use labelled actions instead - see trip-schedules.css. */
+.icon-action, .card-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -547,8 +558,8 @@ select {
     cursor: pointer;
     transition: background-color 160ms var(--ease), color 160ms var(--ease);
 }
-.icon-action:hover, .card-action:hover, .trip-action:hover { background: var(--surface-2); color: var(--text); }
-.icon-action .ic, .card-action .ic, .trip-action .ic { width: 17px; height: 17px; vertical-align: 0; }
+.icon-action:hover, .card-action:hover { background: var(--surface-2); color: var(--text); }
+.icon-action .ic, .card-action .ic { width: 17px; height: 17px; vertical-align: 0; }
 
 /* =========================================================
    RESPONSIVE — kept last so these win over the base rules above

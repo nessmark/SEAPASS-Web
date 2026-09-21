@@ -48,9 +48,8 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="card-title">Passenger List</div>
-            <div class="card-subtitle">View registered app users</div>
 
             @if (session('success'))
                 <div class="alert" style="margin-top: 15px;">{{ session('success') }}</div>

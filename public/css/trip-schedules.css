@@ -64,126 +64,205 @@
     display: block;
 }
 
-/* Trip Grid */
+/* Trip Grid — a departure board. Wider cards, fewer per row, more air. */
 .trip-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 400px));
-    gap: 24px;
-    justify-content: start;
+    grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
+    gap: 14px;
 }
 
+/* Depth strategy for this page: surface step + hairline + lit edge. No drop
+   shadows competing with it. The canvas->card step is 1.138:1 (measured), which
+   is what makes the card a card instead of a paragraph on the page. */
 .trip-card {
-    background: var(--card-bg);
+    background: var(--surface);
     border: none;
     border-radius: var(--r-lg);
-    padding: 20px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 18px 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: inset 0 0 0 1px var(--hairline), var(--lit-edge);
+    transition: background-color 180ms var(--ease), box-shadow 180ms var(--ease);
 }
 
 .trip-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--hairline), var(--lit-edge), var(--e1);
 }
 
-.trip-card-active {
-    border-left: 4px solid var(--accent);
-}
+.trip-card-active { box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px var(--hairline), var(--lit-edge); }
+.trip-card-completed { opacity: .72; }
+.trip-card-completed:hover { opacity: 1; }
 
-.trip-card-completed {
-    opacity: 0.8;
-    border-left: 4px solid var(--success);
-}
-
-.trip-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 16px;
-    gap: 12px;
-}
+.trip-card-header { display: flex; }
 
 .trip-card-title {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     flex: 1;
+    min-width: 0;
 }
 
 .trip-route {
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--text-primary);
+    font-weight: 650;
+    font-size: 16.5px;
+    letter-spacing: -0.015em;
+    color: var(--text);
 }
 
-.trip-boat {
-    font-size: 14px;
-    color: var(--text-secondary);
+/* One quiet line carries boat and date, separated by space, not punctuation. */
+.trip-meta { display: flex; gap: 14px; font-size: 13px; color: var(--text-3); }
+.trip-boat { color: var(--text-2); }
+.trip-date { font-variant-numeric: tabular-nums; }
+
+/* ---- The rail: the signature of this page ---- */
+.trip-rail {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+}
+
+.trip-rail-stop { display: flex; flex-direction: column; gap: 2px; }
+.trip-rail-stop-end { align-items: flex-end; }
+
+.trip-time {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.trip-mer {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    margin-left: 3px;
+    letter-spacing: .02em;
+}
+
+.trip-stop-label { font-size: 11px; color: var(--text-3); }
+
+/* The line between the two times, with the duration riding on it. */
+.trip-rail-line {
+    position: relative;
+    height: 1px;
+    background: var(--hairline);
+    display: flex;
+    justify-content: center;
+}
+
+.trip-rail-line::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-3);
+    transform: translateY(-50%);
+}
+
+.trip-duration {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface);
+    padding: 0 8px;
+    font-size: 11.5px;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    transition: background-color 180ms var(--ease);
+}
+
+.trip-card:hover .trip-duration { background: var(--surface-2); }
+
+/* ---- Load: seats you can see, not decode ---- */
+.trip-load { display: flex; flex-direction: column; gap: 7px; }
+
+.trip-load-track {
+    height: 4px;
+    border-radius: var(--r-pill);
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    overflow: hidden;
+}
+
+.trip-load-fill {
+    height: 100%;
+    border-radius: var(--r-pill);
+    background: var(--accent);
+    transition: width 320ms var(--ease);
+}
+
+.trip-load-fill.is-tight { background: var(--warning); }
+.trip-load-fill.is-full { background: var(--danger); }
+
+.trip-load-text { font-size: 12.5px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.trip-load-text strong { color: var(--text); font-weight: 600; }
+
+.trip-note {
+    font-size: 12.5px;
+    color: var(--text-2);
+    background: var(--surface-3);
+    border-radius: var(--r-sm);
+    padding: 8px 10px;
+    margin: 0;
 }
 
 .trip-status-badge {
-    padding: 4px 12px;
-    border-radius: var(--r-lg);
-    font-size: 12px;
+    align-self: flex-start;
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
     font-weight: 600;
-    text-transform: uppercase;
+    letter-spacing: .02em;
 }
 
-.status-departed {
-    background: var(--accent);
-    color: var(--bg-primary);
-}
+.status-departed { background: var(--accent-tint); color: var(--accent-strong); }
+.status-arrived { background: var(--success-tint); color: var(--success-fg); }
 
-.status-arrived {
-    background: var(--success);
-    color: white;
-}
-
+/* ---- Actions: labelled and always visible. Destructive one pushed away. ---- */
 .trip-card-actions {
     display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.trip-action-btn {
-    padding: 6px 10px;
-    border-radius: var(--r-sm);
-    border: none;
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.2s ease;
-}
-
-.trip-action-btn:hover {
-    filter: brightness(1.1);
-    transform: scale(1.05);
-}
-
-.trip-card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.trip-info-row {
-    display: flex;
-    gap: 8px;
-    font-size: 14px;
     align-items: center;
+    gap: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--hairline);
 }
 
-.trip-label {
-    font-weight: 600;
-    color: var(--text-secondary);
-    min-width: 120px;
-    flex-shrink: 0;
+.trip-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border: none;
+    border-radius: var(--r-sm);
+    background: transparent;
+    color: var(--text-2);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 140ms var(--ease), color 140ms var(--ease);
 }
 
-.trip-value {
-    color: var(--text-primary);
-    flex: 1;
-}
+.trip-action .ic { width: 16px; height: 16px; flex-shrink: 0; }
+.trip-action:hover { background: var(--surface-3); color: var(--text); }
+
+.trip-action-destroy { margin-left: auto; display: inline-flex; }
+.trip-action-danger { padding: 7px 9px; color: var(--text-3); }
+.trip-action-danger:hover { background: var(--danger-tint); color: var(--danger-fg); }
+
+.trip-status-control { display: flex; }
 
 .trip-status-form {
     display: inline-block;
@@ -610,13 +689,24 @@
         grid-template-columns: 1fr;
     }
     
-    .trip-card-header {
-        flex-direction: column;
+    /* At phone width the rail stacks, so the two times keep their weight
+       instead of being squeezed onto one line. */
+    .trip-rail {
+        grid-template-columns: 1fr;
+        gap: 8px;
     }
-    
-    .trip-card-actions {
-        align-self: flex-end;
+
+    .trip-rail-stop-end { align-items: flex-start; }
+
+    .trip-rail-line {
+        width: 1px;
+        height: 18px;
+        margin-left: 6px;
+        justify-content: flex-start;
     }
+
+    .trip-rail-line::after { right: auto; left: 0; top: auto; bottom: 0; transform: translate(-2px, 0); }
+    .trip-duration { left: 12px; transform: translateY(-50%); }
 }
 
 @media (max-width: 640px) {

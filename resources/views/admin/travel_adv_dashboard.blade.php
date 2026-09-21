@@ -12,13 +12,10 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="adv-header">
                 <div>
                     <div class="card-title">Travel Advisory</div>
-                    <div class="card-subtitle">
-                        Post weather updates, sea condition warnings, and port suspensions, and manage alerts for passengers.
-                    </div>
                 </div>
             </div>
 

@@ -9,20 +9,16 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="fare-header">
                 <div>
                     <div class="card-title">Fare Management</div>
-                    <div class="card-subtitle">
-                        Set pricing by route for Regular, Student, and Senior Citizen passengers.
-                    </div>
                 </div>
             </div>
 
             {{-- Fare Matrix Section --}}
             <section class="fare-section">
                 <h2 class="fare-section-title">Fare Matrix</h2>
-                <p class="fare-section-desc">Configure fare per route and passenger type (Regular, Student, Senior Citizen).</p>
 
                 <form class="fare-form" id="fareMatrixForm" method="POST" action="{{ route('admin.fare-management.store') }}">
                     @csrf

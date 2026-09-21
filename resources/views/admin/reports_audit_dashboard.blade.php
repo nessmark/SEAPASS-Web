@@ -10,13 +10,10 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="reports-container">
                 <div class="reports-header">
                     <div class="card-title">Reports &amp; Audit</div>
-                    <div class="card-subtitle">
-                        View real-time sales reports, passenger boat capacity statistics, and audit logs for all system activities.
-                    </div>
                 </div>
 
                 {{-- Sales Report Section --}}
@@ -24,7 +21,6 @@
                     <div class="reports-section-header">
                         <div>
                             <h2 class="reports-section-title">Sales Report</h2>
-                            <p class="reports-section-desc">Filter by date, boat, or route to view detailed ticket sales and revenue.</p>
                         </div>
                         <div class="section-actions">
                             <a href="{{ route('admin.reports-audit.export-sales', request()->query()) }}" class="btn btn-export" title="Download filtered sales transactions as CSV">
@@ -177,7 +173,6 @@
                     <div class="reports-section-header">
                         <div>
                             <h2 class="reports-section-title">Passenger Count Report</h2>
-                            <p class="reports-section-desc">Statistics for boat capacity limits and passenger safety compliance.</p>
                         </div>
                         <div class="section-actions">
                             <a href="{{ route('admin.reports-audit.export-capacity', request()->query()) }}" class="btn btn-export" title="Download boat capacity & safety report as CSV">
@@ -256,7 +251,6 @@
                     <div class="reports-section-header">
                         <div>
                             <h2 class="reports-section-title">Audit Log</h2>
-                            <p class="reports-section-desc">Track schedule modifications, ticket refunds, and admin activities.</p>
                         </div>
                     </div>
 

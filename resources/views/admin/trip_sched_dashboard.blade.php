@@ -12,11 +12,10 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="trip-header">
                 <div>
                     <div class="card-title">Trip & Schedule Management</div>
-                    <div class="card-subtitle">Manage schedules, monitor trips, and view seat maps</div>
                 </div>
                 <button class="trip-button" type="button" id="openScheduleModal">Add Schedule</button>
             </div>

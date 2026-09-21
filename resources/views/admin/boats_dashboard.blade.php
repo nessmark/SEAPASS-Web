@@ -12,11 +12,10 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="boats-header">
                 <div>
                     <div class="card-title">Fleet Management</div>
-                    <div class="card-subtitle">Manage lancha vessels - Add, Edit, Delete boats and set status</div>
                 </div>
 
                 <button class="boats-button" type="button" id="openBoatModal">Add Boat</button>

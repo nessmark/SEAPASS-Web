@@ -70,9 +70,8 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="card-title">Roles & Permissions</div>
-            <div class="card-subtitle">Define who can edit schedules and who can only view reports</div>
 
             @if (session('success'))
                 <div class="alert" style="margin-top: 15px;">{{ session('success') }}</div>

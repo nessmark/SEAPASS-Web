@@ -13,13 +13,10 @@
 
 @section('content')
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="ticket-header">
                 <div>
                     <div class="card-title">Ticketing &amp; Bookings</div>
-                    <div class="card-subtitle">
-                        Manage bookings, walk‑in ticketing, and refund requests in one place.
-                    </div>
                 </div>
             </div>
 
@@ -29,7 +26,6 @@
                     <div class="ticket-section-header">
                         <div>
                             <h2>Manage Bookings</h2>
-                            <p>Select a date to view pending, confirmed, and cancelled bookings.</p>
                         </div>
                         <div class="ticket-filter">
                             <form method="GET" action="{{ route('admin.tickets.index') }}">

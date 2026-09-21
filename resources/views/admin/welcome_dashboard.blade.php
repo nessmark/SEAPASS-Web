@@ -195,7 +195,6 @@
     <div class="command-header">
         <div>
             <h1 class="command-title">SeaPass Port Command Center</h1>
-            <p class="command-subtitle">Real-time maritime passenger ticketing, vessel schedules, and port security overview.</p>
         </div>
         <div class="command-actions">
             <a href="{{ route('admin.tickets.index') }}" class="cmd-btn">
@@ -253,7 +252,6 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
                     <div class="card-title" style="margin-bottom: 4px;">Recent Booking Activity</div>
-                    <div class="card-subtitle" style="margin-bottom: 0;">Latest bookings submitted via mobile app &amp; counter desk.</div>
                 </div>
                 <a href="{{ route('admin.tickets.index') }}" style="font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none;">View All →</a>
             </div>
@@ -306,7 +304,6 @@
         <!-- Weekly Revenue Analytics Chart -->
         <div class="card">
             <div class="card-title" style="margin-bottom: 4px;">Weekly Revenue Trend</div>
-            <div class="card-subtitle">Daily sales revenue over the past 7 days.</div>
             <div class="chart-container">
                 <canvas id="weeklyRevenueChart"></canvas>
             </div>
@@ -320,7 +317,6 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
                     <div class="card-title" style="margin-bottom: 4px;">Active Vessel Fleet</div>
-                    <div class="card-subtitle" style="margin-bottom: 0;">Registered passenger boats operating Surigao ⇄ San Jose.</div>
                 </div>
                 <a href="{{ route('admin.boats') }}" style="font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none;">Manage Fleet →</a>
             </div>
@@ -357,7 +353,6 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
                     <div class="card-title" style="margin-bottom: 4px;">Recent Advisories &amp; System Activity</div>
-                    <div class="card-subtitle" style="margin-bottom: 0;">Latest push notifications and admin activity logs.</div>
                 </div>
                 <a href="{{ route('admin.reports-audit') }}" style="font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none;">Audit Log →</a>
             </div>

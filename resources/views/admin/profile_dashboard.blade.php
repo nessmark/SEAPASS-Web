@@ -17,9 +17,8 @@
     @endphp
 
     <div class="dashboard-grid full-width">
-        <div class="card">
+        <div class="page-body">
             <div class="card-title">Profile</div>
-            <div class="card-subtitle">Admin Information</div>
 
             <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
                 <div style="width: 72px; height: 72px; border-radius: var(--r-lg); background: var(--accent-color); color: var(--bg-primary); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 22px;">
