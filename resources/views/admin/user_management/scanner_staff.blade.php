@@ -47,15 +47,15 @@
             color: var(--bg-primary);
         }
         .btn-delete {
-            background-color: #dc3545;
+            background-color: #E5484D;
             color: white;
         }
         .btn-toggle-deactivate {
-            background-color: #f59e0b;
+            background-color: #E9A23B;
             color: white;
         }
         .btn-toggle-activate {
-            background-color: #10b981;
+            background-color: #1FA971;
             color: white;
         }
         .btn-edit:hover, .btn-delete:hover, .btn-toggle:hover {
@@ -72,12 +72,12 @@
             letter-spacing: 0.5px;
         }
         .badge-active {
-            background-color: #d1fae5;
-            color: #065f46;
+            background-color: #DCF2E8;
+            color: #16794F;
         }
         .badge-inactive {
-            background-color: #fee2e2;
-            color: #991b1b;
+            background-color: #FBE4E5;
+            color: #B32A2E;
         }
         .port-badge {
             display: inline-flex;
@@ -107,13 +107,13 @@
             </div>
 
             @if (session('success'))
-                <div class="alert" style="background-color: #d1fae5; color: #065f46; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: var(--r-sm); margin-top: 16px;">
+                <div class="alert" style="background-color: #DCF2E8; color: #16794F; border-left: 4px solid #1FA971; padding: 12px 16px; border-radius: var(--r-sm); margin-top: 16px;">
                     {{ session('success') }}
                 </div>
             @endif
 
             @if ($errors->any())
-                <div class="alert error" style="background-color: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: var(--r-sm); margin-top: 16px;">
+                <div class="alert error" style="background-color: #FBE4E5; color: #B32A2E; border-left: 4px solid #E5484D; padding: 12px 16px; border-radius: var(--r-sm); margin-top: 16px;">
                     {{ $errors->first() }}
                 </div>
             @endif

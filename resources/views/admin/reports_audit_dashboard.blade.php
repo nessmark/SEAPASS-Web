@@ -85,15 +85,15 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Regular Tickets</div>
-                            <div class="stat-value" style="color: #0369A1;">{{ $regularTicketsCount ?? 0 }}</div>
+                            <div class="stat-value" style="color: #1D8895;">{{ $regularTicketsCount ?? 0 }}</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Student Tickets</div>
-                            <div class="stat-value" style="color: #6B21A8;">{{ $studentTicketsCount ?? 0 }}</div>
+                            <div class="stat-value" style="color: #171717;">{{ $studentTicketsCount ?? 0 }}</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Senior / PWD Tickets</div>
-                            <div class="stat-value" style="color: #92400E;">{{ $seniorTicketsCount ?? 0 }}</div>
+                            <div class="stat-value" style="color: #171717;">{{ $seniorTicketsCount ?? 0 }}</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Confirmed Bookings</div>
@@ -197,7 +197,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Trips Over Capacity</div>
-                            <div class="stat-value" style="color: {{ ($tripsOverCapacityCount ?? 0) > 0 ? '#DC2626' : 'var(--text)' }};">
+                            <div class="stat-value" style="color: {{ ($tripsOverCapacityCount ?? 0) > 0 ? '#E5484D' : 'var(--text)' }};">
                                 {{ $tripsOverCapacityCount ?? 0 }}
                             </div>
                         </div>
@@ -313,7 +313,7 @@
                             @forelse($allAuditLogs ?? [] as $log)
                                 <div class="audit-log-item">
                                     <div class="audit-log-header">
-                                        <span class="audit-log-action"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6l-1 6 3 3H7l3-3-1-6z"/><path d="M12 13v7"/></svg> {{ $log->action }} — <small style="color: var(--primary-color);">{{ strtoupper($log->category) }}</small></span>
+                                        <span class="audit-log-action"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6l-1 6 3 3H7l3-3-1-6z"/><path d="M12 13v7"/></svg> {{ $log->action }} <small style="color: var(--primary-color);">{{ strtoupper($log->category) }}</small></span>
                                         <span class="audit-log-time">{{ $log->created_at->format('M d, Y h:i A') }}</span>
                                     </div>
                                     <div class="audit-log-details">

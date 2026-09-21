@@ -185,22 +185,22 @@
 }
 
 .adv-info {
-    background: rgba(33, 150, 243, 0.15);
+    background: var(--accent-tint);
     color: var(--accent);
 }
 
 .adv-warning {
-    background: rgba(255, 193, 7, 0.15);
+    background: var(--warning-tint);
     color: var(--warning);
 }
 
 .adv-critical {
-    background: rgba(244, 67, 54, 0.18);
+    background: var(--danger-tint);
     color: var(--danger);
 }
 
 .adv-published {
-    background: rgba(76, 175, 80, 0.18);
+    background: var(--success-tint);
     color: var(--success);
 }
 
@@ -210,17 +210,17 @@
 }
 
 .adv-sent {
-    background: rgba(0, 188, 212, 0.18);
+    background: var(--accent-tint);
     color: var(--accent);
 }
 
 .adv-pending {
-    background: rgba(255, 193, 7, 0.18);
+    background: var(--warning-tint);
     color: var(--warning);
 }
 
 .adv-none {
-    background: rgba(120, 144, 156, 0.18);
+    background: var(--surface-3);
     color: var(--text-3);
 }
 
@@ -282,7 +282,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(10, 15, 29, 0.75);
+    background: rgba(0, 0, 0, .6);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     display: flex;

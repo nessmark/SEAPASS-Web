@@ -181,7 +181,7 @@
                                 @endif
                                 <div class="boat-detail-row">
                                     <span class="boat-detail-label">Capacity:</span>
-                                    <span class="boat-detail-value">{{ $boat->passenger_capacity ?? '—' }} passengers</span>
+                                    <span class="boat-detail-value">{{ $boat->passenger_capacity ?? '-' }} passengers</span>
                                 </div>
                                 @if($boat->owner)
                                 <div class="boat-detail-row">

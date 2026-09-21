@@ -13,7 +13,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         body {
-            background-color: #0b1329;
+            background-color: #0A0A0A;
             color: #ffffff;
             min-height: 100vh;
             display: flex;
@@ -23,16 +23,16 @@
             padding: 16px;
         }
         .checkout-card {
-            background: #131c36;
+            background: #141414;
             width: 100%;
             max-width: 420px;
             border-radius: 20px;
-            border: 1px solid #233157;
+            border: 1px solid #262626;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
+            background: linear-gradient(135deg, #166D78 0%, #1D8895 100%);
             padding: 20px 24px;
             display: flex;
             align-items: center;
@@ -45,7 +45,7 @@
         }
         .brand-icon {
             background: #ffffff;
-            color: #007bff;
+            color: #1D8895;
             font-weight: 900;
             font-size: 18px;
             width: 36px;
@@ -82,7 +82,7 @@
         }
         .amount-label {
             font-size: 12px;
-            color: #94a3b8;
+            color: #A3A3A3;
             text-transform: uppercase;
             letter-spacing: 0.8px;
             margin-bottom: 4px;
@@ -90,16 +90,16 @@
         .amount-value {
             font-size: 36px;
             font-weight: 800;
-            color: #38bdf8;
+            color: #1D8895;
         }
         .trip-info {
-            background: #0d1527;
+            background: #141414;
             padding: 12px 16px;
             border-radius: 12px;
             margin-bottom: 20px;
             font-size: 13px;
             text-align: left;
-            border: 1px solid #1e293b;
+            border: 1px solid #262626;
         }
         .trip-info-row {
             display: flex;
@@ -110,11 +110,11 @@
             margin-bottom: 0;
         }
         .trip-info-label {
-            color: #94a3b8;
+            color: #A3A3A3;
         }
         .trip-info-val {
             font-weight: 600;
-            color: #e2e8f0;
+            color: #E5E5E5;
         }
         .qr-wrapper {
             background: #ffffff;
@@ -131,7 +131,7 @@
         }
         .scan-instruction {
             font-size: 13px;
-            color: #cbd5e1;
+            color: #D4D4D4;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -141,7 +141,7 @@
         .btn-pay {
             display: block;
             width: 100%;
-            background: #007bff;
+            background: #1D8895;
             color: #ffffff;
             border: none;
             border-radius: 12px;
@@ -152,11 +152,11 @@
             cursor: pointer;
             transition: background 0.2s, transform 0.1s;
             text-decoration: none;
-            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(29, 136, 149, 0.4);
             margin-bottom: 12px;
         }
         .btn-pay:hover {
-            background: #0069d9;
+            background: #166D78;
         }
         .btn-pay:active {
             transform: scale(0.98);
@@ -165,8 +165,8 @@
             display: block;
             width: 100%;
             background: transparent;
-            color: #94a3b8;
-            border: 1px solid #334155;
+            color: #A3A3A3;
+            border: 1px solid #262626;
             border-radius: 12px;
             padding: 12px;
             font-size: 13px;
@@ -176,12 +176,12 @@
             transition: all 0.2s;
         }
         .btn-cancel:hover {
-            background: #1e293b;
+            background: #262626;
             color: #ffffff;
         }
         .footer-note {
             font-size: 11px;
-            color: #64748b;
+            color: #737373;
             margin-top: 16px;
             line-height: 1.4;
         }
@@ -222,7 +222,7 @@
                 </div>
                 <div class="trip-info-row">
                     <span class="trip-info-label">Schedule:</span>
-                    <span class="trip-info-val">{{ optional($booking->trip_date)->format('M d, Y') }} · {{ $booking->departure_time_slot }}</span>
+                    <span class="trip-info-val">{{ optional($booking->trip_date)->format('M d, Y') }}, {{ $booking->departure_time_slot }}</span>
                 </div>
             </div>
 

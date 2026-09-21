@@ -49,7 +49,7 @@
                         <button class="ticket-tab active" data-tab="pending">
                             Pending
                             @if(isset($toBeConfirmedCount) && $toBeConfirmedCount > 0)
-                                <span class="badge-tab-count" style="background: #f59e0b; color: #fff; border-radius: 9999px; padding: 1px 7px; font-size: 11px; font-weight: 600; margin-left: 4px;">{{ $toBeConfirmedCount }} ID</span>
+                                <span class="badge-tab-count" style="background: #E9A23B; color: #fff; border-radius: 9999px; padding: 1px 7px; font-size: 11px; font-weight: 600; margin-left: 4px;">{{ $toBeConfirmedCount }} ID</span>
                             @endif
                         </button>
                         <button class="ticket-tab" data-tab="confirmed">Confirmed</button>
@@ -82,7 +82,7 @@
                                             <strong>{{ $bookingRef }}</strong>
                                             @if($booking->isToBeConfirmed())
                                                 <div style="margin-top: 3px;">
-                                                    <span style="background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.35); padding: 2px 7px; border-radius: 9999px; font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;" title="Paid via PayMongo. Student/Senior/PWD ID awaiting verification.">
+                                                    <span style="background: rgba(233, 162, 59, 0.15); color: #9A6414; border: 1px solid rgba(233, 162, 59, 0.35); padding: 2px 7px; border-radius: 9999px; font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;" title="Paid via PayMongo. Student/Senior/PWD ID awaiting verification.">
                                                         ⏳ ID Verification
                                                     </span>
                                                 </div>
@@ -119,11 +119,11 @@
                                                     <button type="button" class="btn-approve-booking-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" style="background: var(--success); color: #fff; border: none; font-weight: 600; padding: 7px 13px; border-radius: var(--r-sm); cursor: pointer; font-size: 12.5px;" title="Approve discounted ID and issue boarding pass QR">
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Approve
                                                     </button>
-                                                    <button type="button" class="btn-reject-refund-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" data-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}" style="background-color: #dc2626; color: #ffffff; border: none; font-weight: 600; padding: 6px 10px; border-radius: var(--r-sm); cursor: pointer; font-size: 12px;" title="Reject ID and automatically refund via PayMongo">
+                                                    <button type="button" class="btn-reject-refund-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" data-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}" style="background-color: #E5484D; color: #ffffff; border: none; font-weight: 600; padding: 6px 10px; border-radius: var(--r-sm); cursor: pointer; font-size: 12px;" title="Reject ID and automatically refund via PayMongo">
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg> Reject &amp; Refund
                                                     </button>
                                                 @else
-                                                    <button type="button" class="btn-confirm-booking-action" data-booking-id="{{ $booking->id }}" style="background-color: #81C7A8; color: #0D5C3A; border: none; font-weight: 600; padding: 6px 12px; border-radius: var(--r-sm); cursor: pointer; font-size: 12px;">
+                                                    <button type="button" class="btn-confirm-booking-action" data-booking-id="{{ $booking->id }}" style="background-color: #1D8895; color: #FFFFFF; border: none; font-weight: 600; padding: 6px 12px; border-radius: var(--r-sm); cursor: pointer; font-size: 12px;">
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Confirm
                                                     </button>
                                                 @endif
@@ -383,7 +383,7 @@
                                     <div class="category-row" style="display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);">
                                         <div>
                                             <strong style="font-size: 13px; color: var(--text);">Student</strong>
-                                            <span style="font-size: 10px; background: rgba(78, 205, 196, 0.15); color: var(--accent); padding: 2px 7px; border-radius: var(--r-sm); font-weight: 600; margin-left: 6px;">Discounted</span>
+                                            <span style="font-size: 10px; background: rgba(29, 136, 149, 0.15); color: var(--accent); padding: 2px 7px; border-radius: var(--r-sm); font-weight: 600; margin-left: 6px;">Discounted</span>
                                             <div style="font-size: 11px; color: var(--text-2); margin-top: 2px;" id="unit_price_student">₱0.00 / passenger</div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -396,7 +396,7 @@
                                     <div class="category-row" style="display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);">
                                         <div>
                                             <strong style="font-size: 13px; color: var(--text);">Senior Citizen / PWD</strong>
-                                            <span style="font-size: 10px; background: rgba(78, 205, 196, 0.15); color: var(--accent); padding: 2px 7px; border-radius: var(--r-sm); font-weight: 600; margin-left: 6px;">20% Off</span>
+                                            <span style="font-size: 10px; background: rgba(29, 136, 149, 0.15); color: var(--accent); padding: 2px 7px; border-radius: var(--r-sm); font-weight: 600; margin-left: 6px;">20% Off</span>
                                             <div style="font-size: 11px; color: var(--text-2); margin-top: 2px;" id="unit_price_senior">₱0.00 / passenger</div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -572,7 +572,7 @@
                     <button type="button" class="btn-modal-approve-action" id="modalApproveBtn" style="display: none; background: var(--text); color: #ffffff; border: none; font-weight: 600; padding: 8px 16px; border-radius: var(--r-md); cursor: pointer; font-size: 13px;" title="Approve Student/Senior/PWD ID and generate boarding pass">
                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Approve Discount &amp; Issue Ticket
                     </button>
-                    <button type="button" class="btn-modal-reject-action" id="modalRejectBtn" style="display: none; background: #dc2626; color: #ffffff; border: none; font-weight: 600; padding: 8px 16px; border-radius: var(--r-md); cursor: pointer; font-size: 13px;" title="Reject ID verification and refund payment via PayMongo">
+                    <button type="button" class="btn-modal-reject-action" id="modalRejectBtn" style="display: none; background: #E5484D; color: #ffffff; border: none; font-weight: 600; padding: 8px 16px; border-radius: var(--r-md); cursor: pointer; font-size: 13px;" title="Reject ID verification and refund payment via PayMongo">
                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg> Reject &amp; Refund Payment
                     </button>
                     <button type="button" class="passenger-modal-cancel" id="cancelPassengerModal">Close</button>
@@ -606,34 +606,34 @@
     {{-- Rejection & Automated Refund Modal --}}
     <div id="rejection_refund_modal" class="id-lightbox-backdrop" style="display: none; z-index: 10000;" aria-hidden="true">
         <div class="id-lightbox-content" style="max-width: 480px; border-radius: 16px; overflow: hidden; background: #ffffff;" role="dialog" aria-modal="true">
-            <div class="id-lightbox-header" style="background: #fef2f2; border-bottom: 1px solid #fecaca; padding: 16px 20px;">
+            <div class="id-lightbox-header" style="background: #FBE4E5; border-bottom: 1px solid #F3C6C8; padding: 16px 20px;">
                 <div class="id-lightbox-title-wrap">
-                    <h3 style="color: #dc2626; margin: 0; font-size: 16px; font-weight: 600;">Reject &amp; Refund Booking</h3>
-                    <span class="id-lightbox-cat-badge" style="background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.3);">Automated PayMongo Refund</span>
+                    <h3 style="color: #E5484D; margin: 0; font-size: 16px; font-weight: 600;">Reject &amp; Refund Booking</h3>
+                    <span class="id-lightbox-cat-badge" style="background: rgba(229, 72, 77, 0.1); color: #E5484D; border: 1px solid rgba(229, 72, 77, 0.3);">Automated PayMongo Refund</span>
                 </div>
                 <button type="button" class="id-lightbox-close" id="closeRejectionModal" aria-label="Close modal">×</button>
             </div>
             <form id="rejectionRefundForm" style="padding: 20px 24px; margin: 0;">
                 <input type="hidden" id="rejectBookingId" value="">
-                <p style="margin: 0 0 14px 0; font-size: 13.5px; color: #475569; line-height: 1.5;">
-                    Rejecting booking <strong id="rejectBookingRefDisplay" style="color: #0f172a;">#SP-0000</strong> will <strong style="color: #dc2626;">automatically refund <span id="rejectRefundAmountDisplay">₱0.00</span></strong> directly back to the passenger's GCash / E-Wallet via PayMongo and release the reserved seat(s) back to open capacity.
+                <p style="margin: 0 0 14px 0; font-size: 13.5px; color: #666666; line-height: 1.5;">
+                    Rejecting booking <strong id="rejectBookingRefDisplay" style="color: #171717;">#SP-0000</strong> will <strong style="color: #E5484D;">automatically refund <span id="rejectRefundAmountDisplay">₱0.00</span></strong> directly back to the passenger's GCash / E-Wallet via PayMongo and release the reserved seat(s) back to open capacity.
                 </p>
                 <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: #1e293b;">
-                        Reason for Rejection <span style="color: #ef4444;">*</span>
+                    <label style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: #262626;">
+                        Reason for Rejection <span style="color: #E5484D;">*</span>
                     </label>
-                    <select id="rejectPresetReason" style="width: 100%; padding: 9px 12px; border-radius: var(--r-md); border: 1px solid #cbd5e1; background: #fff; font-size: 13px; margin-bottom: 10px; color: #0f172a;">
+                    <select id="rejectPresetReason" style="width: 100%; padding: 9px 12px; border-radius: var(--r-md); border: 1px solid #D4D4D4; background: #fff; font-size: 13px; margin-bottom: 10px; color: #171717;">
                         <option value="Uploaded ID photo is unreadable or blurry.">Uploaded ID photo is unreadable or blurry</option>
                         <option value="Expired Student / Senior Citizen / PWD ID card.">Expired Student / Senior Citizen / PWD ID card</option>
                         <option value="Passenger name does not match the name on the uploaded ID.">Passenger name does not match the name on the ID</option>
                         <option value="Invalid or non-accredited institution ID presented.">Invalid or non-accredited institution ID presented</option>
                         <option value="custom">Other (Specify custom reason below)...</option>
                     </select>
-                    <textarea id="rejectCustomReason" rows="3" maxlength="500" placeholder="Specify explanation for rejection and refund..." style="width: 100%; padding: 9px 12px; border-radius: var(--r-md); border: 1px solid #cbd5e1; background: #fff; font-size: 13px; box-sizing: border-box; color: #0f172a; resize: vertical; display: none;"></textarea>
+                    <textarea id="rejectCustomReason" rows="3" maxlength="500" placeholder="Specify explanation for rejection and refund..." style="width: 100%; padding: 9px 12px; border-radius: var(--r-md); border: 1px solid #D4D4D4; background: #fff; font-size: 13px; box-sizing: border-box; color: #171717; resize: vertical; display: none;"></textarea>
                 </div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 10px; border-top: 1px solid #f1f5f9;">
-                    <button type="button" id="cancelRejectionModal" style="padding: 8px 16px; border-radius: var(--r-md); border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; cursor: pointer; font-size: 13px;">Cancel</button>
-                    <button type="submit" id="confirmRejectRefundBtn" style="padding: 8px 18px; border-radius: var(--r-md); border: none; background: #dc2626; color: #ffffff; font-weight: 600; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 10px; border-top: 1px solid #F0F0F0;">
+                    <button type="button" id="cancelRejectionModal" style="padding: 8px 16px; border-radius: var(--r-md); border: 1px solid #D4D4D4; background: #FAFAFA; color: #666666; font-weight: 600; cursor: pointer; font-size: 13px;">Cancel</button>
+                    <button type="submit" id="confirmRejectRefundBtn" style="padding: 8px 18px; border-radius: var(--r-md); border: none; background: #E5484D; color: #ffffff; font-weight: 600; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
                         <span>Confirm Rejection &amp; Refund</span>
                     </button>
                 </div>

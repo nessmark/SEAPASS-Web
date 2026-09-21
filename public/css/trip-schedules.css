@@ -762,7 +762,7 @@
     display: inline-block;
     padding: 3px 9px;
     border-radius: var(--r-sm);
-    background: rgba(2, 132, 199, 0.12);
+    background: var(--accent-tint);
     color: var(--accent);
     font-weight: 600;
     font-size: 12px;

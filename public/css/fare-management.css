@@ -129,13 +129,13 @@
 }
 
 .fare-alert-success {
-    background: rgba(34, 197, 94, 0.15);
+    background: var(--success-tint);
     color: var(--text-primary);
     border: none;
 }
 
 .fare-alert-error {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--danger-tint);
     color: var(--text-primary);
     border: none;
 }

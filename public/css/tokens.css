@@ -7,7 +7,10 @@
  */
 
 :root {
-    /* ---- Brand ramp (from the official logo SVG, #1D8895) ---- */
+    /* ---- Brand ramp (from the official logo SVG, #1D8895).
+       ACCENT ONLY: buttons, active/selected states, links, focus rings, chips, marks.
+       NEVER a canvas, surface, card, panel, text or border colour. Those are pure
+       greys (R=G=B) in both themes — dark and white only. ---- */
     --teal-50:  #F0F9FA;
     --teal-100: #DCF0F2;
     --teal-200: #B8E1E6;
@@ -53,19 +56,19 @@
    DARK (default)
    ========================================================= */
 :root {
-    --canvas:     #0B0F11;
-    --surface:    #151A1D;
-    --surface-2:  #1D2428;
-    --surface-3:  #252D32;
-    --text:       #F2F5F6;
-    --text-2:     #A8B3BA;
-    --text-3:     #75828A;
+    --canvas:     #0A0A0A;
+    --surface:    #141414;
+    --surface-2:  #1C1C1C;
+    --surface-3:  #262626;
+    --text:       #F5F5F5;
+    --text-2:     #A3A3A3;
+    --text-3:     #737373;
     --hairline:   rgba(255, 255, 255, .10);
     --accent:     #3FA0AD;
     --accent-strong: #5FBAC6;
     --accent-tint:   rgba(63, 160, 173, .16);
     --accent-tint-2: rgba(63, 160, 173, .10);
-    --on-accent:  #06191C;
+    --on-accent:  #0A0A0A;
 
     --e1: 0 1px 2px rgba(0,0,0,.30), 0 6px 16px rgba(0,0,0,.28);
     --e2: 0 2px 6px rgba(0,0,0,.34), 0 14px 32px rgba(0,0,0,.38);
@@ -97,23 +100,23 @@
    LIGHT
    ========================================================= */
 body.light-mode {
-    --canvas:     #F4F6F7;
+    --canvas:     #F5F5F5;
     --surface:    #FFFFFF;
-    --surface-2:  #F7F9F9;
-    --surface-3:  #EEF2F3;
-    --text:       #14191C;
-    --text-2:     #5B6770;
-    --text-3:     #8A949B;
-    --hairline:   rgba(20, 25, 28, .08);
+    --surface-2:  #FAFAFA;
+    --surface-3:  #F0F0F0;
+    --text:       #171717;
+    --text-2:     #666666;
+    --text-3:     #949494;
+    --hairline:   rgba(0, 0, 0, .09);
     --accent:     #1D8895;
     --accent-strong: #166D78;
     --accent-tint:   rgba(29, 136, 149, .10);
     --accent-tint-2: rgba(29, 136, 149, .06);
     --on-accent:  #FFFFFF;
 
-    --e1: 0 1px 2px rgba(16,24,28,.04), 0 6px 16px rgba(16,24,28,.05);
-    --e2: 0 2px 4px rgba(16,24,28,.05), 0 12px 28px rgba(16,24,28,.08);
-    --e3: 0 24px 64px rgba(16,24,28,.18);
+    --e1: 0 1px 2px rgba(0,0,0,.04), 0 6px 16px rgba(0,0,0,.05);
+    --e2: 0 2px 4px rgba(0,0,0,.05), 0 12px 28px rgba(0,0,0,.08);
+    --e3: 0 24px 64px rgba(0,0,0,.18);
     --lit-edge: none;
 
     --success-tint: rgba(31, 169, 113, .12);
@@ -133,7 +136,7 @@ body.light-mode {
     --accent-hover:  var(--accent-strong);
     --border-color:  var(--hairline);
     --input-bg:      var(--surface-2);
-    --chart-grid:    rgba(20,25,28,.06);
+    --chart-grid:    rgba(0,0,0,.07);
 }
 
 /* =========================================================

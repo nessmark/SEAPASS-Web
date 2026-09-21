@@ -124,17 +124,17 @@
 }
 
 .status-pending {
-    background: rgba(255, 193, 7, 0.15);
+    background: var(--warning-tint);
     color: var(--warning);
 }
 
 .status-confirmed {
-    background: rgba(76, 175, 80, 0.18);
+    background: var(--success-tint);
     color: var(--success);
 }
 
 .status-cancelled {
-    background: rgba(233, 30, 99, 0.15);
+    background: var(--danger-tint);
     color: var(--text-3);
 }
 
@@ -405,7 +405,7 @@
     background: var(--accent-tint);
     border-color: var(--accent);
     transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(33, 150, 243, 0.25);
+    box-shadow: var(--e1);
 }
 
 /* Selected State: Solid teal background with white text */
@@ -414,7 +414,7 @@
     border: 1.5px solid var(--accent) !important;
     color: #ffffff !important;
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 191, 165, 0.35);
+    box-shadow: var(--e1);
 }
 
 .ticket-seat.selected:hover {
@@ -544,7 +544,7 @@
 }
 
 .counter-btn:hover {
-    background: rgba(78, 205, 196, 0.2);
+    background: var(--accent-tint);
     transform: scale(1.08);
 }
 
@@ -577,7 +577,7 @@
 }
 
 .passenger-card-item.is-expanded {
-    border-color: rgba(78, 205, 196, 0.5);
+    border-color: var(--accent);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
@@ -629,7 +629,7 @@
 }
 
 .passenger-status-chip.status-completed {
-    background: rgba(78, 205, 196, 0.15);
+    background: var(--accent-tint);
     color: var(--accent);
 }
 
@@ -689,14 +689,14 @@
 
 .passenger-input-group input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+    box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
 .passenger-discount-box {
     margin-top: 12px;
     padding: 12px 14px;
     border-radius: var(--r-md);
-    background: rgba(78, 205, 196, 0.06);
+    background: var(--accent-tint-2);
     border: none;
 }
 
@@ -728,7 +728,7 @@
 }
 
 .passenger-seat-tag {
-    background: rgba(78, 205, 196, 0.15);
+    background: var(--accent-tint);
     color: var(--accent);
     padding: 3px 8px;
     border-radius: var(--r-sm);
@@ -750,7 +750,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(129, 199, 168, 0.15);
+    background: var(--accent-tint);
     color: var(--success-fg);
     border: none;
     font-weight: 700;
@@ -767,7 +767,7 @@
     color: var(--success-fg);
     border-color: var(--success-fg);
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(129, 199, 168, 0.3);
+    box-shadow: var(--e1);
 }
 
 .ticket-print-modal {
@@ -793,7 +793,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(0, 0, 0, 0.72);
     backdrop-filter: blur(6px);
 }
 
@@ -897,7 +897,7 @@
 .btn-modal-print:hover {
     background: var(--success-fg);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(129, 199, 168, 0.35);
+    box-shadow: var(--e2);
 }
 
 .btn-modal-close {
@@ -916,7 +916,7 @@
 }
 
 .btn-modal-close:hover {
-    background: rgba(239, 68, 68, 0.25);
+    background: var(--danger-tint);
     color: var(--danger-fg);
 }
 
@@ -1149,7 +1149,7 @@
 }
 
 .standard-status-badge {
-    background: rgba(129, 199, 168, 0.2);
+    background: var(--accent-tint);
     color: var(--success-fg);
     border: none;
     font-size: 11px;
@@ -1229,7 +1229,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(129, 199, 168, 0.18);
+    background: var(--accent-tint);
     color: var(--success-fg);
     border: none;
     padding: 3px 10px;
@@ -1391,7 +1391,7 @@
     align-items: center;
     gap: 5px;
     padding: 3px 9px;
-    background: rgba(56, 189, 248, 0.12);
+    background: var(--accent-tint-2);
     border: none;
     border-radius: var(--r-sm);
     color: var(--accent);
@@ -1405,11 +1405,11 @@
 }
 
 .passenger-badge-btn:hover {
-    background: rgba(56, 189, 248, 0.25);
+    background: var(--accent-tint);
     border-color: var(--accent);
     color: #ffffff;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+    box-shadow: var(--e2);
 }
 
 .passenger-badge-btn .badge-icon {
@@ -1497,7 +1497,7 @@
     display: inline-flex;
     align-items: center;
     padding: 2px 8px;
-    background: rgba(56, 189, 248, 0.15);
+    background: var(--accent-tint);
     border: none;
     border-radius: 999px;
     color: var(--accent);
@@ -1670,19 +1670,19 @@
 }
 
 .passenger-cat-badge.cat-regular {
-    background: rgba(56, 189, 248, 0.14);
+    background: var(--surface-3);
     border: none;
     color: var(--accent);
 }
 
 .passenger-cat-badge.cat-student {
-    background: rgba(168, 85, 247, 0.14);
+    background: var(--accent-tint);
     border: none;
     color: var(--accent);
 }
 
 .passenger-cat-badge.cat-senior {
-    background: rgba(245, 158, 11, 0.14);
+    background: var(--warning-tint);
     border: none;
     color: var(--warning-fg);
 }
@@ -1762,7 +1762,7 @@
 .btn-modal-approve-action:hover {
     background: var(--success);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+    box-shadow: var(--e2);
 }
 
 .btn-modal-reject-action {
@@ -1773,7 +1773,7 @@
 .btn-modal-reject-action:hover {
     background: var(--danger);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+    box-shadow: var(--e2);
 }
 
 .passenger-modal-cancel {
@@ -1829,7 +1829,7 @@
     align-items: center;
     gap: 6px;
     padding: 4px 9px 4px 5px;
-    background: rgba(46, 160, 67, 0.15);
+    background: var(--success-tint);
     border: none;
     border-radius: var(--r-sm);
     color: var(--success);
@@ -1840,10 +1840,10 @@
 }
 
 .passenger-id-preview-btn:hover {
-    background: rgba(46, 160, 67, 0.25);
+    background: var(--success-tint);
     border-color: var(--success);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(63, 185, 80, 0.2);
+    box-shadow: var(--e1);
 }
 
 .id-thumb-wrap {
@@ -1868,7 +1868,7 @@
     align-items: center;
     gap: 4px;
     padding: 3px 8px;
-    background: rgba(210, 153, 34, 0.15);
+    background: var(--warning-tint);
     border: none;
     border-radius: var(--r-sm);
     color: var(--warning-fg);
@@ -1930,7 +1930,7 @@
     display: inline-flex;
     align-items: center;
     padding: 2px 8px;
-    background: rgba(56, 189, 248, 0.15);
+    background: var(--accent-tint);
     border: none;
     border-radius: 999px;
     color: var(--accent);

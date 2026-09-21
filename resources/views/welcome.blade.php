@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in · SeaPass</title>
+    <title>Sign in to SeaPass</title>
     
     @include('partials.head-icons')
     <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">
@@ -40,7 +40,7 @@
             position: absolute;
             inset: 0;
             background:
-                linear-gradient(to top, rgba(10, 48, 55, .92) 0%, rgba(10, 48, 55, .55) 45%, rgba(10, 48, 55, .28) 100%);
+                linear-gradient(to top, rgba(0, 0, 0, .90) 0%, rgba(0, 0, 0, .58) 45%, rgba(0, 0, 0, .30) 100%);
         }
         .stage-copy { position: relative; z-index: 1; max-width: 30ch; }
         .stage-mark {
@@ -73,15 +73,6 @@
             background: var(--surface);
         }
         .login-card { width: 100%; max-width: 372px; }
-
-        .login-eyebrow {
-            font-size: 11.5px;
-            font-weight: 600;
-            letter-spacing: 0.045em;
-            text-transform: uppercase;
-            color: var(--text-3);
-            margin-bottom: var(--s-3);
-        }
         .login-heading {
             font-size: 27px;
             font-weight: 700;
@@ -203,8 +194,7 @@
 
     <main class="panel">
         <div class="login-card">
-            <p class="login-eyebrow">SeaPass Admin</p>
-            <h2 class="login-heading">Sign in</h2>
+                        <h2 class="login-heading">Sign in</h2>
             <p class="login-note">Use your port staff account to continue.</p>
 
             @if ($errors->any())
@@ -242,7 +232,7 @@
                 <button type="submit" class="btn-login">Log in</button>
             </form>
 
-            <p class="login-foot">SeaPass Ticketing System · San Jose Port, Dinagat Islands</p>
+            <p class="login-foot">SeaPass Ticketing System, San Jose Port, Dinagat Islands</p>
         </div>
     </main>
 </body>

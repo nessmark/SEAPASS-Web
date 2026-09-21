@@ -452,7 +452,7 @@ table td {
     vertical-align: middle;
 }
 table tbody tr { transition: background-color 140ms var(--ease); }
-table tbody tr:hover { background: var(--accent-tint-2); }
+table tbody tr:hover { background: var(--surface-2); }
 table tbody tr:first-child td { border-top: none; }
 
 /* Forms */
@@ -499,7 +499,7 @@ select {
     box-shadow: var(--e3);
 }
 .modal-overlay, .overlay, .backdrop {
-    background: rgba(8, 12, 14, .5);
+    background: rgba(0, 0, 0, .5);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }

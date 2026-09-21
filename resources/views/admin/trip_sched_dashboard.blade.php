@@ -58,7 +58,7 @@
                                     @endforeach
                                 </select>
                                 <small id="boat_capacity_info" style="color: var(--accent); display: block; margin-top: 4px; font-weight: 600; font-size: 13px;">
-                                    Fleet Seat Capacity: —
+                                    Fleet Seat Capacity: -
                                 </small>
                             </div>
                             <div class="trip-field">
@@ -131,7 +131,7 @@
                                 <label>Available Seats <span style="color: red;">*</span></label>
                                 <input type="number" name="available_seats" id="schedule_available_seats" required min="0" placeholder="0">
                                 <small id="available_seats_help" style="color: var(--text-2); display: block; margin-top: 4px;">
-                                    Auto-set to fleet capacity (<span id="capacity_val" style="font-weight: bold; color: #111;">—</span> seats)
+                                    Auto-set to fleet capacity (<span id="capacity_val" style="font-weight: bold; color: #111;">-</span> seats)
                                 </small>
                             </div>
                             <div class="trip-field full-width">
@@ -255,7 +255,7 @@
                                         <td>
                                             <div class="action-btn-group">
                                                 {{-- Edit Rule --}}
-                                                <button type="button" class="action-mini-btn" style="background: rgba(14, 165, 233, 0.1); color: var(--accent); border: 1px solid rgba(14, 165, 233, 0.3);"
+                                                <button type="button" class="action-mini-btn" style="background: rgba(29, 136, 149, 0.1); color: var(--accent); border: 1px solid rgba(29, 136, 149, 0.3);"
                                                     onclick="openEditRecurringModal({{ json_encode([
                                                         'id' => $template->id,
                                                         'boat_id' => $template->boat_id,
