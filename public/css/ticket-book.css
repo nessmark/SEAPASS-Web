@@ -22,8 +22,8 @@
 
 .ticket-section {
     background: var(--card-bg);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-lg);
+    border: none;
     padding: 18px 18px 20px;
     display: flex;
     flex-direction: column;
@@ -59,7 +59,7 @@
     padding: 6px 10px;
     font-size: 13px;
     border-radius: 999px;
-    border: 1px solid transparent;
+    border: none;
     background: var(--bg-tertiary);
     color: var(--text-secondary);
     cursor: pointer;
@@ -125,7 +125,7 @@
 
 .status-pending {
     background: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
+    color: var(--warning);
 }
 
 .status-confirmed {
@@ -135,7 +135,7 @@
 
 .status-cancelled {
     background: rgba(233, 30, 99, 0.15);
-    color: #e91e63;
+    color: var(--text-3);
 }
 
 .ticket-form {
@@ -169,8 +169,8 @@
 .ticket-field select,
 .ticket-field textarea {
     padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--input-bg);
     color: var(--text-primary);
     font-size: 13px;
@@ -192,8 +192,8 @@
 .ticket-btn-primary,
 .ticket-btn-secondary {
     padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
@@ -225,8 +225,8 @@
 .ticket-action-btn {
     width: 26px;
     height: 26px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-sm);
+    border: none;
     background: var(--bg-tertiary);
     cursor: pointer;
     font-size: 14px;
@@ -243,9 +243,9 @@
 .ticket-seat-map {
     margin-top: 6px;
     padding: 12px 10px;
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     background: var(--bg-tertiary, #1e1e1e);
-    border: 1px solid var(--border-color, #333);
+    border: none;
     max-height: 480px;
     overflow-y: auto;
 }
@@ -271,7 +271,7 @@
 .ticket-seat-legend-box {
     width: 20px;
     height: 20px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -316,7 +316,7 @@
     align-items: center;
     gap: 6px;
     padding: 4px 16px;
-    border-radius: 20px;
+    border-radius: var(--r-lg);
     background: var(--bg-secondary, #f1f5f9);
     font-size: 11px;
     font-weight: 700;
@@ -465,8 +465,8 @@
 
 .ticket-confirm-card {
     background: var(--card-bg);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-lg);
+    border: none;
     padding: 18px 20px 16px;
     max-width: 360px;
     width: 90%;
@@ -529,9 +529,9 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    border: 2px solid #4ecdc4;
+    border: 2px solid var(--accent);
     background: transparent;
-    color: #4ecdc4;
+    color: var(--accent);
     font-size: 16px;
     font-weight: 700;
     line-height: 1;
@@ -571,7 +571,7 @@
 .passenger-card-item {
     background: var(--card-bg, #1e293b);
     border: 1.5px solid var(--border-color, #334155);
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     overflow: hidden;
     transition: all 0.2s ease;
 }
@@ -622,7 +622,7 @@
 
 .passenger-status-chip {
     padding: 3px 8px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.3px;
@@ -630,7 +630,7 @@
 
 .passenger-status-chip.status-completed {
     background: rgba(78, 205, 196, 0.15);
-    color: #4ecdc4;
+    color: var(--accent);
 }
 
 .passenger-status-chip.status-pending {
@@ -678,8 +678,8 @@
 .passenger-input-group input {
     width: 100%;
     padding: 9px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color, #475569);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--input-bg, #1a222d);
     color: var(--text-primary);
     font-size: 13px;
@@ -688,22 +688,22 @@
 }
 
 .passenger-input-group input:focus {
-    border-color: #4ecdc4;
+    border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
 }
 
 .passenger-discount-box {
     margin-top: 12px;
     padding: 12px 14px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     background: rgba(78, 205, 196, 0.06);
-    border: 1px solid rgba(78, 205, 196, 0.3);
+    border: none;
 }
 
 .discount-box-title {
     font-size: 12px;
     font-weight: 700;
-    color: #4ecdc4;
+    color: var(--accent);
     margin-bottom: 2px;
 }
 
@@ -723,15 +723,15 @@
 }
 
 .passenger-fare-tag strong {
-    color: #4ecdc4;
+    color: var(--accent);
     font-size: 13px;
 }
 
 .passenger-seat-tag {
     background: rgba(78, 205, 196, 0.15);
-    color: #4ecdc4;
+    color: var(--accent);
     padding: 3px 8px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     font-weight: 700;
     font-size: 11.5px;
 }
@@ -752,10 +752,10 @@
     gap: 6px;
     background: rgba(129, 199, 168, 0.15);
     color: #81C7A8;
-    border: 1px solid rgba(129, 199, 168, 0.4);
+    border: none;
     font-weight: 700;
     padding: 6px 12px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     cursor: pointer;
     font-size: 12px;
     white-space: nowrap;
@@ -800,8 +800,8 @@
 .ticket-print-modal-dialog {
     position: relative;
     background: #1e293b;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 16px;
+    border: none;
+    border-radius: var(--r-lg);
     width: 100%;
     max-width: 840px;
     max-height: 92vh;
@@ -857,8 +857,8 @@
     display: flex;
     background: rgba(255, 255, 255, 0.06);
     padding: 3px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--r-md);
+    border: none;
 }
 
 .btn-format-toggle {
@@ -868,7 +868,7 @@
     padding: 6px 12px;
     font-size: 12px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -889,7 +889,7 @@
     font-weight: 700;
     font-size: 13px;
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -906,7 +906,7 @@
     color: #cbd5e1;
     width: 34px;
     height: 34px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     cursor: pointer;
     font-size: 15px;
     display: flex;
@@ -953,8 +953,8 @@
     background: #ffffff !important;
     color: #000000 !important;
     padding: 22px 18px;
-    border-radius: 10px;
-    border: 1px solid #cbd5e1;
+    border-radius: var(--r-md);
+    border: none;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Courier New", monospace;
     font-size: 12px;
@@ -995,7 +995,7 @@
     font-size: 10px;
     font-weight: 800;
     padding: 3px 10px;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
     margin-top: 8px;
     letter-spacing: 0.5px;
 }
@@ -1028,7 +1028,7 @@
 .thermal-seat-box {
     background: #f8fafc !important;
     border: 1.5px dashed #0D5C3A !important;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     padding: 8px 10px;
     text-align: center;
     margin: 10px 0;
@@ -1112,14 +1112,14 @@
     width: 680px;
     max-width: 100%;
     padding: 24px;
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
     color: #0f172a;
 }
 
 .standard-ticket-card {
-    border: 1px solid #cbd5e1;
-    border-radius: 14px;
+    border: none;
+    border-radius: var(--r-lg);
     overflow: hidden;
     margin-bottom: 24px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -1151,11 +1151,11 @@
 .standard-status-badge {
     background: rgba(129, 199, 168, 0.2);
     color: #81C7A8;
-    border: 1px solid rgba(129, 199, 168, 0.5);
+    border: none;
     font-size: 11px;
     font-weight: 800;
     padding: 3px 10px;
-    border-radius: 20px;
+    border-radius: var(--r-lg);
     letter-spacing: 0.5px;
 }
 
@@ -1231,9 +1231,9 @@
     gap: 4px;
     background: rgba(129, 199, 168, 0.18);
     color: #0D5C3A;
-    border: 1px solid rgba(129, 199, 168, 0.5);
+    border: none;
     padding: 3px 10px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     font-weight: 800;
     font-size: 13px;
 }
@@ -1392,8 +1392,8 @@
     gap: 5px;
     padding: 3px 9px;
     background: rgba(56, 189, 248, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 6px;
+    border: none;
+    border-radius: var(--r-sm);
     color: #38bdf8;
     font-size: 11.5px;
     font-weight: 600;
@@ -1448,8 +1448,8 @@
 
 .passenger-details-modal {
     background: #22252a;
-    border: 1px solid #323842;
-    border-radius: 14px;
+    border: none;
+    border-radius: var(--r-lg);
     width: min(720px, 96vw);
     max-height: 90vh;
     box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
@@ -1498,7 +1498,7 @@
     align-items: center;
     padding: 2px 8px;
     background: rgba(56, 189, 248, 0.15);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    border: none;
     border-radius: 999px;
     color: #38bdf8;
     font-size: 11px;
@@ -1515,7 +1515,7 @@
     cursor: pointer;
     line-height: 1;
     padding: 4px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     transition: color 0.15s, background 0.15s;
 }
 
@@ -1577,8 +1577,8 @@
     gap: 14px;
     padding: 12px 16px;
     background: #1a1d22;
-    border: 1px solid #2d333b;
-    border-radius: 10px;
+    border: none;
+    border-radius: var(--r-md);
     transition: border-color 0.2s, background 0.2s, transform 0.2s;
 }
 
@@ -1600,7 +1600,7 @@
     height: 38px;
     border-radius: 50%;
     background: #252a32;
-    border: 1px solid #333a44;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1645,8 +1645,8 @@
     gap: 5px;
     padding: 5px 10px;
     background: #14171c;
-    border: 1px solid #2d333b;
-    border-radius: 6px;
+    border: none;
+    border-radius: var(--r-sm);
     font-size: 12px;
     font-weight: 700;
     color: #e2e8f0;
@@ -1663,7 +1663,7 @@
     align-items: center;
     gap: 4px;
     padding: 4px 10px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
@@ -1671,19 +1671,19 @@
 
 .passenger-cat-badge.cat-regular {
     background: rgba(56, 189, 248, 0.14);
-    border: 1px solid rgba(56, 189, 248, 0.32);
+    border: none;
     color: #38bdf8;
 }
 
 .passenger-cat-badge.cat-student {
     background: rgba(168, 85, 247, 0.14);
-    border: 1px solid rgba(168, 85, 247, 0.32);
+    border: none;
     color: #c084fc;
 }
 
 .passenger-cat-badge.cat-senior {
     background: rgba(245, 158, 11, 0.14);
-    border: 1px solid rgba(245, 158, 11, 0.32);
+    border: none;
     color: #fbbf24;
 }
 
@@ -1745,7 +1745,7 @@
     align-items: center;
     gap: 6px;
     padding: 9px 16px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
@@ -1755,7 +1755,7 @@
 }
 
 .btn-modal-approve-action {
-    background: #059669;
+    background: var(--success);
     color: #ffffff;
 }
 
@@ -1771,15 +1771,15 @@
 }
 
 .btn-modal-reject-action:hover {
-    background: #ef4444;
+    background: var(--danger);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
 .passenger-modal-cancel {
     padding: 8px 18px;
-    border-radius: 8px;
-    border: 1px solid #374151;
+    border-radius: var(--r-md);
+    border: none;
     background: #374151;
     color: #f3f4f6;
     font-size: 13px;
@@ -1830,8 +1830,8 @@
     gap: 6px;
     padding: 4px 9px 4px 5px;
     background: rgba(46, 160, 67, 0.15);
-    border: 1px solid rgba(46, 160, 67, 0.35);
-    border-radius: 6px;
+    border: none;
+    border-radius: var(--r-sm);
     color: #3fb950;
     font-size: 11.5px;
     font-weight: 600;
@@ -1852,7 +1852,7 @@
     justify-content: center;
     width: 22px;
     height: 18px;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
     overflow: hidden;
     background: #161b22;
 }
@@ -1869,8 +1869,8 @@
     gap: 4px;
     padding: 3px 8px;
     background: rgba(210, 153, 34, 0.15);
-    border: 1px solid rgba(210, 153, 34, 0.3);
-    border-radius: 6px;
+    border: none;
+    border-radius: var(--r-sm);
     color: #d29922;
     font-size: 11px;
     font-weight: 600;
@@ -1893,8 +1893,8 @@
 
 .id-lightbox-content {
     background: #1e2228;
-    border: 1px solid #363d49;
-    border-radius: 14px;
+    border: none;
+    border-radius: var(--r-lg);
     width: min(680px, 95vw);
     max-height: 90vh;
     display: flex;
@@ -1931,7 +1931,7 @@
     align-items: center;
     padding: 2px 8px;
     background: rgba(56, 189, 248, 0.15);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    border: none;
     border-radius: 999px;
     color: #38bdf8;
     font-size: 11px;
@@ -1947,7 +1947,7 @@
     cursor: pointer;
     line-height: 1;
     padding: 4px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     transition: all 0.15s ease;
 }
 
@@ -1970,8 +1970,8 @@
     max-width: 100%;
     max-height: 65vh;
     object-fit: contain;
-    border-radius: 8px;
-    border: 1px solid #2d333b;
+    border-radius: var(--r-md);
+    border: none;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
 }
 
@@ -2000,9 +2000,9 @@
 .id-lightbox-btn-close {
     background: #2b313a;
     color: #e6edf3;
-    border: 1px solid #3c4452;
+    border: none;
     padding: 6px 16px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;

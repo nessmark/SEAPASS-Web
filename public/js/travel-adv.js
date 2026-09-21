@@ -94,15 +94,15 @@ function renderRow(item) {
     const route = escapeHtml(item.route);
 
     const actions = [];
-    actions.push('<button class="adv-action-btn" data-action="view" title="View details">🔍</button>');
+    actions.push('<button class="adv-action-btn" data-action="view" title="View details"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>');
 
     if (item.status === 'Published' && item.push_status === 'Pending') {
-        actions.push('<button class="adv-action-btn adv-send-push" data-action="send_push" title="Send push notification">📲</button>');
+        actions.push('<button class="adv-action-btn adv-send-push" data-action="send_push" title="Send push notification"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M11 18h2"/></svg></button>');
     } else if (item.push_status === 'Sent') {
-        actions.push('<button class="adv-action-btn" data-action="sent" title="Notification already sent" disabled style="opacity: 0.45; cursor: not-allowed;">📲</button>');
+        actions.push('<button class="adv-action-btn" data-action="sent" title="Notification already sent" disabled style="opacity: 0.45; cursor: not-allowed;"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M11 18h2"/></svg></button>');
     }
 
-    actions.push('<button class="adv-action-btn" data-action="archive" title="Archive advisory">📁</button>');
+    actions.push('<button class="adv-action-btn" data-action="archive" title="Archive advisory"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>');
 
     return `
         <tr data-adv-id="${id}">

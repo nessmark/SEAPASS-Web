@@ -63,8 +63,17 @@ class ReportsAuditController extends Controller
 
         $allFilteredBookings = $bookingQuery->get();
 
+        // Status is written in mixed case across the app ('Confirmed', 'confirmed', 'Approved'),
+        // and a Collection whereIn compares case-sensitively — so match on a lowered value.
+        $isEarning = static fn ($b): bool => in_array(
+            strtolower((string) $b->status), ['confirmed', 'completed', 'approved'], true
+        );
+        $isVoided = static fn ($b): bool => in_array(
+            strtolower((string) $b->status), ['cancelled', 'canceled', 'refunded', 'rejected'], true
+        );
+
         // Calculate sales stats & ticket category breakdown
-        $totalSales = $allFilteredBookings->whereIn('status', ['confirmed', 'completed', 'Approved'])->sum('amount_collected');
+        $totalSales = $allFilteredBookings->filter($isEarning)->sum('amount_collected');
 
         $totalTickets = 0;
         $regularTicketsCount = 0;
@@ -86,8 +95,8 @@ class ReportsAuditController extends Controller
             }
         }
 
-        $confirmedBookingsCount = $allFilteredBookings->whereIn('status', ['confirmed', 'completed', 'Approved'])->count();
-        $cancelledBookingsCount = $allFilteredBookings->whereIn('status', ['cancelled', 'Cancelled', 'refunded'])->count();
+        $confirmedBookingsCount = $allFilteredBookings->filter($isEarning)->count();
+        $cancelledBookingsCount = $allFilteredBookings->filter($isVoided)->count();
 
         // -------------------------------------------------------------
         // 2. PASSENGER COUNT & CAPACITY COMPLIANCE

@@ -17,7 +17,7 @@
 
 .card {
     background-color: var(--card-bg);
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     padding: 25px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
@@ -46,7 +46,7 @@
 .sales-box {
     background-color: var(--bg-primary);
     padding: 15px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     transition: background-color 0.3s ease;
 }
 
@@ -109,25 +109,25 @@
 .progress-bar {
     height: 8px;
     background-color: var(--bg-primary);
-    border-radius: 4px;
+    border-radius: var(--r-sm);
     overflow: hidden;
     width: 100px;
 }
 
 .progress-fill {
     height: 100%;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
 }
 
-.progress-fill.orange { background-color: #ff6b35; }
-.progress-fill.blue { background-color: #4ecdc4; }
-.progress-fill.purple { background-color: #9b59b6; }
-.progress-fill.pink { background-color: #e91e63; }
+.progress-fill.orange { background-color: var(--accent); }
+.progress-fill.blue { background-color: var(--accent); }
+.progress-fill.purple { background-color: var(--accent); }
+.progress-fill.pink { background-color: var(--text-3); }
 
 .badge {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     font-size: 12px;
     font-weight: 600;
     background-color: var(--bg-tertiary);
@@ -179,7 +179,7 @@
     color: var(--text-primary);
     width: 35px;
     height: 35px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -200,7 +200,7 @@
 .trending-item {
     min-width: 280px;
     background-color: var(--bg-primary);
-    border-radius: 8px;
+    border-radius: var(--r-md);
     overflow: hidden;
     transition: background-color 0.3s ease;
 }
@@ -208,7 +208,7 @@
 .trending-image {
     width: 100%;
     height: 180px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-tint);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -237,13 +237,13 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background-color: #4ecdc4;
+    background-color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
     font-weight: bold;
-    color: #1a1a1a;
+    color: var(--text);
 }
 
 /* Customers Table */
@@ -256,8 +256,8 @@
     width: 100%;
     padding: 10px 40px 10px 15px;
     background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: none;
+    border-radius: var(--r-md);
     color: var(--text-primary);
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
@@ -276,12 +276,12 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background-color: #4ecdc4;
+    background-color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    color: #1a1a1a;
+    color: var(--text);
     font-size: 14px;
 }
 
@@ -309,7 +309,7 @@
     padding: 8px 15px;
     background-color: var(--bg-tertiary);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     color: var(--text-primary);
     cursor: pointer;
     font-size: 14px;

@@ -107,9 +107,9 @@ function createBookingRow(booking) {
                         data-total-amount="₱${parseFloat(booking.amount || 0).toFixed(2)}"
                         title="Click to view details for ${pCount} ${pCount === 1 ? 'passenger' : 'passengers'}"
                     >
-                        <span class="badge-icon">👥</span>
+                        <span class="badge-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/><circle cx="10" cy="8" r="3.2"/><path d="M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4"/><path d="M15.5 5.2a3.2 3.2 0 0 1 0 5.6"/></svg></span>
                         <span class="badge-count">${pCount} ${pCount === 1 ? 'Passenger' : 'Passengers'}</span>
-                        <span class="badge-view-icon">👁️</span>
+                        <span class="badge-view-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg></span>
                     </button>
                 </div>
             </td>
@@ -373,7 +373,7 @@ function renderPassengerAccordionList() {
 
                     <div class="passenger-card-meta-row">
                         <span class="passenger-fare-tag">Individual Fare: <strong>₱${Number(fare).toFixed(2)}</strong></span>
-                        ${p.seat ? `<span class="passenger-seat-tag">💺 Seat ${escapeHtml(p.seat)}</span>` : '<span class="passenger-seat-pending">⚠️ Select seat on map below</span>'}
+                        ${p.seat ? `<span class="passenger-seat-tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4v8h12V4"/><path d="M5 12h14"/><path d="M7 12v8M17 12v8"/></svg> Seat ${escapeHtml(p.seat)}</span>` : '<span class="passenger-seat-pending"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5 2.8 19h18.4L12 4.5z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg> Select seat on map below</span>'}
                     </div>
                 </div>
             </div>
@@ -470,11 +470,11 @@ function renderTicketSeatMap() {
                 <span>Available</span>
             </div>
             <div class="ticket-seat-legend-item">
-                <div class="ticket-seat-legend-box selected">✓</div>
+                <div class="ticket-seat-legend-box selected"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div>
                 <span>Selected</span>
             </div>
             <div class="ticket-seat-legend-item">
-                <div class="ticket-seat-legend-box booked">✕</div>
+                <div class="ticket-seat-legend-box booked"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
                 <span>Booked</span>
             </div>
         </div>
@@ -564,10 +564,10 @@ function renderSeatBoxHtml(seat, rowNum, col) {
 
     if (isBooked) {
         classes += 'booked';
-        textContent = '<span class="seat-x">✕</span>';
+        textContent = '<span class="seat-x"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></span>';
     } else if (isSelected) {
         classes += 'selected';
-        textContent = '✓';
+        textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
     } else {
         classes += 'available';
     }
@@ -933,7 +933,7 @@ document.addEventListener('DOMContentLoaded', () => {
             seatEl.classList.toggle('available', !isSelected);
 
             if (isSelected) {
-                seatEl.textContent = '✓';
+                seatEl.textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
             } else {
                 seatEl.textContent = seatEl.dataset.column || seatNumber;
             }
@@ -1192,7 +1192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error confirming booking:', error);
                 alert(error.message || 'Failed to confirm booking.');
                 confirmBtn.disabled = false;
-                confirmBtn.textContent = '✓ Confirm';
+                confirmBtn.textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Confirm';
             });
     });
 });
@@ -1402,7 +1402,7 @@ function renderStandardTickets(container, booking, tickets) {
             <div class="standard-ticket-card">
                 <div class="standard-header-strip">
                     <div class="standard-brand">
-                        <span>🚤</span>
+                        <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17.5c1.5 1 2.5 1 4 0s2.5-1 4 0 2.5 1 4 0 2.5-1 4 0"/><path d="M5 15V9.5a1 1 0 0 1 .6-.92l5.8-2.5a1 1 0 0 1 .8 0l5.8 2.5a1 1 0 0 1 .6.92V15"/><path d="M12 6V3"/></svg></span>
                         <span>SeaPass Ferry Service</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -1438,7 +1438,7 @@ function renderStandardTickets(container, booking, tickets) {
                                 <td class="label">Assigned Seat:</td>
                                 <td class="value">
                                     <span class="standard-seat-badge">
-                                        💺 Seat ${escapeHtml(ticket.seat)}
+                                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4v8h12V4"/><path d="M5 12h14"/><path d="M7 12v8M17 12v8"/></svg> Seat ${escapeHtml(ticket.seat)}
                                     </span>
                                 </td>
                             </tr>
@@ -1577,16 +1577,16 @@ function openPassengerDetailsModal(info) {
                 // Category & Badge Class
                 const catRaw = String(p.category || 'Regular').toLowerCase();
                 let catClass = 'cat-regular';
-                let catIcon = '🎫';
+                let catIcon = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2.5 2.5 0 0 0 0 5 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2.5 2.5 0 0 0 0-5z"/><path d="M14 8v8" stroke-dasharray="2 3"/></svg>';
                 let catText = 'Regular';
 
                 if (catRaw.includes('student')) {
                     catClass = 'cat-student';
-                    catIcon = '🎓';
+                    catIcon = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 5 9 4-9 4-9-4 9-4z"/><path d="M7 11.5V16c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4.5"/></svg>';
                     catText = 'Student';
                 } else if (catRaw.includes('senior') || catRaw.includes('pwd')) {
                     catClass = 'cat-senior';
-                    catIcon = '👴';
+                    catIcon = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M17 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-3A3.5 3.5 0 0 0 7 18.5V20"/></svg>';
                     catText = 'Senior Citizen';
                 }
 
@@ -1603,7 +1603,7 @@ function openPassengerDetailsModal(info) {
                         idPhotoHtml = `
                             <button type="button" class="passenger-id-preview-btn" onclick="event.stopPropagation(); openIdPhotoLightbox('${escapeHtml(p.id_photo_url)}', '${escapeHtml(name)}', '${escapeHtml(catText)}')">
                                 <span class="id-thumb-wrap">
-                                    <img src="${escapeHtml(p.id_photo_url)}" alt="ID" class="id-micro-thumb" onerror="this.style.display='none'; this.parentElement.innerHTML='🪪';" />
+                                    <img src="${escapeHtml(p.id_photo_url)}" alt="ID" class="id-micro-thumb" onerror="this.style.display='none'; this.parentElement.innerHTML='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"/><circle cx="9" cy="12" r="2.2"/><path d="M14 10.5h4M14 14h3"/></svg>';" />
                                 </span>
                                 <span>View ID</span>
                             </button>
@@ -1611,7 +1611,7 @@ function openPassengerDetailsModal(info) {
                     } else {
                         idPhotoHtml = `
                             <span class="passenger-id-missing-badge" title="No ID photo attached for this discounted passenger">
-                                ⚠️ No ID Uploaded
+                                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5 2.8 19h18.4L12 4.5z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg> No ID Uploaded
                             </span>
                         `;
                     }
@@ -1620,7 +1620,7 @@ function openPassengerDetailsModal(info) {
                 return `
                     <div class="passenger-item-card">
                         <div class="passenger-item-left">
-                            <div class="passenger-avatar-icon">👤</div>
+                            <div class="passenger-avatar-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-3A3.5 3.5 0 0 0 7 18.5V20"/><circle cx="12" cy="8" r="3.4"/></svg></div>
                             <div class="passenger-name-wrap">
                                 <div class="passenger-card-name">${escapeHtml(name)}</div>
                                 <div class="passenger-card-id">${escapeHtml(idLabel)}</div>
@@ -1628,7 +1628,7 @@ function openPassengerDetailsModal(info) {
                         </div>
                         <div class="passenger-item-right">
                             <div class="passenger-seat-badge">
-                                <span class="seat-icon">💺</span>
+                                <span class="seat-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4v8h12V4"/><path d="M5 12h14"/><path d="M7 12v8M17 12v8"/></svg></span>
                                 <span>${escapeHtml(seatLabel)}</span>
                             </div>
                             <span class="passenger-cat-badge ${catClass}">

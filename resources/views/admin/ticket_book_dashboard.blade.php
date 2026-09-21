@@ -49,7 +49,7 @@
                         <button class="ticket-tab active" data-tab="pending">
                             Pending
                             @if(isset($toBeConfirmedCount) && $toBeConfirmedCount > 0)
-                                <span class="badge-tab-count" style="background: #f59e0b; color: #fff; border-radius: 9999px; padding: 1px 7px; font-size: 11px; font-weight: 700; margin-left: 4px;">{{ $toBeConfirmedCount }} ID</span>
+                                <span class="badge-tab-count" style="background: #f59e0b; color: #fff; border-radius: 9999px; padding: 1px 7px; font-size: 11px; font-weight: 600; margin-left: 4px;">{{ $toBeConfirmedCount }} ID</span>
                             @endif
                         </button>
                         <button class="ticket-tab" data-tab="confirmed">Confirmed</button>
@@ -82,7 +82,7 @@
                                             <strong>{{ $bookingRef }}</strong>
                                             @if($booking->isToBeConfirmed())
                                                 <div style="margin-top: 3px;">
-                                                    <span style="background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.35); padding: 2px 7px; border-radius: 9999px; font-size: 10.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;" title="Paid via PayMongo. Student/Senior/PWD ID awaiting verification.">
+                                                    <span style="background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.35); padding: 2px 7px; border-radius: 9999px; font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;" title="Paid via PayMongo. Student/Senior/PWD ID awaiting verification.">
                                                         ⏳ ID Verification
                                                     </span>
                                                 </div>
@@ -107,24 +107,24 @@
                                                     data-status="{{ $booking->status }}"
                                                     title="Click to view details for {{ $pCount }} {{ $pCount === 1 ? 'passenger' : 'passengers' }}"
                                                 >
-                                                    <span class="badge-icon">👥</span>
+                                                    <span class="badge-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/><circle cx="10" cy="8" r="3.2"/><path d="M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4"/><path d="M15.5 5.2a3.2 3.2 0 0 1 0 5.6"/></svg></span>
                                                     <span class="badge-count">{{ $pCount }} {{ $pCount === 1 ? 'Passenger' : 'Passengers' }}</span>
-                                                    <span class="badge-view-icon">👁️</span>
+                                                    <span class="badge-view-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg></span>
                                                 </button>
                                             </div>
                                         </td>
                                         <td>
                                             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                                                 @if($isVerificationRequired)
-                                                    <button type="button" class="btn-approve-booking-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" style="background-color: #059669; color: #ffffff; border: none; font-weight: 700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;" title="Approve discounted ID and issue boarding pass QR">
-                                                        ✓ Approve
+                                                    <button type="button" class="btn-approve-booking-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" style="background: var(--success); color: #fff; border: none; font-weight: 600; padding: 7px 13px; border-radius: var(--r-sm); cursor: pointer; font-size: 12.5px;" title="Approve discounted ID and issue boarding pass QR">
+                                                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Approve
                                                     </button>
-                                                    <button type="button" class="btn-reject-refund-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" data-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}" style="background-color: #dc2626; color: #ffffff; border: none; font-weight: 700; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;" title="Reject ID and automatically refund via PayMongo">
-                                                        ✕ Reject &amp; Refund
+                                                    <button type="button" class="btn-reject-refund-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" data-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}" style="background-color: #dc2626; color: #ffffff; border: none; font-weight: 600; padding: 6px 10px; border-radius: var(--r-sm); cursor: pointer; font-size: 12px;" title="Reject ID and automatically refund via PayMongo">
+                                                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg> Reject &amp; Refund
                                                     </button>
                                                 @else
-                                                    <button type="button" class="btn-confirm-booking-action" data-booking-id="{{ $booking->id }}" style="background-color: #81C7A8; color: #0D5C3A; border: none; font-weight: 700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
-                                                        ✓ Confirm
+                                                    <button type="button" class="btn-confirm-booking-action" data-booking-id="{{ $booking->id }}" style="background-color: #81C7A8; color: #0D5C3A; border: none; font-weight: 600; padding: 6px 12px; border-radius: var(--r-sm); cursor: pointer; font-size: 12px;">
+                                                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Confirm
                                                     </button>
                                                 @endif
                                                 <select
@@ -145,7 +145,7 @@
                                     </tr>
                                 @empty
                                     <tr id="ticketPendingEmptyRow">
-                                        <td colspan="3" style="padding: 14px 10px; text-align: center; color: var(--text-secondary); font-size: 13px;">
+                                        <td colspan="3" style="padding: 14px 10px; text-align: center; color: var(--text-2); font-size: 13px;">
                                             Pending bookings created from Override / Counter Booking and Mobile Passenger Booking API will appear here for review and confirmation.
                                         </td>
                                     </tr>
@@ -192,9 +192,9 @@
                                                     data-total-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}"
                                                     title="Click to view details for {{ $pCount }} {{ $pCount === 1 ? 'passenger' : 'passengers' }}"
                                                 >
-                                                    <span class="badge-icon">👥</span>
+                                                    <span class="badge-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/><circle cx="10" cy="8" r="3.2"/><path d="M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4"/><path d="M15.5 5.2a3.2 3.2 0 0 1 0 5.6"/></svg></span>
                                                     <span class="badge-count">{{ $pCount }} {{ $pCount === 1 ? 'Passenger' : 'Passengers' }}</span>
-                                                    <span class="badge-view-icon">👁️</span>
+                                                    <span class="badge-view-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg></span>
                                                 </button>
                                             </div>
                                         </td>
@@ -208,14 +208,14 @@
                                                 data-booking="{{ json_encode($booking->print_payload) }}"
                                                 title="Print E-Ticket & Boarding Pass"
                                             >
-                                                <span>🖨️</span>
+                                                <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="7" rx="2"/><path d="M7 14h10v6H7z"/></svg></span>
                                                 <span>Print / View QR</span>
                                             </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr id="ticketConfirmedEmptyRow">
-                                        <td colspan="4" style="padding: 14px 10px; text-align: center; color: var(--text-secondary); font-size: 13px;">
+                                        <td colspan="4" style="padding: 14px 10px; text-align: center; color: var(--text-2); font-size: 13px;">
                                             Confirmed bookings from both the admin desk and Mobile Passenger Booking API will be listed here.
                                         </td>
                                     </tr>
@@ -261,24 +261,24 @@
                                                     data-total-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}"
                                                     title="Click to view details for {{ $pCount }} {{ $pCount === 1 ? 'passenger' : 'passengers' }}"
                                                 >
-                                                    <span class="badge-icon">👥</span>
+                                                    <span class="badge-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/><circle cx="10" cy="8" r="3.2"/><path d="M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4"/><path d="M15.5 5.2a3.2 3.2 0 0 1 0 5.6"/></svg></span>
                                                     <span class="badge-count">{{ $pCount }} {{ $pCount === 1 ? 'Passenger' : 'Passengers' }}</span>
-                                                    <span class="badge-view-icon">👁️</span>
+                                                    <span class="badge-view-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg></span>
                                                 </button>
                                             </div>
                                         </td>
                                         <td>
                                             <span class="status-pill status-cancelled">Cancelled</span>
                                             @if($booking->refund_status === 'refunded' || (float) $booking->refund_amount > 0)
-                                                <div style="font-size: 11px; color: #0284c7; margin-top: 4px; font-weight: 600;" title="Refund ID: {{ $booking->paymongo_refund_id ?? 'N/A' }}">
-                                                    ✓ Refunded ₱{{ number_format((float) ($booking->refund_amount ?: $booking->amount_collected), 2) }} via PayMongo
+                                                <div style="font-size: 11px; color: var(--accent); margin-top: 4px; font-weight: 600;" title="Refund ID: {{ $booking->paymongo_refund_id ?? 'N/A' }}">
+                                                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Refunded ₱{{ number_format((float) ($booking->refund_amount ?: $booking->amount_collected), 2) }} via PayMongo
                                                 </div>
                                             @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr id="ticketCancelledEmptyRow">
-                                        <td colspan="3" style="padding: 14px 10px; text-align: center; color: var(--text-secondary); font-size: 13px;">
+                                        <td colspan="3" style="padding: 14px 10px; text-align: center; color: var(--text-2); font-size: 13px;">
                                             Cancelled bookings (including those cancelled by passengers via the Mobile Booking app) will appear here.
                                         </td>
                                     </tr>
@@ -352,26 +352,26 @@
                                 >
                                 <input type="hidden" id="ticket_trip_schedule_id">
                                 <input type="hidden" id="ticket_selected_seats">
-                                <small style="color: var(--text-secondary);">
+                                <small style="color: var(--text-2);">
                                     Seat options come from the available seat map of the chosen boat and scheduled trip.
                                 </small>
                             </div>
                             <div class="ticket-field full-width">
                                 <label>Seat Map</label>
                                 <div id="ticket_seat_map_container" class="ticket-seat-map">
-                                    <div style="font-size: 12px; color: var(--text-secondary);">
+                                    <div style="font-size: 12px; color: var(--text-2);">
                                         Select Route, Trip Date, Trip Time, and Boat to load the seat map.
                                     </div>
                                 </div>
                             </div>
                             <div class="ticket-field full-width">
                                 <label style="font-weight: 600; margin-bottom: 6px; display: block;">Select Passenger Seats &amp; Types <span style="color: red;">*</span></label>
-                                <div class="passenger-category-box" style="display: flex; flex-direction: column; gap: 10px; background: var(--bg-tertiary); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                <div class="passenger-category-box" style="display: flex; flex-direction: column; gap: 10px; background: var(--bg-tertiary); padding: 14px; border-radius: var(--r-lg); border: 1px solid var(--border-color);">
                                     <!-- Regular Row -->
                                     <div class="category-row" style="display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);">
                                         <div>
-                                            <strong style="font-size: 13px; color: var(--text-primary);">Regular (Adult: ≥12 years)</strong>
-                                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;" id="unit_price_regular">₱0.00 / passenger</div>
+                                            <strong style="font-size: 13px; color: var(--text);">Regular (Adult: ≥12 years)</strong>
+                                            <div style="font-size: 11px; color: var(--text-2); margin-top: 2px;" id="unit_price_regular">₱0.00 / passenger</div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             <button type="button" class="counter-btn" id="btn_dec_regular">-</button>
@@ -382,9 +382,9 @@
                                     <!-- Student Row -->
                                     <div class="category-row" style="display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);">
                                         <div>
-                                            <strong style="font-size: 13px; color: var(--text-primary);">Student</strong>
-                                            <span style="font-size: 10px; background: rgba(78, 205, 196, 0.15); color: #4ecdc4; padding: 2px 7px; border-radius: 4px; font-weight: 700; margin-left: 6px;">Discounted</span>
-                                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;" id="unit_price_student">₱0.00 / passenger</div>
+                                            <strong style="font-size: 13px; color: var(--text);">Student</strong>
+                                            <span style="font-size: 10px; background: rgba(78, 205, 196, 0.15); color: var(--accent); padding: 2px 7px; border-radius: var(--r-sm); font-weight: 600; margin-left: 6px;">Discounted</span>
+                                            <div style="font-size: 11px; color: var(--text-2); margin-top: 2px;" id="unit_price_student">₱0.00 / passenger</div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             <button type="button" class="counter-btn" id="btn_dec_student">-</button>
@@ -395,9 +395,9 @@
                                     <!-- Senior Citizen / PWD Row -->
                                     <div class="category-row" style="display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);">
                                         <div>
-                                            <strong style="font-size: 13px; color: var(--text-primary);">Senior Citizen / PWD</strong>
-                                            <span style="font-size: 10px; background: rgba(78, 205, 196, 0.15); color: #4ecdc4; padding: 2px 7px; border-radius: 4px; font-weight: 700; margin-left: 6px;">20% Off</span>
-                                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;" id="unit_price_senior">₱0.00 / passenger</div>
+                                            <strong style="font-size: 13px; color: var(--text);">Senior Citizen / PWD</strong>
+                                            <span style="font-size: 10px; background: rgba(78, 205, 196, 0.15); color: var(--accent); padding: 2px 7px; border-radius: var(--r-sm); font-weight: 600; margin-left: 6px;">20% Off</span>
+                                            <div style="font-size: 11px; color: var(--text-2); margin-top: 2px;" id="unit_price_senior">₱0.00 / passenger</div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             <button type="button" class="counter-btn" id="btn_dec_senior">-</button>
@@ -410,9 +410,9 @@
 
                             {{-- Dynamic Per-Passenger Details (Matching Mobile App) --}}
                             <div class="ticket-field full-width" id="passenger_details_section" style="display: none;">
-                                <label style="font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                                <label style="font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
                                     <span id="passenger_details_title">Passenger Details (0 Total)</span>
-                                    <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">Enter legal name as shown on ID</span>
+                                    <span style="font-size: 11px; font-weight: 500; color: var(--text-2);">Enter legal name as shown on ID</span>
                                 </label>
                                 <div id="passenger_accordion_list" class="passenger-accordion-container">
                                     {{-- Injected dynamically by ticket-book.js --}}
@@ -428,7 +428,7 @@
                             <div class="ticket-field">
                                 <label>Amount Collected</label>
                                 <input type="number" id="ticket_amount" min="0" step="0.01" placeholder="0.00" readonly>
-                                <small style="color: var(--text-secondary); font-size: 12px; display: block; margin-top: 4px;">
+                                <small style="color: var(--text-2); font-size: 12px; display: block; margin-top: 4px;">
                                     Amount is calculated automatically based on route, passenger type, and number of seats.
                                 </small>
                             </div>
@@ -467,7 +467,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="8" style="padding: 14px 10px; text-align: center; color: var(--text-secondary); font-size: 13px;">
+                                    <td colspan="8" style="padding: 14px 10px; text-align: center; color: var(--text-2); font-size: 13px;">
                                         Refund requests created from Override / Counter Booking and the future Mobile Passenger Booking API
                                         will appear here, where admins can approve, reject, or review details.
                                     </td>
@@ -508,17 +508,17 @@
                 <div class="modal-header-controls">
                     <div class="print-format-toggle" role="group" aria-label="Print Format">
                         <button type="button" class="btn-format-toggle active" data-format="thermal" title="Thermal POS Receipt (80mm)">
-                            🧾 Thermal (80mm)
+                            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg> Thermal (80mm)
                         </button>
                         <button type="button" class="btn-format-toggle" data-format="standard" title="Standard A4 / Letter">
-                            📄 Standard A4
+                            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg> Standard A4
                         </button>
                     </div>
                     <button type="button" class="btn-modal-print" id="btnTriggerPrint">
-                        🖨️ Print Receipt
+                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="7" rx="2"/><path d="M7 14h10v6H7z"/></svg> Print Receipt
                     </button>
                     <button type="button" class="btn-modal-close" data-print-modal-close aria-label="Close modal">
-                        ✕
+                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
                     </button>
                 </div>
             </div>
@@ -569,11 +569,11 @@
                     <span class="summary-total" id="modalBookingAmount">₱0.00</span>
                 </div>
                 <div class="passenger-modal-btn-group">
-                    <button type="button" class="btn-modal-approve-action" id="modalApproveBtn" style="display: none; background: #059669; color: #ffffff; border: none; font-weight: 700; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px;" title="Approve Student/Senior/PWD ID and generate boarding pass">
-                        ✓ Approve Discount &amp; Issue Ticket
+                    <button type="button" class="btn-modal-approve-action" id="modalApproveBtn" style="display: none; background: var(--text); color: #ffffff; border: none; font-weight: 600; padding: 8px 16px; border-radius: var(--r-md); cursor: pointer; font-size: 13px;" title="Approve Student/Senior/PWD ID and generate boarding pass">
+                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Approve Discount &amp; Issue Ticket
                     </button>
-                    <button type="button" class="btn-modal-reject-action" id="modalRejectBtn" style="display: none; background: #dc2626; color: #ffffff; border: none; font-weight: 700; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px;" title="Reject ID verification and refund payment via PayMongo">
-                        ✕ Reject &amp; Refund Payment
+                    <button type="button" class="btn-modal-reject-action" id="modalRejectBtn" style="display: none; background: #dc2626; color: #ffffff; border: none; font-weight: 600; padding: 8px 16px; border-radius: var(--r-md); cursor: pointer; font-size: 13px;" title="Reject ID verification and refund payment via PayMongo">
+                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg> Reject &amp; Refund Payment
                     </button>
                     <button type="button" class="passenger-modal-cancel" id="cancelPassengerModal">Close</button>
                 </div>
@@ -608,7 +608,7 @@
         <div class="id-lightbox-content" style="max-width: 480px; border-radius: 16px; overflow: hidden; background: #ffffff;" role="dialog" aria-modal="true">
             <div class="id-lightbox-header" style="background: #fef2f2; border-bottom: 1px solid #fecaca; padding: 16px 20px;">
                 <div class="id-lightbox-title-wrap">
-                    <h3 style="color: #dc2626; margin: 0; font-size: 16px; font-weight: 700;">Reject &amp; Refund Booking</h3>
+                    <h3 style="color: #dc2626; margin: 0; font-size: 16px; font-weight: 600;">Reject &amp; Refund Booking</h3>
                     <span class="id-lightbox-cat-badge" style="background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.3);">Automated PayMongo Refund</span>
                 </div>
                 <button type="button" class="id-lightbox-close" id="closeRejectionModal" aria-label="Close modal">×</button>
@@ -619,21 +619,21 @@
                     Rejecting booking <strong id="rejectBookingRefDisplay" style="color: #0f172a;">#SP-0000</strong> will <strong style="color: #dc2626;">automatically refund <span id="rejectRefundAmountDisplay">₱0.00</span></strong> directly back to the passenger's GCash / E-Wallet via PayMongo and release the reserved seat(s) back to open capacity.
                 </p>
                 <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; color: #1e293b;">
+                    <label style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: #1e293b;">
                         Reason for Rejection <span style="color: #ef4444;">*</span>
                     </label>
-                    <select id="rejectPresetReason" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; font-size: 13px; margin-bottom: 10px; color: #0f172a;">
+                    <select id="rejectPresetReason" style="width: 100%; padding: 9px 12px; border-radius: var(--r-md); border: 1px solid #cbd5e1; background: #fff; font-size: 13px; margin-bottom: 10px; color: #0f172a;">
                         <option value="Uploaded ID photo is unreadable or blurry.">Uploaded ID photo is unreadable or blurry</option>
                         <option value="Expired Student / Senior Citizen / PWD ID card.">Expired Student / Senior Citizen / PWD ID card</option>
                         <option value="Passenger name does not match the name on the uploaded ID.">Passenger name does not match the name on the ID</option>
                         <option value="Invalid or non-accredited institution ID presented.">Invalid or non-accredited institution ID presented</option>
                         <option value="custom">Other (Specify custom reason below)...</option>
                     </select>
-                    <textarea id="rejectCustomReason" rows="3" maxlength="500" placeholder="Specify explanation for rejection and refund..." style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; font-size: 13px; box-sizing: border-box; color: #0f172a; resize: vertical; display: none;"></textarea>
+                    <textarea id="rejectCustomReason" rows="3" maxlength="500" placeholder="Specify explanation for rejection and refund..." style="width: 100%; padding: 9px 12px; border-radius: var(--r-md); border: 1px solid #cbd5e1; background: #fff; font-size: 13px; box-sizing: border-box; color: #0f172a; resize: vertical; display: none;"></textarea>
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 10px; border-top: 1px solid #f1f5f9;">
-                    <button type="button" id="cancelRejectionModal" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; cursor: pointer; font-size: 13px;">Cancel</button>
-                    <button type="submit" id="confirmRejectRefundBtn" style="padding: 8px 18px; border-radius: 8px; border: none; background: #dc2626; color: #ffffff; font-weight: 700; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                    <button type="button" id="cancelRejectionModal" style="padding: 8px 16px; border-radius: var(--r-md); border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; cursor: pointer; font-size: 13px;">Cancel</button>
+                    <button type="submit" id="confirmRejectRefundBtn" style="padding: 8px 18px; border-radius: var(--r-md); border: none; background: #dc2626; color: #ffffff; font-weight: 600; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
                         <span>Confirm Rejection &amp; Refund</span>
                     </button>
                 </div>

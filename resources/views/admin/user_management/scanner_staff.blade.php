@@ -20,7 +20,7 @@
         .crew-table th {
             background-color: var(--bg-tertiary);
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text);
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -36,7 +36,7 @@
         .btn-edit, .btn-delete, .btn-toggle {
             padding: 6px 12px;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--r-sm);
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
@@ -67,7 +67,7 @@
             padding: 4px 10px;
             border-radius: 9999px;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -85,10 +85,10 @@
             gap: 4px;
             background-color: var(--bg-tertiary);
             padding: 4px 10px;
-            border-radius: 6px;
+            border-radius: var(--r-sm);
             font-size: 12px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text);
         }
     </style>
 @endpush
@@ -107,13 +107,13 @@
             </div>
 
             @if (session('success'))
-                <div class="alert" style="background-color: #d1fae5; color: #065f46; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px; margin-top: 16px;">
+                <div class="alert" style="background-color: #d1fae5; color: #065f46; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: var(--r-sm); margin-top: 16px;">
                     {{ session('success') }}
                 </div>
             @endif
 
             @if ($errors->any())
-                <div class="alert error" style="background-color: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 6px; margin-top: 16px;">
+                <div class="alert error" style="background-color: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: var(--r-sm); margin-top: 16px;">
                     {{ $errors->first() }}
                 </div>
             @endif
@@ -206,9 +206,9 @@
             </div>
 
             @if($scannerStaff->isEmpty())
-                <div class="empty-state" style="text-align: center; padding: 48px 20px; color: var(--text-secondary);">
-                    <div style="font-size: 40px; margin-bottom: 12px;">📷</div>
-                    <h3 style="margin: 0 0 6px 0; color: var(--text-primary);">No Scanner Staff Accounts Found</h3>
+                <div class="empty-state" style="text-align: center; padding: 48px 20px; color: var(--text-2);">
+                    <div style="font-size: 40px; margin-bottom: 12px;"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M9 7l1.2-2h3.6L15 7"/><circle cx="12" cy="13.5" r="3.2"/></svg></div>
+                    <h3 style="margin: 0 0 6px 0; color: var(--text);">No Scanner Staff Accounts Found</h3>
                     <p style="margin: 0 0 18px 0; font-size: 14px;">Create scanner accounts for terminal staff to verify tickets and QR boarding passes in the mobile app.</p>
                     <button class="boats-button" type="button" onclick="document.getElementById('openScannerModal').click()">
                         + Add First Scanner Account
@@ -235,7 +235,7 @@
                                 <td>{{ $user->email }}</td>
                                 <td>
                                     <span class="port-badge">
-                                        📍 {{ $user->assigned_port ?: 'Surigao City Port' }}
+                                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg> {{ $user->assigned_port ?: 'Surigao City Port' }}
                                     </span>
                                 </td>
                                 <td>

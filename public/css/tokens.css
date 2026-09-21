@@ -1,0 +1,191 @@
+/**
+ * SeaPass Design Tokens — single source of truth for the admin dashboard.
+ * See DESIGN-SYSTEM.md. Every other stylesheet consumes var(--…) only.
+ *
+ * Theme switch contract (unchanged): dark is the default on :root,
+ * light is applied by admin.js adding `.light-mode` to <body>.
+ */
+
+:root {
+    /* ---- Brand ramp (from the official logo SVG, #1D8895) ---- */
+    --teal-50:  #F0F9FA;
+    --teal-100: #DCF0F2;
+    --teal-200: #B8E1E6;
+    --teal-300: #7BBEC7;
+    --teal-400: #3FA0AD;
+    --teal-500: #1D8895;
+    --teal-600: #166D78;
+    --teal-700: #12555E;
+    --teal-800: #0E4149;
+    --teal-900: #0A3037;
+
+    /* ---- Semantic ---- */
+    --success: #1FA971;
+    --warning: #E9A23B;
+    --danger:  #E5484D;
+    --info:    var(--teal-500);
+
+    /* ---- Radius ---- */
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 20px;
+    --r-xl: 28px;
+    --r-pill: 999px;
+
+    /* ---- Space ---- */
+    --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+    --s-5: 20px; --s-6: 24px; --s-7: 32px; --s-8: 40px; --s-9: 56px;
+
+    /* ---- Motion ---- */
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+    --dur: 220ms;
+
+    /* ---- Type ---- */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+                 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+    /* ---- Layout ---- */
+    --sidebar-width: 268px;
+    --sidebar-collapsed-width: 80px;
+}
+
+/* =========================================================
+   DARK (default)
+   ========================================================= */
+:root {
+    --canvas:     #0B0F11;
+    --surface:    #151A1D;
+    --surface-2:  #1D2428;
+    --surface-3:  #252D32;
+    --text:       #F2F5F6;
+    --text-2:     #A8B3BA;
+    --text-3:     #75828A;
+    --hairline:   rgba(255, 255, 255, .10);
+    --accent:     #3FA0AD;
+    --accent-strong: #5FBAC6;
+    --accent-tint:   rgba(63, 160, 173, .16);
+    --accent-tint-2: rgba(63, 160, 173, .10);
+    --on-accent:  #06191C;
+
+    --e1: 0 1px 2px rgba(0,0,0,.30), 0 6px 16px rgba(0,0,0,.28);
+    --e2: 0 2px 6px rgba(0,0,0,.34), 0 14px 32px rgba(0,0,0,.38);
+    --e3: 0 32px 72px rgba(0,0,0,.55);
+    --lit-edge: inset 0 1px 0 rgba(255,255,255,.06);
+
+    --success-tint: rgba(31, 169, 113, .18);
+    --warning-tint: rgba(233, 162, 59, .18);
+    --danger-tint:  rgba(229, 72, 77, .18);
+    --success-fg:   #4FD6A0;
+    --warning-fg:   #F3BE72;
+    --danger-fg:    #FF8C90;
+
+    /* ---- Legacy aliases: every existing page stylesheet keeps working ---- */
+    --bg-primary:    var(--canvas);
+    --bg-secondary:  var(--surface);
+    --bg-tertiary:   var(--surface-2);
+    --card-bg:       var(--surface);
+    --text-primary:  var(--text);
+    --text-secondary:var(--text-2);
+    --accent-color:  var(--accent);
+    --accent-hover:  var(--accent-strong);
+    --border-color:  var(--hairline);
+    --input-bg:      var(--surface-2);
+    --chart-grid:    rgba(255,255,255,.07);
+}
+
+/* =========================================================
+   LIGHT
+   ========================================================= */
+body.light-mode {
+    --canvas:     #F4F6F7;
+    --surface:    #FFFFFF;
+    --surface-2:  #F7F9F9;
+    --surface-3:  #EEF2F3;
+    --text:       #14191C;
+    --text-2:     #5B6770;
+    --text-3:     #8A949B;
+    --hairline:   rgba(20, 25, 28, .08);
+    --accent:     #1D8895;
+    --accent-strong: #166D78;
+    --accent-tint:   rgba(29, 136, 149, .10);
+    --accent-tint-2: rgba(29, 136, 149, .06);
+    --on-accent:  #FFFFFF;
+
+    --e1: 0 1px 2px rgba(16,24,28,.04), 0 6px 16px rgba(16,24,28,.05);
+    --e2: 0 2px 4px rgba(16,24,28,.05), 0 12px 28px rgba(16,24,28,.08);
+    --e3: 0 24px 64px rgba(16,24,28,.18);
+    --lit-edge: none;
+
+    --success-tint: rgba(31, 169, 113, .12);
+    --warning-tint: rgba(233, 162, 59, .14);
+    --danger-tint:  rgba(229, 72, 77, .12);
+    --success-fg:   #16794F;
+    --warning-fg:   #9A6414;
+    --danger-fg:    #B32A2E;
+
+    --bg-primary:    var(--canvas);
+    --bg-secondary:  var(--surface);
+    --bg-tertiary:   var(--surface-2);
+    --card-bg:       var(--surface);
+    --text-primary:  var(--text);
+    --text-secondary:var(--text-2);
+    --accent-color:  var(--accent);
+    --accent-hover:  var(--accent-strong);
+    --border-color:  var(--hairline);
+    --input-bg:      var(--surface-2);
+    --chart-grid:    rgba(20,25,28,.06);
+}
+
+/* =========================================================
+   Global normalisation — applies across every page stylesheet
+   ========================================================= */
+body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+}
+
+/* Numbers always line up */
+table td, table th,
+.stat-value, .kpi-value, .metric-value, .amount, .price,
+time, .time, .date { font-variant-numeric: tabular-nums; }
+
+/* Kill the 1px-box look globally; cards get elevation instead.
+   (Anything that genuinely needs a line opts back in with .hairline.) */
+.card, .stat-card, .panel, .content-card, .section-card, .widget,
+.dashboard-card, .table-container, .form-card, .list-card {
+    background: var(--surface);
+    border: none !important;
+    border-radius: var(--r-lg);
+    box-shadow: var(--e1), var(--lit-edge);
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+/* Focus is always visible */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-tint), 0 0 0 1px var(--accent);
+    border-radius: var(--r-sm);
+}
+
+::selection { background: var(--accent-tint); color: var(--text); }
+
+/* Scrollbars that match the surface */
+* { scrollbar-width: thin; scrollbar-color: var(--surface-3) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: var(--r-pill);
+    border: 3px solid transparent;
+    background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background-clip: content-box; background-color: var(--text-3); }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+    }
+}

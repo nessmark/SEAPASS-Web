@@ -28,10 +28,10 @@
                         </div>
                         <div class="section-actions">
                             <a href="{{ route('admin.reports-audit.export-sales', request()->query()) }}" class="btn btn-export" title="Download filtered sales transactions as CSV">
-                                📥 Export CSV
+                                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10"/><path d="m8 11 4 4 4-4"/><path d="M5 18h14"/></svg> Export CSV
                             </a>
                             <button type="button" class="btn btn-print" onclick="window.print()" title="Print this sales report">
-                                🖨️ Print
+                                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="7" rx="2"/><path d="M7 14h10v6H7z"/></svg> Print
                             </button>
                         </div>
                     </div>
@@ -77,7 +77,7 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-label">Total Sales Revenue</div>
-                            <div class="stat-value" style="color: #059669;">₱{{ number_format($totalSales ?? 0, 2) }}</div>
+                            <div class="stat-value" style="color: var(--text);">₱{{ number_format($totalSales ?? 0, 2) }}</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Total Seats Sold</div>
@@ -97,7 +97,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Confirmed Bookings</div>
-                            <div class="stat-value" style="color: #0284C7;">{{ $confirmedBookingsCount ?? 0 }}</div>
+                            <div class="stat-value" style="color: var(--accent);">{{ $confirmedBookingsCount ?? 0 }}</div>
                         </div>
                     </div>
 
@@ -144,13 +144,13 @@
                                                 data-total-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}"
                                                 title="Click to view details for {{ $pCount }} {{ $pCount === 1 ? 'passenger' : 'passengers' }}"
                                             >
-                                                <span class="badge-icon">👥</span>
+                                                <span class="badge-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/><circle cx="10" cy="8" r="3.2"/><path d="M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4"/><path d="M15.5 5.2a3.2 3.2 0 0 1 0 5.6"/></svg></span>
                                                 <span class="badge-count">{{ $pCount }} {{ $pCount === 1 ? 'Passenger' : 'Passengers' }}</span>
-                                                <span class="badge-view-icon">👁️</span>
+                                                <span class="badge-view-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg></span>
                                             </button>
                                         </div>
                                     </td>
-                                    <td><strong style="color: #059669;">₱{{ number_format((float) $booking->amount_collected, 2) }}</strong></td>
+                                    <td><strong style="color: var(--text);">₱{{ number_format((float) $booking->amount_collected, 2) }}</strong></td>
                                     <td>
                                         @if(in_array(strtolower($booking->status), ['confirmed', 'completed', 'approved']))
                                             <span class="status-badge status-confirmed">Confirmed</span>
@@ -181,7 +181,7 @@
                         </div>
                         <div class="section-actions">
                             <a href="{{ route('admin.reports-audit.export-capacity', request()->query()) }}" class="btn btn-export" title="Download boat capacity & safety report as CSV">
-                                📥 Export CSV
+                                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10"/><path d="m8 11 4 4 4-4"/><path d="M5 18h14"/></svg> Export CSV
                             </a>
                         </div>
                     </div>
@@ -197,7 +197,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Trips Over Capacity</div>
-                            <div class="stat-value" style="color: {{ ($tripsOverCapacityCount ?? 0) > 0 ? '#DC2626' : 'var(--text-primary)' }};">
+                            <div class="stat-value" style="color: {{ ($tripsOverCapacityCount ?? 0) > 0 ? '#DC2626' : 'var(--text)' }};">
                                 {{ $tripsOverCapacityCount ?? 0 }}
                             </div>
                         </div>
@@ -227,7 +227,7 @@
                                     <td>{{ $item['route'] }}</td>
                                     <td><strong>{{ $item['boat'] }}</strong></td>
                                     <td>{{ $item['capacity'] }}</td>
-                                    <td><strong style="color: #0284C7;">{{ $item['booked'] }}</strong></td>
+                                    <td><strong style="color: var(--accent);">{{ $item['booked'] }}</strong></td>
                                     <td>{{ $item['available'] }}</td>
                                     <td><strong>{{ $item['occupancy'] }}%</strong></td>
                                     <td>
@@ -269,7 +269,7 @@
                             @forelse($scheduleAuditLogs ?? [] as $log)
                                 <div class="audit-log-item">
                                     <div class="audit-log-header">
-                                        <span class="audit-log-action">⚡ {{ $log->action }} (by {{ $log->user_name ?: 'System' }})</span>
+                                        <span class="audit-log-action"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-8 11h6l-1 9 8-11h-6l1-9z"/></svg> {{ $log->action }} (by {{ $log->user_name ?: 'System' }})</span>
                                         <span class="audit-log-time">{{ $log->created_at->diffForHumans() }}</span>
                                     </div>
                                     <div class="audit-log-details">
@@ -291,7 +291,7 @@
                             @forelse($refundAuditLogs ?? [] as $log)
                                 <div class="audit-log-item">
                                     <div class="audit-log-header">
-                                        <span class="audit-log-action">🎟️ {{ $log->action }} (by {{ $log->user_name ?: 'System' }})</span>
+                                        <span class="audit-log-action"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2.5 2.5 0 0 0 0 5 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2.5 2.5 0 0 0 0-5z"/><path d="M14 8v8" stroke-dasharray="2 3"/></svg> {{ $log->action }} (by {{ $log->user_name ?: 'System' }})</span>
                                         <span class="audit-log-time">{{ $log->created_at->diffForHumans() }}</span>
                                     </div>
                                     <div class="audit-log-details">
@@ -313,7 +313,7 @@
                             @forelse($allAuditLogs ?? [] as $log)
                                 <div class="audit-log-item">
                                     <div class="audit-log-header">
-                                        <span class="audit-log-action">📌 {{ $log->action }} — <small style="color: var(--primary-color);">{{ strtoupper($log->category) }}</small></span>
+                                        <span class="audit-log-action"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6l-1 6 3 3H7l3-3-1-6z"/><path d="M12 13v7"/></svg> {{ $log->action }} — <small style="color: var(--primary-color);">{{ strtoupper($log->category) }}</small></span>
                                         <span class="audit-log-time">{{ $log->created_at->format('M d, Y h:i A') }}</span>
                                     </div>
                                     <div class="audit-log-details">

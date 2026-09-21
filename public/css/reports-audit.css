@@ -65,8 +65,8 @@
 .filter-group input,
 .filter-group select {
     padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border: none;
+    border-radius: var(--r-sm);
     font-size: 14px;
     background: var(--bg-primary);
     color: var(--text-primary);
@@ -88,7 +88,7 @@
 .btn {
     padding: 8px 16px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -100,7 +100,7 @@
 }
 
 .btn-primary {
-    background: var(--primary-color, #0284C7);
+    background: var(--primary-color, var(--accent));
     color: white;
 }
 
@@ -111,7 +111,7 @@
 .btn-secondary {
     background: var(--bg-secondary);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    border: none;
 }
 
 .btn-secondary:hover {
@@ -165,8 +165,8 @@
 .stat-card {
     padding: 20px;
     background: var(--bg-secondary);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
 }
 
 .stat-label {
@@ -192,45 +192,45 @@
 }
 
 .status-confirmed {
-    background: #DCFCE7;
-    color: #15803D;
+    background: var(--success-tint);
+    color: var(--success-fg);
 }
 
 .status-pending {
-    background: #FEF3C7;
-    color: #B45309;
+    background: var(--warning-tint);
+    color: var(--warning-fg);
 }
 
 .status-cancelled {
-    background: #FEE2E2;
-    color: #B91C1C;
+    background: var(--danger-tint);
+    color: var(--danger-fg);
 }
 
 .ticket-tag {
     display: inline-block;
     padding: 3px 9px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     font-size: 11px;
     font-weight: 700;
     margin: 2px 2px 2px 0;
 }
 
 .tag-regular {
-    background: #E0F2FE;
-    color: #0369A1;
-    border: 1px solid #BAE6FD;
+    background: var(--accent-tint);
+    color: var(--accent-strong);
+    border: none;
 }
 
 .tag-student {
-    background: #F3E8FF;
+    background: var(--accent-tint);
     color: #6B21A8;
-    border: 1px solid #E9D5FF;
+    border: none;
 }
 
 .tag-senior {
-    background: #FEF3C7;
+    background: var(--warning-tint);
     color: #92400E;
-    border: 1px solid #FDE68A;
+    border: none;
 }
 
 .expandable-section {
@@ -243,8 +243,8 @@
     gap: 8px;
     padding: 14px 16px;
     background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: none;
+    border-radius: var(--r-md);
     cursor: pointer;
     transition: all 0.2s;
     width: 100%;
@@ -271,7 +271,7 @@
     display: none;
     padding: 20px;
     background: var(--bg-primary);
-    border: 1px solid var(--border-color);
+    border: none;
     border-top: none;
     border-radius: 0 0 8px 8px;
 }
@@ -326,12 +326,12 @@
 }
 
 .btn-export {
-    background: #059669;
+    background: var(--success);
     color: #ffffff;
     font-size: 13px;
     font-weight: 600;
     padding: 7px 14px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     border: none;
     text-decoration: none;
     display: inline-flex;
@@ -351,8 +351,8 @@
     font-size: 13px;
     font-weight: 600;
     padding: 7px 14px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-sm);
+    border: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;

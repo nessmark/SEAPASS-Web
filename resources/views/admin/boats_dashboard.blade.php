@@ -69,7 +69,7 @@
                             <div class="boat-field">
                                 <label>Image</label>
                                 <input type="file" name="image" accept="image/jpeg,image/png,image/jpg,image/gif">
-                                <small style="color: var(--text-secondary);">Max size: 2MB (JPEG, PNG, JPG, GIF)</small>
+                                <small style="color: var(--text-2);">Max size: 2MB (JPEG, PNG, JPG, GIF)</small>
                             </div>
                             <div class="boat-field">
                                 <label>Status <span style="color: red;">*</span></label>
@@ -126,7 +126,7 @@
                             <div class="boat-field">
                                 <label>Image</label>
                                 <input type="file" name="image" accept="image/jpeg,image/png,image/jpg,image/gif">
-                                <small style="color: var(--text-secondary);">Max size: 2MB (JPEG, PNG, JPG, GIF)</small>
+                                <small style="color: var(--text-2);">Max size: 2MB (JPEG, PNG, JPG, GIF)</small>
                                 <div id="edit_current_image" style="margin-top: 8px;"></div>
                             </div>
                             <div class="boat-field">
@@ -151,13 +151,13 @@
                     <div class="boat-card">
                         <div class="boat-actions">
                             <button class="boat-edit" type="button" onclick="openEditModal({{ $boat->id }}, '{{ addslashes($boat->name) }}', '{{ addslashes($boat->license_number ?? '') }}', '{{ $boat->passenger_capacity ?? '' }}', '{{ addslashes($boat->owner ?? '') }}', '{{ addslashes($boat->operator ?? '') }}', '{{ addslashes($boat->boat_number ?? '') }}', '{{ $boat->status ?? 'Active' }}', '{{ $boat->image ? asset('Boats_images/' . $boat->image) : '' }}')" aria-label="Edit {{ $boat->name }}" title="Edit">
-                                ✏️
+                                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14.5 6.5l3 3"/></svg>
                             </button>
                             <form method="POST" action="{{ route('admin.boats.destroy', $boat) }}" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button class="boat-delete" type="submit" aria-label="Delete {{ $boat->name }}" title="Delete" onclick="return confirm('Are you sure you want to delete this boat?');">
-                                    🗑️
+                                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M10 11v6M14 11v6"/></svg>
                                 </button>
                             </form>
                         </div>
@@ -166,10 +166,10 @@
                             @if($boat->image)
                                 <div class="boat-image-container">
                                     <img src="{{ asset('Boats_images/' . $boat->image) }}" alt="{{ $boat->name }}" class="boat-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <div class="boat-icon" style="display: none;">🚤</div>
+                                    <div class="boat-icon" style="display: none;"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17.5c1.5 1 2.5 1 4 0s2.5-1 4 0 2.5 1 4 0 2.5-1 4 0"/><path d="M5 15V9.5a1 1 0 0 1 .6-.92l5.8-2.5a1 1 0 0 1 .8 0l5.8 2.5a1 1 0 0 1 .6.92V15"/><path d="M12 6V3"/></svg></div>
                                 </div>
                             @else
-                                <div class="boat-icon">🚤</div>
+                                <div class="boat-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17.5c1.5 1 2.5 1 4 0s2.5-1 4 0 2.5 1 4 0 2.5-1 4 0"/><path d="M5 15V9.5a1 1 0 0 1 .6-.92l5.8-2.5a1 1 0 0 1 .8 0l5.8 2.5a1 1 0 0 1 .6.92V15"/><path d="M12 6V3"/></svg></div>
                             @endif
                             <div class="boat-details">
                                 <div class="boat-name" title="{{ $boat->name }}">{{ $boat->name }}</div>
@@ -226,7 +226,7 @@
                         </div>
                     </div>
                 @empty
-                    <div style="color: var(--text-secondary); padding: 8px 2px;">
+                    <div style="color: var(--text-2); padding: 8px 2px;">
                         No boats yet. Add your first boat using the form above.
                     </div>
                 @endforelse

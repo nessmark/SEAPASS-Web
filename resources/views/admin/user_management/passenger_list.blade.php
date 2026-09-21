@@ -18,7 +18,7 @@
         .passenger-table th {
             background-color: var(--bg-tertiary);
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text);
         }
         .passenger-table tr:hover {
             background-color: var(--bg-tertiary);
@@ -26,7 +26,7 @@
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: var(--text-secondary);
+            color: var(--text-2);
         }
         .search-filter {
             display: flex;
@@ -39,9 +39,9 @@
             min-width: 250px;
             padding: 10px 15px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: var(--r-md);
             background-color: var(--bg-secondary);
-            color: var(--text-primary);
+            color: var(--text);
         }
     </style>
 @endpush
@@ -81,7 +81,7 @@
                                 <td>{{ $passenger->email }}</td>
                                 <td>{{ $passenger->created_at->format('M d, Y') }}</td>
                                 <td>
-                                    <span style="padding: 4px 12px; border-radius: 12px; background-color: var(--accent-color); color: var(--bg-primary); font-size: 12px;">
+                                    <span style="padding: 4px 12px; border-radius: var(--r-lg); background-color: var(--accent-color); color: var(--bg-primary); font-size: 12px;">
                                         Active
                                     </span>
                                 </td>

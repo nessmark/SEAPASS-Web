@@ -13,8 +13,8 @@
 
 .trip-button {
     padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--accent-color);
     color: var(--bg-primary);
     cursor: pointer;
@@ -74,8 +74,8 @@
 
 .trip-card {
     background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border: none;
+    border-radius: var(--r-lg);
     padding: 20px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -86,12 +86,12 @@
 }
 
 .trip-card-active {
-    border-left: 4px solid #4ecdc4;
+    border-left: 4px solid var(--accent);
 }
 
 .trip-card-completed {
     opacity: 0.8;
-    border-left: 4px solid #28a745;
+    border-left: 4px solid var(--success);
 }
 
 .trip-card-header {
@@ -122,19 +122,19 @@
 
 .trip-status-badge {
     padding: 4px 12px;
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
 }
 
 .status-departed {
-    background: #4ecdc4;
+    background: var(--accent);
     color: var(--bg-primary);
 }
 
 .status-arrived {
-    background: #28a745;
+    background: var(--success);
     color: white;
 }
 
@@ -146,8 +146,8 @@
 
 .trip-action-btn {
     padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-sm);
+    border: none;
     background: var(--bg-tertiary);
     color: var(--text-primary);
     cursor: pointer;
@@ -191,8 +191,8 @@
 
 .trip-status-select {
     padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-sm);
+    border: none;
     background: var(--input-bg);
     color: var(--text-primary);
     font-size: 14px;
@@ -221,7 +221,7 @@
 
 .trip-modal {
     background: var(--bg-secondary);
-    border-radius: 14px;
+    border-radius: var(--r-lg);
     padding: 24px 28px;
     width: min(700px, 100% - 32px);
     max-height: 90vh;
@@ -259,7 +259,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
     transition: background 0.2s ease;
 }
 
@@ -300,8 +300,8 @@
 .trip-field textarea {
     width: 100%;
     padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--input-bg);
     color: var(--text-primary);
     font-size: 14px;
@@ -329,8 +329,8 @@
 
 .trip-modal-cancel {
     padding: 10px 18px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--bg-tertiary);
     color: var(--text-primary);
     cursor: pointer;
@@ -344,8 +344,8 @@
 
 .trip-modal-save {
     padding: 10px 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--accent-color);
     color: var(--bg-primary);
     cursor: pointer;
@@ -372,7 +372,7 @@
 
 .seat-item {
     aspect-ratio: 1;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -389,7 +389,7 @@
 }
 
 .seat-item.booked {
-    background: #e91e63;
+    background: var(--text-3);
     color: white;
     border-color: #c2185b;
     cursor: not-allowed;
@@ -404,7 +404,7 @@
     margin-bottom: 20px;
     padding: 16px;
     background: var(--bg-tertiary);
-    border-radius: 8px;
+    border-radius: var(--r-md);
     display: flex;
     gap: 24px;
     flex-wrap: wrap;
@@ -434,7 +434,7 @@
 .seat-map-legend-box {
     width: 20px;
     height: 20px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -473,7 +473,7 @@
     align-items: center;
     gap: 6px;
     padding: 4px 16px;
-    border-radius: 20px;
+    border-radius: var(--r-lg);
     background: var(--bg-secondary, #f1f5f9);
     font-size: 11px;
     font-weight: 700;
@@ -587,7 +587,7 @@
 .seat-map-legend-box {
     width: 24px;
     height: 24px;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
     border: 2px solid var(--border-color);
 }
 
@@ -596,7 +596,7 @@
 }
 
 .seat-map-legend-box.booked {
-    background: #e91e63;
+    background: var(--text-3);
     border-color: #c2185b;
 }
 
@@ -675,8 +675,8 @@
     min-width: 44px;
     height: 38px;
     padding: 0 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--bg-tertiary);
     color: var(--text-primary);
     font-size: 13px;
@@ -704,8 +704,8 @@
     margin-bottom: 18px;
     padding: 14px 18px;
     background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
+    border: none;
+    border-radius: var(--r-md);
 }
 
 .recurring-header-text h3 {
@@ -722,8 +722,8 @@
 
 .recurring-table-container {
     overflow-x: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
+    border: none;
+    border-radius: var(--r-md);
     background: var(--card-bg);
 }
 
@@ -761,9 +761,9 @@
 .badge-recurrence {
     display: inline-block;
     padding: 3px 9px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     background: rgba(2, 132, 199, 0.12);
-    color: #0284c7;
+    color: var(--accent);
     font-weight: 600;
     font-size: 12px;
 }
@@ -799,8 +799,8 @@
     align-items: center;
     gap: 4px;
     padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-sm);
+    border: none;
     background: var(--bg-secondary);
     color: var(--text-primary);
     cursor: pointer;
@@ -814,9 +814,9 @@
 }
 
 .action-mini-btn.btn-gen-now {
-    background: #0284c7;
+    background: var(--accent);
     color: white;
-    border-color: #0284c7;
+    border-color: var(--accent);
 }
 
 .action-mini-btn.btn-toggle-deactivate {
@@ -832,8 +832,8 @@
 }
 
 .action-mini-btn.btn-delete-rule {
-    background: #ef4444;
+    background: var(--danger);
     color: white;
-    border-color: #ef4444;
+    border-color: var(--danger);
 }
 

@@ -33,16 +33,16 @@
                 <button class="trip-action-btn" type="button"
                         onclick="openEditScheduleModal({{ $schedule->id }}, {{ $schedule->boat_id }}, {{ json_encode($schedule->route) }}, {{ json_encode($departure->format('Y-m-d')) }}, {{ json_encode($departure->format('H:i')) }}, {{ (int) $schedule->available_seats }}, {{ json_encode($schedule->notes ?? '') }})"
                         title="Edit">
-                    ✏️
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14.5 6.5l3 3"/></svg>
                 </button>
                 <button class="trip-action-btn" type="button" onclick="viewSeatMap({{ $schedule->id }})" title="View Seat Map">
-                    🪑
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4v8h12V4"/><path d="M5 12h14"/><path d="M7 12v8M17 12v8"/></svg>
                 </button>
                 <form method="POST" action="{{ route('admin.trip-schedules.destroy', $schedule) }}" style="display: inline;">
                     @csrf
                     @method('DELETE')
                     <button class="trip-action-btn" type="submit" title="Delete" onclick="return confirm('Are you sure you want to delete this schedule?');">
-                        🗑️
+                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M10 11v6M14 11v6"/></svg>
                     </button>
                 </form>
             </div>

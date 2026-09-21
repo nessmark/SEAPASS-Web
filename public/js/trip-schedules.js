@@ -540,7 +540,7 @@ function renderSeatMap(data, container, titleElement) {
                 <span>Available</span>
             </div>
             <div class="seat-map-legend-item">
-                <div class="seat-map-legend-box booked">✕</div>
+                <div class="seat-map-legend-box booked"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
                 <span>Booked</span>
             </div>
         </div>
@@ -577,7 +577,7 @@ function renderSeatMap(data, container, titleElement) {
             } else {
                 const isBooked = !!seat.isBooked;
                 const cls = isBooked ? 'modal-seat-box booked' : 'modal-seat-box available';
-                const content = isBooked ? '<span class="seat-x">✕</span>' : col;
+                const content = isBooked ? '<span class="seat-x"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></span>' : col;
                 const title = isBooked
                     ? `Seat ${seat.seat_number} - Booked${seat.passenger_name ? ` by ${seat.passenger_name}` : ''}`
                     : `Seat ${seat.seat_number} - Available`;
@@ -598,7 +598,7 @@ function renderSeatMap(data, container, titleElement) {
             } else {
                 const isBooked = !!seat.isBooked;
                 const cls = isBooked ? 'modal-seat-box booked' : 'modal-seat-box available';
-                const content = isBooked ? '<span class="seat-x">✕</span>' : col;
+                const content = isBooked ? '<span class="seat-x"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></span>' : col;
                 const title = isBooked
                     ? `Seat ${seat.seat_number} - Booked${seat.passenger_name ? ` by ${seat.passenger_name}` : ''}`
                     : `Seat ${seat.seat_number} - Available`;

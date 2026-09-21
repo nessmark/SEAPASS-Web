@@ -145,7 +145,7 @@
         <div class="adv-modal-card">
             <div class="adv-modal-header">
                 <div class="adv-modal-header-left">
-                    <div class="adv-modal-icon-badge">📣</div>
+                    <div class="adv-modal-icon-badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4a1 1 0 0 0 1 1h3l5 4V5L8 9H5a1 1 0 0 0-1 1z"/><path d="M17.5 9a4 4 0 0 1 0 6"/></svg></div>
                     <div>
                         <h3 id="advModalTitle" class="adv-modal-title">Advisory Title</h3>
                         <div class="adv-modal-badges" id="advModalBadges"></div>

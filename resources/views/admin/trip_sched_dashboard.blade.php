@@ -57,7 +57,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <small id="boat_capacity_info" style="color: #0284c7; display: block; margin-top: 4px; font-weight: 600; font-size: 13px;">
+                                <small id="boat_capacity_info" style="color: var(--accent); display: block; margin-top: 4px; font-weight: 600; font-size: 13px;">
                                     Fleet Seat Capacity: —
                                 </small>
                             </div>
@@ -76,7 +76,7 @@
                                     <option value="daily">Daily (Every Day)</option>
                                     <option value="weekly">Weekly on Specific Days</option>
                                 </select>
-                                <small style="color: var(--text-secondary); display: block; margin-top: 4px;">
+                                <small style="color: var(--text-2); display: block; margin-top: 4px;">
                                     Choose "Daily" or "Weekly" to automatically generate and repeat trips into the future.
                                 </small>
                             </div>
@@ -104,7 +104,7 @@
                             <div class="trip-field" id="recurringDateContainer" style="display: none;">
                                 <label>Repeat Until (Optional)</label>
                                 <input type="date" name="effective_until" id="schedule_effective_until" placeholder="Leave blank for indefinite">
-                                <small style="color: var(--text-secondary); display: block; margin-top: 4px;">
+                                <small style="color: var(--text-2); display: block; margin-top: 4px;">
                                     Leave blank to repeat indefinitely until toggled off.
                                 </small>
                             </div>
@@ -122,7 +122,7 @@
                             <div class="trip-field">
                                 <label>Estimated Arrival Time (Optional)</label>
                                 <input type="time" name="arrival_time" id="schedule_arrival_time">
-                                <small style="color: var(--text-secondary); display: block; margin-top: 4px;">
+                                <small style="color: var(--text-2); display: block; margin-top: 4px;">
                                     Auto-set to +2 hours if left blank.
                                 </small>
                             </div>
@@ -130,7 +130,7 @@
                             <div class="trip-field">
                                 <label>Available Seats <span style="color: red;">*</span></label>
                                 <input type="number" name="available_seats" id="schedule_available_seats" required min="0" placeholder="0">
-                                <small id="available_seats_help" style="color: var(--text-secondary); display: block; margin-top: 4px;">
+                                <small id="available_seats_help" style="color: var(--text-2); display: block; margin-top: 4px;">
                                     Auto-set to fleet capacity (<span id="capacity_val" style="font-weight: bold; color: #111;">—</span> seats)
                                 </small>
                             </div>
@@ -227,12 +227,12 @@
                                     <tr>
                                         <td>
                                             <strong>{{ $template->boat?->name ?? 'Vessel' }}</strong>
-                                            <div style="font-size: 12px; color: var(--text-secondary);">Capacity: {{ $template->boat?->passenger_capacity ?? 0 }}</div>
+                                            <div style="font-size: 12px; color: var(--text-2);">Capacity: {{ $template->boat?->passenger_capacity ?? 0 }}</div>
                                         </td>
                                         <td>{{ $template->route }}</td>
                                         <td>
                                             <div><strong>Dep:</strong> {{ $template->formatted_departure_time }}</div>
-                                            <div style="font-size: 12px; color: var(--text-secondary);"><strong>Arr:</strong> {{ $template->formatted_arrival_time }}</div>
+                                            <div style="font-size: 12px; color: var(--text-2);"><strong>Arr:</strong> {{ $template->formatted_arrival_time }}</div>
                                         </td>
                                         <td>
                                             <span class="badge-recurrence">{{ $template->formatted_recurrence }}</span>
@@ -242,7 +242,7 @@
                                             @if($template->effective_until)
                                                 Until {{ $template->effective_until->format('M d, Y') }}
                                             @else
-                                                <span style="color: #0284c7; font-weight: 500;">Runs Indefinitely</span>
+                                                <span style="color: var(--accent); font-weight: 500;">Runs Indefinitely</span>
                                             @endif
                                         </td>
                                         <td>
@@ -255,7 +255,7 @@
                                         <td>
                                             <div class="action-btn-group">
                                                 {{-- Edit Rule --}}
-                                                <button type="button" class="action-mini-btn" style="background: rgba(14, 165, 233, 0.1); color: #0284c7; border: 1px solid rgba(14, 165, 233, 0.3);"
+                                                <button type="button" class="action-mini-btn" style="background: rgba(14, 165, 233, 0.1); color: var(--accent); border: 1px solid rgba(14, 165, 233, 0.3);"
                                                     onclick="openEditRecurringModal({{ json_encode([
                                                         'id' => $template->id,
                                                         'boat_id' => $template->boat_id,
@@ -268,14 +268,14 @@
                                                         'effective_until' => $template->effective_until ? $template->effective_until->format('Y-m-d') : null,
                                                         'notes' => $template->notes,
                                                     ]) }})" title="Edit recurring rule">
-                                                    ✏️ Edit
+                                                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14.5 6.5l3 3"/></svg> Edit
                                                 </button>
 
                                                 {{-- Generate Now --}}
                                                 <form method="POST" action="{{ route('admin.recurring-schedules.generate', $template) }}" style="display: inline;">
                                                     @csrf
                                                     <button type="submit" class="action-mini-btn btn-gen-now" title="Spawn trips immediately for next 3 months (90 days)">
-                                                        ⚡ Generate
+                                                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-8 11h6l-1 9 8-11h-6l1-9z"/></svg> Generate
                                                     </button>
                                                 </form>
 
@@ -299,7 +299,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="action-mini-btn btn-delete-rule" title="Delete rule">
-                                                        🗑️
+                                                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M10 11v6M14 11v6"/></svg>
                                                     </button>
                                                 </form>
                                             </div>
@@ -312,8 +312,8 @@
                 @else
                     <div class="empty-state" style="text-align: center; padding: 48px 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
                         <div style="font-size: 38px; margin-bottom: 12px;">⏰</div>
-                        <h3 style="margin: 0 0 6px 0; color: var(--text-primary);">No Recurring Schedule Rules Defined</h3>
-                        <p style="margin: 0 0 18px 0; font-size: 14px; color: var(--text-secondary);">
+                        <h3 style="margin: 0 0 6px 0; color: var(--text);">No Recurring Schedule Rules Defined</h3>
+                        <p style="margin: 0 0 18px 0; font-size: 14px; color: var(--text-2);">
                             Set up daily or weekly repeating ferry schedules to automatically spawn bookable trips for passengers.
                         </p>
                         <button class="trip-button" type="button" onclick="document.getElementById('openScheduleModal').click()">

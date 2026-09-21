@@ -33,7 +33,7 @@ function initializeCharts() {
                     {
                         label: 'Volume',
                         data: [65, 59, 80, 81, 56, 55],
-                        backgroundColor: '#4ecdc4',
+                        backgroundColor: getCSSVariable('--accent'),
                         borderRadius: 4
                     },
                     {
@@ -59,11 +59,11 @@ function initializeCharts() {
                 scales: {
                     x: {
                         ticks: { color: getCSSVariable('--text-secondary') },
-                        grid: { color: getCSSVariable('--chart-grid') }
+                        grid: { color: getCSSVariable('--chart-grid'), drawBorder: false, borderDash: [3, 4] }
                     },
                     y: {
                         ticks: { color: getCSSVariable('--text-secondary') },
-                        grid: { color: getCSSVariable('--chart-grid') }
+                        grid: { color: getCSSVariable('--chart-grid'), drawBorder: false, borderDash: [3, 4] }
                     }
                 }
             }
@@ -81,18 +81,26 @@ function initializeCharts() {
                     {
                         label: 'This Month',
                         data: [3200, 3500, 4200, 4785],
-                        borderColor: '#4ecdc4',
-                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                        borderColor: getCSSVariable('--accent'),
+                        backgroundColor: getCSSVariable('--accent-tint'),
                         fill: true,
-                        tension: 0.4
+                        tension: 0.35,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderCapStyle: 'round'
                     },
                     {
                         label: 'Last Month',
                         data: [2800, 3200, 3800, 4029],
-                        borderColor: '#e91e63',
-                        backgroundColor: 'rgba(233, 30, 99, 0.1)',
+                        borderColor: getCSSVariable('--text-3'),
+                        backgroundColor: 'transparent',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.35,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderCapStyle: 'round'
                     }
                 ]
             },
@@ -111,11 +119,11 @@ function initializeCharts() {
                 scales: {
                     x: {
                         ticks: { color: getCSSVariable('--text-secondary') },
-                        grid: { color: getCSSVariable('--chart-grid') }
+                        grid: { color: getCSSVariable('--chart-grid'), drawBorder: false, borderDash: [3, 4] }
                     },
                     y: {
                         ticks: { color: getCSSVariable('--text-secondary') },
-                        grid: { color: getCSSVariable('--chart-grid') }
+                        grid: { color: getCSSVariable('--chart-grid'), drawBorder: false, borderDash: [3, 4] }
                     }
                 }
             }
@@ -130,7 +138,7 @@ function initializeCharts() {
             data: {
                 datasets: [{
                     data: [80, 20],
-                    backgroundColor: ['#4ecdc4', getCSSVariable('--bg-tertiary')],
+                    backgroundColor: [getCSSVariable('--accent'), getCSSVariable('--bg-tertiary')],
                     borderWidth: 0
                 }]
             },
@@ -171,10 +179,14 @@ function initializeCharts() {
                 datasets: [{
                     label: 'New Visitors',
                     data: [120, 190, 300, 250, 280, 350, 400, 380, 420, 450, 480, 500],
-                    borderColor: '#4ecdc4',
-                    backgroundColor: 'rgba(78, 205, 196, 0.2)',
+                    borderColor: getCSSVariable('--accent'),
+                    backgroundColor: getCSSVariable('--accent-tint'),
                     fill: true,
-                    tension: 0.4
+                    tension: 0.35,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderCapStyle: 'round'
                 }]
             },
             options: {
@@ -188,11 +200,11 @@ function initializeCharts() {
                 scales: {
                     x: {
                         ticks: { color: getCSSVariable('--text-secondary'), font: { size: 10 } },
-                        grid: { color: getCSSVariable('--chart-grid') }
+                        grid: { color: getCSSVariable('--chart-grid'), drawBorder: false, borderDash: [3, 4] }
                     },
                     y: {
                         ticks: { color: getCSSVariable('--text-secondary') },
-                        grid: { color: getCSSVariable('--chart-grid') },
+                        grid: { color: getCSSVariable('--chart-grid'), drawBorder: false, borderDash: [3, 4] },
                         max: 500
                     }
                 }

@@ -19,8 +19,8 @@
 
 .adv-section {
     background: var(--card-bg);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-lg);
+    border: none;
     padding: 18px 18px 20px;
     display: flex;
     flex-direction: column;
@@ -69,8 +69,8 @@
 .adv-field select,
 .adv-field textarea {
     padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--input-bg);
     color: var(--text-primary);
     font-size: 13px;
@@ -104,8 +104,8 @@
 .adv-btn-primary,
 .adv-btn-secondary {
     padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
@@ -137,8 +137,8 @@
 
 .adv-filter {
     padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--input-bg);
     color: var(--text-primary);
     font-size: 13px;
@@ -191,7 +191,7 @@
 
 .adv-warning {
     background: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
+    color: var(--warning);
 }
 
 .adv-critical {
@@ -216,7 +216,7 @@
 
 .adv-pending {
     background: rgba(255, 193, 7, 0.18);
-    color: #ffc107;
+    color: var(--warning);
 }
 
 .adv-none {
@@ -232,8 +232,8 @@
 .adv-action-btn {
     width: 26px;
     height: 26px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-sm);
+    border: none;
     background: var(--bg-tertiary);
     cursor: pointer;
     font-size: 14px;
@@ -303,8 +303,8 @@
     width: 92%;
     max-width: 620px;
     background: var(--card-bg, #1e1e2d);
-    border: 1px solid var(--border-color, #2b2b40);
-    border-radius: 16px;
+    border: none;
+    border-radius: var(--r-lg);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
     overflow: hidden;
     transform: scale(0.92) translateY(12px);
@@ -335,9 +335,9 @@
 .adv-modal-icon-badge {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     background: var(--bg-tertiary, rgba(255, 255, 255, 0.06));
-    border: 1px solid var(--border-color, #2b2b40);
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -366,7 +366,7 @@
     line-height: 1;
     cursor: pointer;
     padding: 4px 8px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -392,8 +392,8 @@
 
 .adv-modal-info-box {
     background: var(--bg-tertiary, rgba(255, 255, 255, 0.04));
-    border: 1px solid var(--border-color, #2b2b40);
-    border-radius: 10px;
+    border: none;
+    border-radius: var(--r-md);
     padding: 12px 14px;
     display: flex;
     flex-direction: column;
@@ -422,8 +422,8 @@
 
 .adv-modal-message-card {
     background: var(--bg-tertiary, rgba(255, 255, 255, 0.04));
-    border: 1px solid var(--border-color, #2b2b40);
-    border-radius: 12px;
+    border: none;
+    border-radius: var(--r-lg);
     padding: 16px;
     font-size: 14px;
     line-height: 1.6;

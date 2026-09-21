@@ -14,8 +14,8 @@
 
 .fare-section {
     background: var(--card-bg);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-lg);
+    border: none;
     padding: 20px 24px;
     margin-top: 8px;
 }
@@ -70,8 +70,8 @@
     width: 100%;
     max-width: 120px;
     padding: 8px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: none;
+    border-radius: var(--r-md);
     background: var(--input-bg);
     color: var(--text-primary);
     font-size: 13px;
@@ -90,7 +90,7 @@
 
 .fare-btn {
     padding: 8px 14px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -101,7 +101,7 @@
 .fare-btn-save {
     background: var(--bg-tertiary, rgba(0, 0, 0, 0.06));
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    border: none;
 }
 
 .fare-btn-save:hover {
@@ -123,7 +123,7 @@
 
 .fare-alert {
     padding: 12px 16px;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     margin-top: 16px;
     font-size: 14px;
 }
@@ -131,13 +131,13 @@
 .fare-alert-success {
     background: rgba(34, 197, 94, 0.15);
     color: var(--text-primary);
-    border: 1px solid rgba(34, 197, 94, 0.4);
+    border: none;
 }
 
 .fare-alert-error {
     background: rgba(239, 68, 68, 0.15);
     color: var(--text-primary);
-    border: 1px solid rgba(239, 68, 68, 0.4);
+    border: none;
 }
 
 @media (max-width: 768px) {

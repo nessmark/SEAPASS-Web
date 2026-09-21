@@ -21,16 +21,16 @@
 .boats-input {
     min-width: 260px;
     padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--input-bg);
     color: var(--text-primary);
 }
 
 .boats-button {
     padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--accent-color);
     color: var(--bg-primary);
     cursor: pointer;
@@ -43,21 +43,23 @@
 
 .boats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 450px));
-    gap: 32px;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: var(--s-4);
     justify-content: start;
 }
 
 .boat-card {
     background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 32px 28px;
+    border: none;
+    border-radius: var(--r-lg);
+    padding: var(--s-5);
     position: relative;
-    min-height: 180px;
-    width: 450px;
+    min-height: 0;
+    width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    box-shadow: var(--e1), var(--lit-edge);
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
 
 .boat-meta {
@@ -69,22 +71,23 @@
 }
 
 .boat-icon {
-    width: 120px;
-    height: 120px;
-    border-radius: 10px;
-    background: var(--bg-tertiary);
+    width: 76px;
+    height: 76px;
+    border-radius: var(--r-md);
+    background: var(--accent-tint);
+    color: var(--accent-strong);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 50px;
+    font-size: 0;
     flex-shrink: 0;
     flex-grow: 0;
 }
 
 .boat-image-container {
-    width: 120px;
-    height: 120px;
-    border-radius: 10px;
+    width: 76px;
+    height: 76px;
+    border-radius: var(--r-md);
     overflow: hidden;
     flex-shrink: 0;
     flex-grow: 0;
@@ -101,9 +104,10 @@
 }
 
 .boat-name {
-    font-weight: 700;
-    font-size: 20px;
-    color: var(--text-primary);
+    font-weight: 650;
+    font-size: 17px;
+    letter-spacing: -0.012em;
+    color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -127,8 +131,8 @@
 
 .boat-edit {
     padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--bg-tertiary);
     color: var(--text-primary);
     cursor: pointer;
@@ -141,8 +145,8 @@
 
 .boat-delete {
     padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--bg-tertiary);
     color: var(--text-primary);
     cursor: pointer;
@@ -155,9 +159,9 @@
 
 .alert {
     padding: 12px 14px;
-    border-radius: 10px;
+    border-radius: var(--r-md);
     margin-bottom: 14px;
-    border: 1px solid var(--border-color);
+    border: none;
     background: var(--bg-secondary);
     color: var(--text-primary);
 }
@@ -172,30 +176,32 @@
     gap: 6px;
     flex: 1;
     min-width: 0;
-    max-width: calc(100% - 140px);
-    padding-right: 60px;
+    max-width: calc(100% - 92px);
+    padding-right: 0;
     box-sizing: border-box;
 }
 
 .boat-detail-row {
     display: flex;
-    gap: 8px;
-    font-size: 15px;
-    align-items: center;
+    gap: var(--s-2);
+    font-size: 13.5px;
+    align-items: baseline;
     width: 100%;
     min-width: 0;
+    padding: 3px 0;
 }
 
 .boat-detail-label {
-    font-weight: 600;
-    color: var(--text-secondary);
-    min-width: 100px;
+    font-weight: 500;
+    color: var(--text-3);
+    min-width: 84px;
     flex-shrink: 0;
     flex-grow: 0;
 }
 
 .boat-detail-value {
-    color: var(--text-primary);
+    color: var(--text);
+    font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -212,16 +218,18 @@
 }
 
 .boat-status-select {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background: var(--input-bg);
-    color: var(--text-primary);
-    font-size: 14px;
+    padding: 5px 30px 5px 11px;
+    border-radius: var(--r-pill);
+    border: none;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 600;
     cursor: pointer;
-    min-width: 150px;
-    max-width: 180px;
-    width: 150px;
+    min-width: 0;
+    max-width: 170px;
+    width: auto;
+    min-height: 0;
     flex-shrink: 0;
     flex-grow: 0;
 }
@@ -233,11 +241,11 @@
 }
 
 .boat-status-available {
-    color: #4ecdc4;
+    color: var(--accent);
 }
 
 .boat-status-unavailable {
-    color: #e91e63;
+    color: var(--text-3);
 }
 
 /* Modal styles */
@@ -253,7 +261,7 @@
 
 .boat-modal {
     background: var(--bg-secondary);
-    border-radius: 14px;
+    border-radius: var(--r-lg);
     padding: 20px 22px;
     width: min(640px, 100% - 32px);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
@@ -302,8 +310,8 @@
 .boat-field select {
     width: 100%;
     padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--input-bg);
     color: var(--text-primary);
 }
@@ -317,8 +325,8 @@
 
 .boat-modal-cancel {
     padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--bg-tertiary);
     color: var(--text-primary);
     cursor: pointer;
@@ -326,8 +334,8 @@
 
 .boat-modal-save {
     padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    border: none;
     background: var(--accent-color);
     color: var(--bg-primary);
     cursor: pointer;
@@ -407,3 +415,31 @@
     }
 }
 
+
+
+/* --- card polish (design system) --- */
+.boat-card:hover { box-shadow: var(--e2), var(--lit-edge); transform: translateY(-1px); }
+.boat-card .boat-icon .ic { width: 30px; height: 30px; }
+.boat-meta { display: flex; gap: var(--s-4); align-items: flex-start; }
+.boat-details { min-width: 0; flex: 1; }
+.boat-name { margin-bottom: var(--s-2); padding-right: 68px; }
+.boat-status-select {
+    width: 128px;
+    background-color: var(--surface-2);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A949B' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    text-overflow: ellipsis;
+}
+.boat-status-select:hover { background-color: var(--surface-3); }
+.boat-actions { position: absolute; top: var(--s-4); right: var(--s-4); display: flex; gap: 2px; }
+.boat-edit, .boat-delete {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border: none; border-radius: var(--r-sm);
+    background: transparent; color: var(--text-3); cursor: pointer;
+    transition: background-color 160ms var(--ease), color 160ms var(--ease);
+}
+.boat-edit:hover { background: var(--surface-2); color: var(--text); }
+.boat-delete:hover { background: var(--danger-tint); color: var(--danger-fg); }
+.boat-edit .ic, .boat-delete .ic { width: 16px; height: 16px; vertical-align: 0; }
+.boat-status-row { margin-top: var(--s-2); align-items: center; }
