@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->unsignedInteger('passenger_capacity')->nullable();
             $table->unsignedInteger('vehicle_capacity')->nullable();
-            $table->string('status')->default('Available');
+            $table->string('status')->default('Active');
             $table->timestamps();
         });
     }

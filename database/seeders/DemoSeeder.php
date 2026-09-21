@@ -27,7 +27,7 @@ class DemoSeeder extends Seeder
         $boats = [
             ['name' => 'MB Dinagat Star',   'boat_number' => 'SP-BOAT-1', 'license_number' => 'MARINA-2024-0011', 'passenger_capacity' => 30, 'status' => 'Active'],
             ['name' => 'MB Surigao Pearl',  'boat_number' => 'SP-BOAT-2', 'license_number' => 'MARINA-2024-0027', 'passenger_capacity' => 42, 'status' => 'Active'],
-            ['name' => 'MB Libjo Express',  'boat_number' => 'SP-BOAT-3', 'license_number' => 'MARINA-2023-0184', 'passenger_capacity' => 24, 'status' => 'Maintenance'],
+            ['name' => 'MB Libjo Express',  'boat_number' => 'SP-BOAT-3', 'license_number' => 'MARINA-2023-0184', 'passenger_capacity' => 24, 'status' => 'Under Maintenance'],
         ];
 
         foreach ($boats as $row) {
