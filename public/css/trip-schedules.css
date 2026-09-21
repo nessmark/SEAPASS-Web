@@ -391,7 +391,7 @@
 .seat-item.booked {
     background: var(--text-3);
     color: white;
-    border-color: #c2185b;
+    border-color: var(--danger);
     cursor: not-allowed;
 }
 
@@ -444,14 +444,14 @@
 
 .seat-map-legend-box.available {
     background: #ffffff;
-    border: 1.5px solid #64b5f6;
-    color: #1976d2;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
 }
 
 .seat-map-legend-box.booked {
-    background: #e0e0e0;
-    border: 1.5px solid #bdbdbd;
-    color: #757575;
+    background: var(--hairline);
+    border: 1.5px solid var(--text-3);
+    color: var(--text-2);
 }
 
 /* Cabin Outline for Schedule View Modal */
@@ -460,7 +460,7 @@
     margin: 0 auto;
     background: var(--card-bg, #ffffff);
     border-radius: 52px 52px 18px 18px;
-    border: 1.5px solid var(--border-color, #d0d7de);
+    border: 1.5px solid var(--border-color, var(--hairline));
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     padding: 16px 12px 18px 12px;
     display: flex;
@@ -474,15 +474,15 @@
     gap: 6px;
     padding: 4px 16px;
     border-radius: var(--r-lg);
-    background: var(--bg-secondary, #f1f5f9);
+    background: var(--bg-secondary, var(--surface-2));
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-secondary, #64748b);
+    color: var(--text-secondary, var(--text-2));
     letter-spacing: 1px;
 }
 
 .modal-vessel-bow .bow-arrow {
-    color: #00bfa5;
+    color: var(--accent);
     font-size: 12px;
     font-weight: bold;
 }
@@ -493,7 +493,7 @@
     width: 100%;
     font-size: 10px;
     font-weight: 700;
-    color: var(--text-secondary, #94a3b8);
+    color: var(--text-secondary, var(--text-3));
     margin-top: 12px;
     padding: 0 8px;
     letter-spacing: 0.5px;
@@ -502,7 +502,7 @@
 .modal-vessel-exit-divider {
     width: 100%;
     height: 1px;
-    background: var(--border-color, #e2e8f0);
+    background: var(--border-color, var(--hairline));
     margin: 6px 0 10px 0;
 }
 
@@ -530,7 +530,7 @@
     text-align: center;
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-secondary, #94a3b8);
+    color: var(--text-secondary, var(--text-3));
     user-select: none;
 }
 
@@ -549,28 +549,28 @@
 
 .modal-seat-box.available {
     background: var(--card-bg, #ffffff);
-    border: 1.5px solid #64b5f6;
-    color: #1976d2;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
 }
 
 .modal-seat-box.booked {
-    background: #e2e8f0;
-    border: 1.5px solid #cbd5e1;
-    color: #94a3b8;
+    background: var(--hairline);
+    border: 1.5px solid var(--text-3);
+    color: var(--text-3);
     cursor: not-allowed;
 }
 
 .modal-seat-box.booked .seat-x {
     font-size: 13px;
     font-weight: bold;
-    color: #94a3b8;
+    color: var(--text-3);
     line-height: 1;
 }
 
 .modal-vessel-stern {
     font-size: 10px;
     font-weight: 700;
-    color: var(--text-secondary, #94a3b8);
+    color: var(--text-secondary, var(--text-3));
     letter-spacing: 0.8px;
     margin-top: 12px;
     text-align: center;
@@ -597,7 +597,7 @@
 
 .seat-map-legend-box.booked {
     background: var(--text-3);
-    border-color: #c2185b;
+    border-color: var(--danger);
 }
 
 /* Responsive */
@@ -778,13 +778,13 @@
 }
 
 .badge-active-status.active {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--success-tint);
+    color: var(--success-fg);
 }
 
 .badge-active-status.inactive {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--danger-tint);
+    color: var(--danger-fg);
 }
 
 .action-btn-group {
@@ -820,15 +820,15 @@
 }
 
 .action-mini-btn.btn-toggle-deactivate {
-    background: #f59e0b;
+    background: var(--warning);
     color: white;
-    border-color: #f59e0b;
+    border-color: var(--warning);
 }
 
 .action-mini-btn.btn-toggle-activate {
-    background: #10b981;
+    background: var(--success);
     color: white;
-    border-color: #10b981;
+    border-color: var(--success);
 }
 
 .action-mini-btn.btn-delete-rule {

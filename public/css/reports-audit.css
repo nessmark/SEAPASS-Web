@@ -223,13 +223,13 @@
 
 .tag-student {
     background: var(--accent-tint);
-    color: #6B21A8;
+    color: var(--accent-strong);
     border: none;
 }
 
 .tag-senior {
     background: var(--warning-tint);
-    color: #92400E;
+    color: var(--warning-fg);
     border: none;
 }
 
@@ -341,7 +341,7 @@
 }
 
 .btn-export:hover {
-    background: #047857;
+    background: var(--success-fg);
     color: #ffffff;
 }
 
