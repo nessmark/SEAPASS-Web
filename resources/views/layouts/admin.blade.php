@@ -6,11 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Dashboard')</title>
     
-    {{-- Favicon / Tab Icon --}}
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/seapass_logo.png') }}">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/seapass_logo.png') }}">
+    @include('partials.head-icons')
     
     {{-- CSS Files --}}
     <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">

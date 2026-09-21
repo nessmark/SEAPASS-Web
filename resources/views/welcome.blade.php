@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in · SeaPass</title>
     
-    {{-- Favicon / Tab Icon --}}
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/seapass_logo.png') }}">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/seapass_logo.png') }}">
+    @include('partials.head-icons')
     <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -50,7 +46,7 @@
         .stage-mark {
             width: 58px; height: 58px;
             border-radius: var(--r-md);
-            background: rgba(255,255,255,.14) url('{{ asset("images/brand/seapass-logo.svg") }}') center/34px no-repeat;
+            background: rgba(255,255,255,.14) url('{{ asset("images/brand/mark-white.svg") }}') center/36px no-repeat;
             backdrop-filter: blur(8px);
             margin-bottom: var(--s-6);
         }

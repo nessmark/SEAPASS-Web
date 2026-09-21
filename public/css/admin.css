@@ -57,7 +57,7 @@ body {
     flex: 0 0 32px;
     height: 32px;
     border-radius: 9px;
-    background: var(--accent-tint) url("/images/brand/seapass-logo.svg") center/20px no-repeat;
+    background: url("/images/brand/icon.svg") center/cover no-repeat;
 }
 
 .nav-item {
