@@ -112,14 +112,14 @@
                                         <td>
                                             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                                                 @if($isVerificationRequired)
-                                                    <button type="button" class="btn-approve-booking-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" style="background: var(--success); color: #fff; border: none; font-weight: 600; padding: 7px 13px; border-radius: var(--r-sm); cursor: pointer; font-size: 12.5px;" title="Approve discounted ID and issue boarding pass QR">
+                                                    <button type="button" class="btn-approve-booking-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" title="Approve discounted ID and issue boarding pass QR">
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Approve
                                                     </button>
-                                                    <button type="button" class="btn-reject-refund-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" data-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}" style="background-color: #E5484D; color: #ffffff; border: none; font-weight: 600; padding: 6px 10px; border-radius: var(--r-sm); cursor: pointer; font-size: 12px;" title="Reject ID and automatically refund via PayMongo">
+                                                    <button type="button" class="btn-reject-refund-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" data-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}" title="Reject ID and automatically refund via PayMongo">
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg> Reject &amp; Refund
                                                     </button>
                                                 @else
-                                                    <button type="button" class="btn-confirm-booking-action" data-booking-id="{{ $booking->id }}" style="background-color: #1D8895; color: #FFFFFF; border: none; font-weight: 600; padding: 6px 12px; border-radius: var(--r-sm); cursor: pointer; font-size: 12px;">
+                                                    <button type="button" class="btn-confirm-booking-action" data-booking-id="{{ $booking->id }}">
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Confirm
                                                     </button>
                                                 @endif
@@ -127,7 +127,6 @@
                                                     class="ticket-status-select"
                                                     data-original-status="{{ $booking->status }}"
                                                     @if($booking->status !== 'pending' && $booking->status !== 'to_be_confirmed') disabled @endif
-                                                    style="padding: 4px 6px; font-size: 12px;"
                                                 >
                                                     <option value="pending" @selected($booking->status === 'pending')>Pending</option>
                                                     @if($booking->isToBeConfirmed())
@@ -288,7 +287,6 @@
                 <section class="ticket-section">
                     <div class="ticket-section-header">
                         <h2>Override / Counter Booking</h2>
-                        <p>Manually book tickets for walk‑in passengers paying with cash.</p>
                     </div>
 
                     <form class="ticket-form" id="ticketOverrideForm">
@@ -349,7 +347,6 @@
                                 <input type="hidden" id="ticket_trip_schedule_id">
                                 <input type="hidden" id="ticket_selected_seats">
                                 <small style="color: var(--text-2);">
-                                    Seat options come from the available seat map of the chosen boat and scheduled trip.
                                 </small>
                             </div>
                             <div class="ticket-field full-width">

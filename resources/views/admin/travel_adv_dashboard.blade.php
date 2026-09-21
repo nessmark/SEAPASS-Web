@@ -24,7 +24,6 @@
                 <section class="adv-section">
                     <div class="adv-section-header">
                         <h2>Create Advisory</h2>
-                        <p>Create and publish travel advisories for passengers and staff.</p>
                     </div>
 
                     <form class="adv-form" id="advisoryForm">
@@ -89,7 +88,6 @@
                 <section class="adv-section">
                     <div class="adv-section-header">
                         <h2>Manage Alerts</h2>
-                        <p>Send and track push notifications sent to the Passenger Mobile App.</p>
                     </div>
 
                     <div class="adv-filter-row">
@@ -116,7 +114,7 @@
                                 <th>Route</th>
                                 <th>Severity</th>
                                 <th>Status</th>
-                                <th>Push Status</th>
+                                <th>Delivery</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -128,10 +126,9 @@
                             </tr>
                         </tbody>
                     </table>
-                    <p class="adv-note">
-                        Note: Push notifications here represent calls to your future mobile API (for example Firebase Cloud Messaging)
-                        that you will integrate later in your thesis implementation.
-                    </p>
+                    {{-- Advisories currently go out as queued email (see AdvisoryMail); there is no
+                         FCM/push client in the Flutter app yet. The Delivery column reflects what the
+                         system actually does. Keep this note in the code, not on the screen. --}}
                 </section>
             </div>
         </div>
