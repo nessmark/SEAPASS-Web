@@ -1,7 +1,7 @@
-import {renderReply} from './assistant/reply.js';
-import {pageGuide} from './assistant/guides.js';
-import {downloadReportPdf} from './assistant/report.js';
-import {createMicCapture, createPlaybackQueue, AUDIO_INPUT_MIME_TYPE} from './assistant/audio.js';
+import {renderReply} from './assistant/reply.js?v=20261020-completion';
+import {pageGuide} from './assistant/guides.js?v=20261020-completion';
+import {downloadReportPdf} from './assistant/report.js?v=20261020-completion';
+import {createMicCapture, createPlaybackQueue, AUDIO_INPUT_MIME_TYPE} from './assistant/audio.js?v=20261020-completion';
 
 const panel=document.getElementById('sp-assistant');
 let embeddedConfig=null;
@@ -32,6 +32,7 @@ function init(){
  const save=()=>{try{localStorage.setItem(storageKey,JSON.stringify(chats.slice(0,20)));}catch{notice.textContent='Chat history could not be saved on this device.';}};
  const say=(text)=>{notice.textContent=text||'';};
  const state=text=>$('sp-assistant-state').textContent=text;
+ state('Trips, tickets and a little guidance');
  async function api(path,body){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);
   try{
