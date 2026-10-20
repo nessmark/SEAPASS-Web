@@ -13,7 +13,8 @@
         <div class="page-body">
             <div class="reports-container">
                 <div class="reports-header">
-                    <div class="card-title">Reports &amp; Audit</div>
+                    <h1 class="workspace-page-title">Reports &amp; Audit</h1>
+                    <p class="page-description">Reconcile sales, check capacity and follow operational activity.</p>
                 </div>
 
                 {{-- Sales Report Section --}}
@@ -97,7 +98,7 @@
                         </div>
                     </div>
 
-                    <table class="reports-table">
+                    <div class="workspace-table-scroll" role="region" aria-label="Scrollable report table" tabindex="0"><table class="reports-table">
                         <thead>
                             <tr>
                                 <th>Booking ID / Ref</th>
@@ -165,7 +166,7 @@
                                 </tr>
                             @endforelse
                         </tbody>
-                    </table>
+                    </table></div>
                 </section>
 
                 {{-- Passenger Count Report Section --}}
@@ -202,7 +203,7 @@
                         </div>
                     </div>
 
-                    <table class="reports-table">
+                    <div class="workspace-table-scroll" role="region" aria-label="Scrollable report table" tabindex="0"><table class="reports-table">
                         <thead>
                             <tr>
                                 <th>Departure Time</th>
@@ -243,7 +244,7 @@
                                 </tr>
                             @endforelse
                         </tbody>
-                    </table>
+                    </table></div>
                 </section>
 
                 {{-- Audit Log Section --}}

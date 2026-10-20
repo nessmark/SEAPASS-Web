@@ -93,6 +93,9 @@
         <p class="trip-note">{{ $schedule->notes }}</p>
     @endif
 
+    <a class="trip-action" href="{{ route('admin.trip-schedules.manifest', $schedule) }}?format=csv" title="Download confirmed passenger manifest as CSV">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 17v4h14v-4"/></svg> Passenger manifest
+    </a>
     @if($variant === 'scheduled')
         <div class="trip-card-actions">
             <button class="trip-action" type="button" onclick="viewSeatMap({{ $schedule->id }})">

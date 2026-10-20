@@ -15,7 +15,8 @@
         <div class="page-body">
             <div class="boats-header">
                 <div>
-                    <div class="card-title">Fleet Management</div>
+                    <h1 class="workspace-page-title">Fleet Management</h1>
+                    <p class="page-description">Vessels, capacity and availability for every sailing.</p>
                 </div>
 
                 <button class="boats-button" type="button" id="openBoatModal">Add Boat</button>

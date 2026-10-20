@@ -8,7 +8,6 @@
  * - Synchronized with database API
  */
 
-const STORAGE_KEY = 'seapass_travel_advisories_v2';
 let isSubmittingAdvisory = false;
 let lastSubmittedSignature = '';
 let lastSubmittedTimestamp = 0;
@@ -56,27 +55,22 @@ function statusBadge(status) {
 }
 
 function pushBadge(pushStatus) {
-    const s = String(pushStatus || '').toLowerCase();
-    if (s === 'sent') return '<span class="adv-badge adv-sent">Push Sent</span>';
-    if (s === 'pending') return '<span class="adv-badge adv-pending">Pending Push</span>';
-    return '<span class="adv-badge adv-none">Not Sent</span>';
+    const status = String(pushStatus || 'Not Sent');
+    const tone = status === 'Queued' ? 'adv-pending' : status === 'Failed' ? 'adv-critical' : status === 'Partial' ? 'adv-warning' : 'adv-none';
+    const label = status === 'Queued' ? 'Email queued' : status === 'Partial' ? 'Partly queued' : status === 'Sent' ? 'Previously sent' : status;
+    return `<span class="adv-badge ${tone}">${escapeHtml(label)}</span>`;
 }
 
-function loadAdvisories() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) return parsed;
-        }
-    } catch {
-        // Fallback
-    }
-    return [];
-}
+// The database owns advisory and delivery state; never restore stale browser records.
+let advisoryRecords = [];
+function loadAdvisories() { return advisoryRecords; }
+function saveAdvisories(items) { advisoryRecords = items; }
 
-function saveAdvisories(items) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+async function advisoryRequest(url, options = {}) {
+    const response = await fetch(url, { ...options, headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', ...options.headers } });
+    const data = await response.json();
+    if (!response.ok || data.success === false) throw new Error(data.message || Object.values(data.errors || {}).flat().join(' ') || 'The request could not be completed.');
+    return data;
 }
 
 function hideEmptyRowIfNeeded() {
@@ -96,13 +90,13 @@ function renderRow(item) {
     const actions = [];
     actions.push('<button class="adv-action-btn" data-action="view" title="View details"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>');
 
-    if (item.status === 'Published' && item.push_status === 'Pending') {
-        actions.push('<button class="adv-action-btn adv-send-push" data-action="send_push" title="Send push notification"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M11 18h2"/></svg></button>');
-    } else if (item.push_status === 'Sent') {
+    if (item.status === 'Published' && !['Queued', 'Sent'].includes(item.push_status)) {
+        actions.push('<button class="adv-action-btn adv-send-push" data-action="send_push" title="Send passenger notification"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M11 18h2"/></svg></button>');
+    } else if (['Queued', 'Sent'].includes(item.push_status)) {
         actions.push('<button class="adv-action-btn" data-action="sent" title="Notification already sent" disabled style="opacity: 0.45; cursor: not-allowed;"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M11 18h2"/></svg></button>');
     }
 
-    actions.push('<button class="adv-action-btn" data-action="archive" title="Archive advisory"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>');
+    if (item.status !== 'Archived') actions.push('<button class="adv-action-btn" data-action="archive" title="Archive advisory"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>');
 
     return `
         <tr data-adv-id="${id}">
@@ -194,7 +188,7 @@ function addAdvisory(status) {
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    fetch('/admin/travel-advisory', {
+    advisoryRequest('/admin/travel-advisory', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -213,14 +207,12 @@ function addAdvisory(status) {
             publish_push: publishPush
         })
     })
-    .then(res => res.json())
     .then(data => {
         lastSubmittedSignature = currentSignature;
         lastSubmittedTimestamp = Date.now();
 
-        const id = data.advisory ? data.advisory.id : `${Date.now()}`;
-        // If publishPush was checked upon publish, push is already sent on backend
-        const pushStatus = (status === 'Published' && publishPush) ? 'Sent' : (data.push_status || 'Not Sent');
+        const id = data.advisory?.id;
+        const pushStatus = data.push_status || 'Not Sent';
 
         const advisories = loadAdvisories();
         // Check if an entry with this title already exists to avoid duplicate rows
@@ -246,7 +238,7 @@ function addAdvisory(status) {
         }
 
         saveAdvisories(advisories);
-        renderTable();
+        syncWithDatabase();
         document.getElementById('advisoryForm')?.reset();
         const publishPushCheckbox = document.getElementById('adv_publish_push');
         if (publishPushCheckbox) publishPushCheckbox.checked = true;
@@ -257,7 +249,7 @@ function addAdvisory(status) {
     })
     .catch(err => {
         console.error('Error submitting advisory:', err);
-        alert('Could not publish advisory. Please try again.');
+        alert(err.message || 'Could not save advisory. Please try again.');
     })
     .finally(() => {
         setTimeout(() => {
@@ -325,28 +317,20 @@ function closeAdvisoryModal() {
 }
 
 function syncWithDatabase() {
-    fetch('/api/advisories')
-        .then(res => res.json())
+    return advisoryRequest('/admin/travel-advisory/list')
         .then(res => {
-            if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-                const dbItems = res.data.map(item => ({
-                    id: item.id,
-                    title: item.title,
-                    type: item.type || 'General Advisory',
-                    route: item.route || 'All Routes',
-                    effectiveFrom: item.effective_from || '',
-                    until: item.until || '',
-                    severity: item.severity || 'Information',
-                    status: 'Published',
-                    push_status: 'Sent',
-                    message: item.content ? item.content.replace(/<[^>]*>?/gm, '').trim() : '',
-                    created_at: item.published_at || item.created_at || new Date().toISOString(),
-                }));
-                saveAdvisories(dbItems);
-                renderTable();
-            }
+            saveAdvisories((res.data || []).map(item => ({ ...item,
+                effectiveFrom: item.effective_from || '',
+                message: item.message || '',
+                push_status: item.push_status || 'Not Sent'
+            })));
+            renderTable();
         })
-        .catch(e => console.log('Advisory background sync note:', e));
+        .catch(error => {
+            const empty = document.getElementById('advEmptyRow');
+            if (empty) empty.querySelector('td').textContent = 'Could not load advisories. Refresh the page to try again.';
+            console.error('Could not load advisories', error);
+        });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -399,55 +383,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const action = btn.getAttribute('data-action');
         if (action === 'send_push') {
-            if (btn.disabled || btn.classList.contains('is-busy')) return;
-
-            const advisories = loadAdvisories();
-            const item = advisories.find(a => String(a.id) === String(id));
-
-            if (item && item.push_status === 'Sent') {
-                alert('This advisory notification has already been broadcasted.');
-                btn.disabled = true;
-                return;
-            }
-
+            if (btn.disabled) return;
+            if (!confirm('Send this advisory to registered passengers?')) return;
             btn.disabled = true;
-            btn.classList.add('is-busy');
             const originalIcon = btn.innerHTML;
-            btn.innerHTML = '⏳';
-
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-            fetch('/admin/travel-advisory/send-push', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                },
-                body: JSON.stringify(item || { id })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    updateAdvisory(id, { push_status: 'Sent' });
-                    alert(data.message || 'Advisory successfully broadcasted to registered users!');
-                } else {
-                    alert('Advisory notification notice: ' + (data.message || 'Already processed'));
-                    btn.disabled = false;
-                    btn.innerHTML = originalIcon;
-                }
-            })
-            .catch(() => {
-                updateAdvisory(id, { push_status: 'Sent' });
-            })
-            .finally(() => {
-                btn.classList.remove('is-busy');
-            });
+            btn.textContent = 'Sending…';
+            advisoryRequest('/admin/travel-advisory/send-push', { method: 'POST', body: JSON.stringify({ id }) })
+                .then(data => { updateAdvisory(id, { push_status: data.push_status || 'Not Sent' }); })
+                .catch(error => { alert(error.message); })
+                .finally(() => { btn.disabled = false; btn.innerHTML = originalIcon; });
             return;
         }
 
         if (action === 'archive') {
-            updateAdvisory(id, { status: 'Archived' });
+            if (!confirm('Archive this advisory and remove it from passenger updates?')) return;
+            btn.disabled = true;
+            advisoryRequest(`/admin/travel-advisory/${encodeURIComponent(id)}/archive`, { method: 'PATCH' })
+                .then(() => { updateAdvisory(id, { status: 'Archived' }); })
+                .catch(error => { alert(error.message); btn.disabled = false; });
             return;
         }
 

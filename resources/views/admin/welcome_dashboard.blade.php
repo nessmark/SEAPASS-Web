@@ -1,475 +1,93 @@
 @extends('layouts.admin')
-
-@section('title', 'Admin Dashboard')
-
+@section('title', 'Overview')
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <style>
-        /* Page header — a title block, not a coloured banner (DESIGN-SYSTEM.md §0.2) */
-        .command-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: var(--s-4);
-            margin-bottom: var(--s-7);
-        }
-        .command-title {
-            font-size: 30px;
-            font-weight: 600;
-            letter-spacing: -0.022em;
-            color: var(--text);
-            margin: 0 0 4px;
-        }
-        .command-subtitle {
-            font-size: 15px;
-            color: var(--text-2);
-            margin: 0;
-            max-width: 62ch;
-        }
-        .command-actions { display: flex; gap: var(--s-2); flex-shrink: 0; }
-
-        .cmd-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--s-2);
-            height: 40px;
-            padding: 0 var(--s-4);
-            border: none;
-            border-radius: var(--r-md);
-            background: var(--accent);
-            color: var(--on-accent);
-            font-weight: 600;
-            font-size: 14.5px;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background-color 160ms var(--ease), transform 120ms var(--ease);
-        }
-        .cmd-btn:hover { background: var(--accent-strong); color: var(--on-accent); }
-        .cmd-btn:active { transform: scale(.98); }
-        .cmd-btn svg { width: 17px; height: 17px; }
-
-        .cmd-btn-secondary { background: var(--accent-tint); color: var(--accent-strong); }
-        .cmd-btn-secondary:hover { background: var(--accent-tint); filter: brightness(1.08); color: var(--accent-strong); }
-
-        /* KPI tiles */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: var(--s-4);
-            margin-bottom: var(--s-6);
-        }
-        .kpi-card {
-            background: var(--surface);
-            border: none;
-            padding: var(--s-5) var(--s-5) var(--s-5) var(--s-6);
-            border-radius: var(--r-lg);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--s-4);
-            box-shadow: var(--e1), var(--lit-edge);
-            transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
-        }
-        .kpi-card:hover { box-shadow: var(--e2), var(--lit-edge); transform: translateY(-1px); }
-        .kpi-info-label {
-            font-size: 11.5px;
-            font-weight: 600;
-            color: var(--text-3);
-            text-transform: uppercase;
-            letter-spacing: 0.045em;
-            margin-bottom: 8px;
-        }
-        .kpi-info-value {
-            font-size: 32px;
-            font-weight: 600;
-            letter-spacing: -0.025em;
-            color: var(--text);
-            font-variant-numeric: tabular-nums;
-            line-height: 1.1;
-        }
-        .kpi-subtext {
-            font-size: 12.5px;
-            color: var(--text-2);
-            margin-top: 6px;
-            font-weight: 500;
-        }
-        .kpi-icon-box {
-            width: 36px;
-            height: 36px;
-            flex-shrink: 0;
-            border-radius: var(--r-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--accent-tint);
-            color: var(--accent-strong);
-        }
-        .kpi-icon-box svg { width: 19px; height: 19px; }
-        /* one accent: the old blue/teal/purple/amber boxes all resolve to the brand tint */
-        .kpi-icon-blue, .kpi-icon-teal, .kpi-icon-purple, .kpi-icon-amber {
-            background: var(--accent-tint);
-            color: var(--accent-strong);
-        }
-
-        /* Fleet */
-        .fleet-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: var(--s-3);
-        }
-        .boat-mini-card {
-            background: var(--surface-2);
-            border: none;
-            border-radius: var(--r-md);
-            padding: var(--s-4);
-            display: flex;
-            align-items: center;
-            gap: var(--s-3);
-            transition: background-color 160ms var(--ease);
-        }
-        .boat-mini-card:hover { background: var(--accent-tint-2); }
-        .boat-avatar {
-            width: 42px;
-            height: 42px;
-            flex-shrink: 0;
-            border-radius: var(--r-sm);
-            background: var(--accent-tint);
-            color: var(--accent-strong);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .boat-avatar svg { width: 21px; height: 21px; }
-        .boat-info-title {
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            color: var(--text);
-            margin: 0 0 2px 0;
-        }
-        .boat-info-meta { font-size: 12.5px; color: var(--text-2); }
-
-        /* Booking table cells */
-        .cell-ref, .cell-route { white-space: nowrap; }
-        .cell-ref strong { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
-        .cat-chip {
-            display: inline-block;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-2);
-            background: var(--surface-2);
-            padding: 3px 9px;
-            border-radius: var(--r-pill);
-            white-space: nowrap;
-        }
-
-        /* Status pills */
-        .badge-active, .badge-maintenance, .status-badge-sm {
-            display: inline-flex;
-            align-items: center;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: var(--r-pill);
-        }
-        .badge-active   { background: var(--success-tint); color: var(--success-fg); }
-        .badge-maintenance { background: var(--warning-tint); color: var(--warning-fg); }
-        .status-confirmed { background: var(--success-tint); color: var(--success-fg); }
-        .status-pending   { background: var(--warning-tint); color: var(--warning-fg); }
-        .status-cancelled { background: var(--danger-tint);  color: var(--danger-fg); }
-
-        @media (max-width: 1024px) {
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 640px) {
-            .kpi-grid { grid-template-columns: 1fr; }
-            .command-header { flex-direction: column; align-items: flex-start; gap: var(--s-4); }
-            .command-actions { width: 100%; }
-            .cmd-btn { flex: 1; justify-content: center; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/overview.css') }}?v=20261020">
 @endpush
-
 @section('content')
-    <!-- Command Header -->
-    <div class="command-header">
+    @php
+        $portNow = \Carbon\Carbon::now('Asia/Manila');
+        $reviewCount = $pendingReviewCount ?? 0;
+        $paymentCount = $pendingPaymentCount ?? 0;
+    @endphp
+    <div class="workspace-heading">
         <div>
-            <h1 class="command-title">SeaPass Port Command Center</h1>
+            <p class="page-eyebrow">{{ $portNow->format('l, j F Y') }}</p>
+            <h1>Port overview</h1>
+            <p class="page-description">The day's departures, passenger bookings and updates in one place.</p>
         </div>
-        <div class="command-actions">
-            <a href="{{ route('admin.tickets.index') }}" class="cmd-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2.5 2.5 0 0 0 0 5 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2.5 2.5 0 0 0 0-5z"/><path d="M14 8v8" stroke-dasharray="2 3"/></svg> Counter Booking
-            </a>
-            <a href="{{ route('admin.travel-advisory') }}" class="cmd-btn cmd-btn-secondary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4a1 1 0 0 0 1 1h3l5 4V5L8 9H5a1 1 0 0 0-1 1z"/><path d="M17.5 9a4 4 0 0 1 0 6"/></svg> Dispatch Advisory
-            </a>
-        </div>
+        <a href="{{ route('admin.tickets.index') }}" class="btn-primary">Open booking counter <span aria-hidden="true">↗</span></a>
     </div>
 
-    <!-- 1. KPI Summary Cards Grid -->
-    <div class="kpi-grid">
-        <div class="kpi-card">
-            <div>
-                <div class="kpi-info-label">Today's Revenue</div>
-                <div class="kpi-info-value" style="color: var(--text);">₱{{ number_format($todayRevenue ?? 0, 2) }}</div>
-                <div class="kpi-subtext">Total Sales: ₱{{ number_format($totalSalesAllTime ?? 0, 2) }}</div>
-            </div>
-            <div class="kpi-icon-box kpi-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20V5h5.5a4 4 0 0 1 0 8H7"/><path d="M5 9h9M5 12h9"/></svg></div>
+    <div class="port-overview">
+        <div class="overview-primary">
+            <section class="operation-panel" id="needs-attention" aria-labelledby="attention-heading">
+                <div class="operation-panel-heading"><h2 id="attention-heading">Things to do</h2><span class="section-note">Start here</span></div>
+                <a class="operation-row" href="{{ route('admin.tickets.index') }}?tab=pending">
+                    <span class="operation-symbol"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M8 12h8M8 16h5"/></svg></span>
+                    <span class="operation-copy"><strong>Review passenger bookings</strong><small>{{ $reviewCount > 0 ? $reviewCount.' paid booking'.($reviewCount === 1 ? '' : 's').' awaiting discount ID verification.' : 'Check pending bookings and verify student, senior or PWD IDs.' }}</small></span>
+                    <span class="row-end">{{ $reviewCount > 0 ? $reviewCount.' to review' : 'Review' }} <span aria-hidden="true">›</span></span>
+                </a>
+                <a class="operation-row" href="{{ route('admin.trip-schedules') }}">
+                    <span class="operation-symbol"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span>
+                    <span class="operation-copy"><strong>Prepare today's departures</strong><small>{{ $tripsTodayCount ?? 0 }} scheduled today. Check seat availability and download passenger manifests.</small></span>
+                    <span class="row-end">Schedules <span aria-hidden="true">›</span></span>
+                </a>
+                <a class="operation-row" href="{{ route('admin.travel-advisory') }}">
+                    <span class="operation-symbol"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9v6h4l6 4V5L8 9H4zM18 8a6 6 0 0 1 0 8"/></svg></span>
+                    <span class="operation-copy"><strong>Keep passengers informed</strong><small>Publish weather, route or sailing changes before passengers leave for the port.</small></span>
+                    <span class="row-end">Advisories <span aria-hidden="true">›</span></span>
+                </a>
+            </section>
+
+            <section class="operation-panel" id="upcoming-departures" aria-labelledby="departures-heading">
+                <div class="operation-panel-heading"><div><h2 id="departures-heading">Upcoming departures</h2><p>Next sailings, in departure order</p></div><a class="text-action" href="{{ route('admin.trip-schedules') }}">All trips <span aria-hidden="true">›</span></a></div>
+                @forelse($upcomingTrips ?? [] as $trip)
+                    <div class="departure-row">
+                        <div class="departure-time"><strong>{{ \Carbon\Carbon::parse($trip->departure_time)->format('g:i') }}<small>{{ \Carbon\Carbon::parse($trip->departure_time)->format('A') }}</small></strong><span>{{ \Carbon\Carbon::parse($trip->departure_time)->format('M j') }}</span></div>
+                        <div class="departure-copy"><strong>{{ $trip->route }}</strong><small>{{ $trip->boat?->name ?? 'Vessel pending' }} <span aria-hidden="true">·</span> {{ ucfirst($trip->status) }}</small></div>
+                        <a class="text-action manifest-link" href="{{ url('/admin/trip-schedules/'.$trip->id.'/manifest') }}?format=csv">Manifest <span aria-hidden="true">↓</span></a>
+                    </div>
+                @empty
+                    <div class="panel-empty"><strong>No upcoming departures</strong><p>New sailings will appear here once they are scheduled.</p><a class="text-action" href="{{ route('admin.trip-schedules') }}">Manage schedules <span aria-hidden="true">›</span></a></div>
+                @endforelse
+            </section>
+
+            <section class="operation-panel" id="recent-bookings" aria-labelledby="bookings-heading">
+                <div class="operation-panel-heading"><h2 id="bookings-heading">Recent bookings</h2><a class="text-action" href="{{ route('admin.tickets.index') }}">View all <span aria-hidden="true">›</span></a></div>
+                <div class="overview-booking-table"><table><thead><tr><th>Passenger / reference</th><th>Journey</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+                @forelse($recentBookings ?? [] as $booking)
+                    @php $bookingStatus = strtolower($booking->status); $statusType = match($bookingStatus) { 'confirmed', 'completed', 'approved', 'paid' => 'success', 'pending', 'to_be_confirmed', 'awaiting_payment' => 'warning', 'cancelled', 'refunded', 'failed' => 'danger', default => 'info' }; @endphp
+                    <tr><td data-label="Passenger"><strong>{{ $booking->passenger_name }}</strong><small>{{ $booking->reference_number ?: ('SP'.$booking->id) }}</small></td><td data-label="Journey">{{ $booking->route }}<small>{{ optional($booking->trip_date)->format('M j, Y') }}</small></td><td data-label="Amount" class="numeric">₱{{ number_format((float)$booking->amount_collected, 2) }}</td><td data-label="Status"><span class="badge {{ $statusType }}">{{ $bookingStatus === 'to_be_confirmed' ? 'ID review' : ucfirst(str_replace('_', ' ', $booking->status)) }}</span></td></tr>
+                @empty
+                    <tr><td colspan="4"><div class="panel-empty">No bookings yet. Passenger and counter bookings appear here.</div></td></tr>
+                @endforelse
+                </tbody></table></div>
+            </section>
         </div>
 
-        <div class="kpi-card">
-            <div>
-                <div class="kpi-info-label">Active Fleet</div>
-                <div class="kpi-info-value">{{ $activeBoatsCount ?? 0 }} / {{ $totalBoatsCount ?? 0 }}</div>
-                <div class="kpi-subtext">Operational Boats</div>
-            </div>
-            <div class="kpi-icon-box kpi-icon-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5c1.5 1 2.5 1 4 0s2.5-1 4 0 2.5 1 4 0 2.5-1 4 0"/><path d="M5 15V9.5a1 1 0 0 1 .6-.92l5.8-2.5a1 1 0 0 1 .8 0l5.8 2.5a1 1 0 0 1 .6.92V15"/><path d="M12 6V3"/></svg></div>
-        </div>
-
-        <div class="kpi-card">
-            <div>
-                <div class="kpi-info-label">Trips Scheduled</div>
-                <div class="kpi-info-value">{{ $tripsTodayCount ?? 0 }}</div>
-                <div class="kpi-subtext">Total Schedules: {{ $totalSchedulesCount ?? 0 }}</div>
-            </div>
-            <div class="kpi-icon-box kpi-icon-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></div>
-        </div>
-
-        <div class="kpi-card">
-            <div>
-                <div class="kpi-info-label">Passengers</div>
-                <div class="kpi-info-value">{{ $totalPassengersCount ?? 0 }}</div>
-                <div class="kpi-subtext">Registered Users</div>
-            </div>
-            <div class="kpi-icon-box kpi-icon-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/><circle cx="10" cy="8" r="3.2"/><path d="M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4"/><path d="M15.5 5.2a3.2 3.2 0 0 1 0 5.6"/></svg></div>
-        </div>
-    </div>
-
-    <!-- 2. Main Operational Grid -->
-    <div class="dashboard-grid">
-        <!-- Live Recent Bookings Table -->
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div>
-                    <div class="card-title" style="margin-bottom: 4px;">Recent Booking Activity</div>
-                </div>
-                <a href="{{ route('admin.tickets.index') }}" style="font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none;">View All →</a>
-            </div>
-
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Ref #</th>
-                        <th>Passenger</th>
-                        <th>Route</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($recentBookings ?? [] as $booking)
-                        <tr>
-                            <td class="cell-ref"><strong>{{ $booking->reference_number ?: ('SP' . $booking->id) }}</strong></td>
-                            <td>{{ $booking->passenger_name }}</td>
-                            <td class="cell-route">{{ $booking->route }}</td>
-                            <td>
-                                @php $bd = $booking->passenger_breakdown; @endphp
-                                @foreach(['regular' => 'Regular', 'student' => 'Student', 'senior' => 'Senior/PWD'] as $key => $label)
-                                    @if(($bd[$key] ?? 0) > 0)
-                                        <span class="cat-chip">{{ $bd[$key] }} {{ $label }}</span>
-                                    @endif
-                                @endforeach
-                            </td>
-                            <td><strong style="color: var(--text);">₱{{ number_format((float)$booking->amount_collected, 2) }}</strong></td>
-                            <td>
-                                @if(in_array(strtolower($booking->status), ['confirmed', 'completed', 'approved']))
-                                    <span class="status-badge-sm status-confirmed">Confirmed</span>
-                                @elseif(in_array(strtolower($booking->status), ['pending', 'to_be_confirmed']))
-                                    <span class="status-badge-sm status-pending">Pending</span>
-                                @else
-                                    <span class="status-badge-sm status-cancelled">Cancelled</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-2);">No recent bookings recorded.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Weekly Revenue Analytics Chart -->
-        <div class="card">
-            <div class="card-title" style="margin-bottom: 4px;">Weekly Revenue Trend</div>
-            <div class="chart-container">
-                <canvas id="weeklyRevenueChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. Fleet & Security Grid -->
-    <div class="dashboard-grid">
-        <!-- Active Vessel Fleet -->
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div>
-                    <div class="card-title" style="margin-bottom: 4px;">Active Vessel Fleet</div>
-                </div>
-                <a href="{{ route('admin.boats') }}" style="font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none;">Manage Fleet →</a>
-            </div>
-
-            <div class="fleet-grid">
+        <aside class="overview-secondary" aria-label="Port context">
+            <section class="operation-panel port-day-summary">
+                <div class="operation-panel-heading"><h2>Today at the port</h2><span class="today-dot" aria-hidden="true"></span></div>
+                <div class="day-revenue"><span>Collected today</span><strong>₱{{ number_format($todayRevenue ?? 0, 2) }}</strong><a class="text-action" href="{{ route('admin.reports-audit') }}">View sales report <span aria-hidden="true">›</span></a></div>
+                <dl class="port-facts"><div><dt>Departures today</dt><dd>{{ $tripsTodayCount ?? 0 }}</dd></div><div><dt>Active vessels</dt><dd>{{ $activeBoatsCount ?? 0 }} <span>/ {{ $totalBoatsCount ?? 0 }}</span></dd></div><div><dt>Awaiting payment</dt><dd>{{ $paymentCount }}</dd></div></dl>
+            </section>
+            <section class="operation-panel" aria-labelledby="fleet-heading">
+                <div class="operation-panel-heading"><h2 id="fleet-heading">Your fleet</h2><a class="text-action" href="{{ route('admin.boats') }}">Manage <span aria-hidden="true">›</span></a></div>
                 @forelse($boats ?? [] as $boat)
-                    <div class="boat-mini-card">
-                        <div class="boat-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5c1.5 1 2.5 1 4 0s2.5-1 4 0 2.5 1 4 0 2.5-1 4 0"/><path d="M5 15V9.5a1 1 0 0 1 .6-.92l5.8-2.5a1 1 0 0 1 .8 0l5.8 2.5a1 1 0 0 1 .6.92V15"/><path d="M12 6V3"/></svg></div>
-                        <div style="flex: 1;">
-                            <div class="boat-info-title">{{ $boat->name }}</div>
-                            <div class="boat-info-meta">
-                                Capacity: <strong>{{ $boat->passenger_capacity }} passengers</strong>
-                            </div>
-                            <div class="boat-info-meta">
-                                Lic: {{ $boat->license_number ?: 'SP-BOAT-' . $boat->id }}
-                            </div>
-                        </div>
-                        <div>
-                            @if(strtolower($boat->status) === 'active')
-                                <span class="badge-active">Active</span>
-                            @else
-                                <span class="badge-maintenance">{{ $boat->status }}</span>
-                            @endif
-                        </div>
-                    </div>
+                    <a class="context-row" href="{{ route('admin.boats') }}"><span class="vessel-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 12 8-3 8 3-3 6H7l-3-6ZM7 11V6h10v5M12 6V3M3 21c2-2 4 2 6 0s4 2 6 0 4 2 6 0"/></svg></span><span class="context-copy"><strong>{{ $boat->name }}</strong><small>{{ $boat->passenger_capacity }} passenger capacity</small></span><span class="state-dot {{ strtolower($boat->status) === 'active' ? 'is-active' : '' }}" title="{{ $boat->status }}"></span><span class="sr-only">{{ $boat->status }}</span></a>
                 @empty
-                    <div style="padding: 16px; color: var(--text-2);">No registered boats in the fleet.</div>
+                    <div class="panel-empty">No vessels registered.</div>
                 @endforelse
-            </div>
-        </div>
-
-        <!-- Active Advisories & Audit Stream -->
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div>
-                    <div class="card-title" style="margin-bottom: 4px;">Recent Advisories &amp; System Activity</div>
-                </div>
-                <a href="{{ route('admin.reports-audit') }}" style="font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none;">Audit Log →</a>
-            </div>
-
-            <!-- Advisories List -->
-            <div style="margin-bottom: 16px;">
+            </section>
+            <section class="operation-panel" aria-labelledby="updates-heading">
+                <div class="operation-panel-heading"><h2 id="updates-heading">Port updates</h2><a class="text-action" href="{{ route('admin.travel-advisory') }}">View all <span aria-hidden="true">›</span></a></div>
                 @forelse($activeAdvisories ?? [] as $adv)
-                    <div style="background: var(--bg-primary); border-left: 4px solid var(--accent); padding: 10px 14px; border-radius: var(--r-sm); margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="font-size: 13px; color: var(--text);">{{ $adv->title }}</strong>
-                            <span style="font-size: 11px; color: var(--text-2);">{{ $adv->created_at->diffForHumans() }}</span>
-                        </div>
-                        <p style="font-size: 12px; color: var(--text-2); margin: 4px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            {{ $adv->message }}
-                        </p>
-                    </div>
+                    <a class="update-row" href="{{ route('admin.travel-advisory') }}"><small>{{ $adv->created_at->diffForHumans() }}</small><strong>{{ $adv->title }}</strong><p>{{ \Illuminate\Support\Str::limit($adv->message, 105) }}</p></a>
                 @empty
-                    <div style="font-size: 13px; color: var(--text-2);">No active advisories broadcasted.</div>
+                    <div class="panel-empty"><strong>No port updates</strong><p>Published travel advisories will appear here.</p></div>
                 @endforelse
-            </div>
-
-            <!-- Recent Audit Trail -->
-            <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
-                <div style="font-size: 12px; font-weight: 600; color: var(--text-2); text-transform: uppercase; margin-bottom: 8px;">Latest Activity Log</div>
-                @forelse($recentAuditLogs ?? [] as $log)
-                    <div style="font-size: 12.5px; padding: 6px 0; border-bottom: 1px dashed var(--border-color); color: var(--text); display: flex; justify-content: space-between;">
-                        <span><strong>{{ $log->action }}</strong>: {{ \Illuminate\Support\Str::limit($log->details, 45) }}</span>
-                        <span style="font-size: 11px; color: var(--text-2);">{{ $log->created_at->diffForHumans() }}</span>
-                    </div>
-                @empty
-                    <div style="font-size: 12px; color: var(--text-2);">No audit logs recorded yet.</div>
-                @endforelse
-            </div>
-        </div>
+            </section>
+            <a class="audit-shortcut" href="{{ route('admin.reports-audit') }}">View reports &amp; activity log <span aria-hidden="true">↗</span></a>
+        </aside>
     </div>
 @endsection
-
-@push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Light mode is declared on body.light-mode, dark on :root — read body first.
-            const css = (name) => getComputedStyle(document.body).getPropertyValue(name).trim()
-                || getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-            const ctx = document.getElementById('weeklyRevenueChart');
-            if (ctx) {
-                const weeklyData = @json($weeklyData ?? []);
-                const labels = weeklyData.map(item => item.day);
-                const revenues = weeklyData.map(item => item.revenue);
-
-                const chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Sales Revenue (₱)',
-                            data: revenues,
-                            backgroundColor: css('--accent'),
-                            hoverBackgroundColor: css('--accent-strong'),
-                            borderWidth: 0,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                            maxBarThickness: 44,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: { duration: 420, easing: 'easeOutQuart' },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: css('--surface-3'),
-                                titleColor: css('--text'),
-                                bodyColor: css('--text-2'),
-                                padding: 10,
-                                cornerRadius: 10,
-                                displayColors: false,
-                                callbacks: {
-                                    label: (c) => '₱' + Number(c.parsed.y).toLocaleString('en-PH', { minimumFractionDigits: 2 })
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { display: false, drawBorder: false },
-                                ticks: { color: css('--text-3'), font: { size: 11.5 } }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                border: { display: false },
-                                grid: { color: css('--chart-grid'), drawTicks: false },
-                                ticks: {
-                                    color: css('--text-3'),
-                                    font: { size: 11.5 },
-                                    padding: 10,
-                                    maxTicksLimit: 5,
-                                    callback: (value) => '₱' + Number(value).toLocaleString('en-PH')
-                                }
-                            }
-                        }
-                    }
-                });
-
-                window.addEventListener('themeChanged', () => {
-                    const ds = chart.data.datasets[0];
-                    ds.backgroundColor = css('--accent');
-                    ds.hoverBackgroundColor = css('--accent-strong');
-                    chart.options.scales.x.ticks.color = css('--text-3');
-                    chart.options.scales.y.ticks.color = css('--text-3');
-                    chart.options.scales.y.grid.color = css('--chart-grid');
-                    chart.options.plugins.tooltip.backgroundColor = css('--surface-3');
-                    chart.options.plugins.tooltip.titleColor = css('--text');
-                    chart.options.plugins.tooltip.bodyColor = css('--text-2');
-                    chart.update('none');
-                });
-            }
-        });
-    </script>
-@endpush

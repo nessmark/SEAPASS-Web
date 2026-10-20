@@ -1,0 +1,63 @@
+/* The port's work leads. Summary numbers support the work in a quieter column. */
+.port-overview { display:grid;grid-template-columns:minmax(0,1.8fr) minmax(290px,1fr);gap:28px;align-items:start; }
+.overview-primary,.overview-secondary { display:grid;gap:24px;min-width:0; }
+.operation-panel { background:var(--surface);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--lit-edge); }
+.operation-panel-heading { display:flex;align-items:center;justify-content:space-between;gap:16px;padding:23px 24px; }
+.operation-panel-heading h2 { font-size:18px;font-weight:600;letter-spacing:-.025em;line-height:1.35;margin:0;color:var(--text); }
+.operation-panel-heading p { color:var(--text-2);font-size:13px;margin:4px 0 0; }
+.section-note { font-size:12px;color:var(--text-2); }
+.operation-row { display:flex;align-items:center;gap:16px;padding:23px 24px;border-top:1px solid var(--hairline);text-decoration:none;transition:background 140ms; }
+.operation-row:hover,.context-row:hover,.update-row:hover { background:var(--surface-2); }
+.operation-symbol { flex:0 0 44px;width:44px;height:44px;background:var(--accent-tint-2);border-radius:12px;color:var(--accent-strong);display:grid;place-items:center; }
+.operation-symbol .ic { width:23px;height:23px; }
+.operation-copy { flex:1;min-width:0; }
+.operation-copy strong,.context-copy strong { display:block;color:var(--text);font-size:14.5px;font-weight:550; }
+.operation-copy small { display:block;color:var(--text-2);font-size:13px;line-height:1.55;margin-top:3px;max-width:60ch; }
+.row-end { display:flex;align-items:center;gap:12px;color:var(--text-2);font-size:12px;flex-shrink:0; }
+.row-end span { font-size:23px;font-weight:400; }
+.text-action { font-size:13px;color:var(--accent-strong);text-decoration:none;font-weight:550;white-space:nowrap; }
+.text-action:hover { text-decoration:underline;text-underline-offset:4px; }
+.text-action span { margin-left:5px; }
+.departure-row { display:flex;align-items:center;gap:20px;padding:18px 24px;border-top:1px solid var(--hairline); }
+.departure-time { flex:0 0 68px; }
+.departure-time strong { color:var(--text);display:block;font-size:19px;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums; }
+.departure-time strong small { font-size:11px;margin-left:4px;font-weight:500; }
+.departure-time>span { font-size:12px;color:var(--text-2); }
+.departure-copy { min-width:0;flex:1; }
+.departure-copy>strong { font-size:14px;font-weight:550;display:block;color:var(--text); }
+.departure-copy>small { display:block;margin-top:3px;font-size:12px;color:var(--text-2); }
+.panel-empty { padding:24px;color:var(--text-2);font-size:13px;line-height:1.6; }
+.panel-empty strong { font-size:14px;font-weight:550;color:var(--text); }
+.panel-empty p { margin:4px 0 12px; }
+.day-revenue { padding:0 24px 24px; }
+.day-revenue>span { font-size:13px;color:var(--text-2); }
+.day-revenue strong { display:block;color:var(--text);font-size:34px;line-height:1.25;font-weight:600;letter-spacing:-.035em;margin:6px 0 12px;font-variant-numeric:tabular-nums; }
+.today-dot,.state-dot { width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--text-3); }
+.today-dot,.state-dot.is-active { background:var(--success); }
+.port-facts { padding:0 24px 12px; }
+.port-facts>div { display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--hairline); }
+.port-facts dt { color:var(--text-2);font-size:13px; }
+.port-facts dd { color:var(--text);font-size:14px;font-weight:550;font-variant-numeric:tabular-nums; }
+.port-facts dd span { color:var(--text-3);font-weight:400; }
+.context-row { display:flex;align-items:center;gap:12px;padding:18px 24px;border-top:1px solid var(--hairline);text-decoration:none; }
+.context-copy { flex:1;min-width:0; }
+.context-copy strong { font-size:13px; }
+.context-copy small { display:block;font-size:12px;color:var(--text-2);margin-top:3px; }
+.vessel-mark { display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--surface-2);color:var(--text-2);flex-shrink:0; }
+.vessel-mark svg { width:22px;height:22px; }
+.update-row { display:block;padding:18px 24px;border-top:1px solid var(--hairline);text-decoration:none; }
+.update-row>small { display:block;color:var(--text-2);font-size:11px;margin-bottom:6px; }
+.update-row strong { color:var(--text);font-size:13px;font-weight:550;line-height:1.5;display:block; }
+.update-row p { color:var(--text-2);font-size:12px;line-height:1.6;margin-top:6px; }
+.audit-shortcut { display:flex;justify-content:space-between;text-decoration:none;color:var(--text-2);font-size:12px;padding:0 6px; }
+.audit-shortcut:hover { color:var(--accent-strong); }
+.overview-booking-table { padding:0 8px 8px; }
+.overview-booking-table th { padding:8px 16px 12px;font-size:11px;text-transform:none;letter-spacing:0; }
+.overview-booking-table td { padding:16px;font-size:12px; }
+.overview-booking-table td strong { display:block;font-weight:550;font-size:13px; }
+.overview-booking-table td small { display:block;color:var(--text-2);font-size:11px;margin-top:4px; }
+.numeric { white-space:nowrap;font-variant-numeric:tabular-nums; }
+@media(min-width:1700px) { .port-overview { grid-template-columns:minmax(0,2.1fr) minmax(340px,1fr);gap:32px; } .operation-row { padding-block:26px; } }
+@media(max-width:1200px) { .port-overview { grid-template-columns:minmax(0,1fr) 290px;gap:20px; } .row-end { font-size:0;gap:0; } .row-end span { font-size:22px; } }
+@media(max-width:1100px) and (min-width:901px) { .port-overview { grid-template-columns:1fr; } .overview-secondary { grid-template-columns:1fr 1fr; } .overview-secondary>section:first-child { grid-column:1/-1; } }
+@media(max-width:760px) { .port-overview { grid-template-columns:1fr;gap:24px; } .operation-row { gap:12px;padding:20px; } .operation-panel-heading,.departure-row { padding:20px; } .operation-copy strong { font-size:14px; } .operation-copy small { font-size:12px; } .operation-symbol { width:38px;height:38px;flex-basis:38px; } .departure-row { gap:12px;flex-wrap:wrap; } .manifest-link { margin-left:auto; } .overview-booking-table td { padding:4px 0; } .overview-booking-table td small { margin-top:1px; } }

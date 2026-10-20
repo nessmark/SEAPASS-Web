@@ -16,7 +16,8 @@
         <div class="page-body">
             <div class="ticket-header">
                 <div>
-                    <div class="card-title">Ticketing &amp; Bookings</div>
+                    <h1 class="workspace-page-title">Ticketing &amp; Bookings</h1>
+                    <p class="page-description">Review bookings, verify discount IDs and issue boarding tickets.</p>
                 </div>
             </div>
 
@@ -29,7 +30,7 @@
                         </div>
                         <div class="ticket-filter">
                             <form method="GET" action="{{ route('admin.tickets.index') }}">
-                                <label for="ticket_filter_date">Booking Date</label>
+                                <label for="ticket_filter_date">Trip date</label>
                                 <input
                                     type="date"
                                     id="ticket_filter_date"
@@ -71,12 +72,16 @@
                                         $tripTimeFormatted = \Carbon\Carbon::hasFormat($booking->departure_time_slot, 'H:i') ? \Carbon\Carbon::createFromFormat('H:i', $booking->departure_time_slot)->format('g:i A') : $booking->departure_time_slot;
                                         $tripDateFormatted = optional($booking->trip_date)->format('M d, Y') ?: ($booking->created_at ? $booking->created_at->format('M d, Y') : '');
                                         $bookingRef = $booking->reference_number ?: ('SP-' . $booking->id);
-                                        $isVerificationRequired = $booking->isToBeConfirmed() || $booking->hasDiscounts();
+                                        $isPaymentReview = (bool) $booking->payment_review_required;
+                                        $isVerificationRequired = !$isPaymentReview && ($booking->isToBeConfirmed() || $booking->hasDiscounts());
                                     @endphp
                                     <tr data-ticket-id="{{ $booking->id }}" data-trip-date="{{ optional($booking->trip_date)->toDateString() }}">
                                         <td>
                                             <strong>{{ $bookingRef }}</strong>
-                                            @if($booking->isToBeConfirmed())
+                                            @if($isPaymentReview)
+                                                <div class="badge warning" style="margin-top:6px">Late payment review</div>
+                                                <small class="muted" style="display:block;margin-top:4px">Payment received after seat hold expired. Do not board.</small>
+                                            @elseif($booking->isToBeConfirmed())
                                                 <div style="margin-top: 3px;">
                                                     <span style="background: rgba(233, 162, 59, 0.15); color: #9A6414; border: 1px solid rgba(233, 162, 59, 0.35); padding: 2px 7px; border-radius: 9999px; font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;" title="Paid via PayMongo. Student/Senior/PWD ID awaiting verification.">
                                                         ⏳ ID Verification
@@ -111,7 +116,13 @@
                                         </td>
                                         <td>
                                             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                                                @if($isVerificationRequired)
+                                                @if($isPaymentReview)
+                                                    @if($booking->paymongo_payment_id && !in_array($booking->refund_status, ['pending', 'processing', 'refunded']))
+                                                        <button type="button" class="btn-reject-refund-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" data-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}">Request refund</button>
+                                                    @else
+                                                        <span class="badge warning">{{ ucfirst($booking->refund_status ?: 'Needs review') }}</span>
+                                                    @endif
+                                                @elseif($isVerificationRequired)
                                                     <button type="button" class="btn-approve-booking-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" title="Approve discounted ID and issue boarding pass QR">
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Approve
                                                     </button>
@@ -123,6 +134,7 @@
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Confirm
                                                     </button>
                                                 @endif
+                                                @if(!$isPaymentReview)
                                                 <select
                                                     class="ticket-status-select"
                                                     data-original-status="{{ $booking->status }}"
@@ -135,6 +147,7 @@
                                                     <option value="confirmed" @selected($booking->status === 'confirmed')>Confirmed</option>
                                                     <option value="cancelled" @selected($booking->status === 'cancelled')>Cancelled</option>
                                                 </select>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -264,10 +277,9 @@
                                         </td>
                                         <td>
                                             <span class="status-pill status-cancelled">Cancelled</span>
-                                            @if($booking->refund_status === 'refunded' || (float) $booking->refund_amount > 0)
-                                                <div style="font-size: 11px; color: var(--accent); margin-top: 4px; font-weight: 600;" title="Refund ID: {{ $booking->paymongo_refund_id ?? 'N/A' }}">
-                                                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Refunded ₱{{ number_format((float) ($booking->refund_amount ?: $booking->amount_collected), 2) }} via PayMongo
-                                                </div>
+                                            @if($booking->refund_status)
+                                                <div class="badge {{ $booking->refund_status === 'refunded' ? 'success' : ($booking->refund_status === 'failed' ? 'danger' : 'warning') }}" style="margin-top:6px">Refund {{ $booking->refund_status }}</div>
+                                                @if((float) $booking->refund_amount > 0)<small class="muted" style="display:block;margin-top:4px">₱{{ number_format((float) $booking->refund_amount, 2) }} {{ $booking->refund_status === 'refunded' ? 'returned via PayMongo' : 'requested' }}</small>@endif
                                             @endif
                                         </td>
                                     </tr>
@@ -609,7 +621,7 @@
             <form id="rejectionRefundForm" style="padding: 20px 24px; margin: 0;">
                 <input type="hidden" id="rejectBookingId" value="">
                 <p style="margin: 0 0 14px 0; font-size: 13.5px; color: #666666; line-height: 1.5;">
-                    Rejecting booking <strong id="rejectBookingRefDisplay" style="color: #171717;">#SP-0000</strong> will <strong style="color: #E5484D;">automatically refund <span id="rejectRefundAmountDisplay">₱0.00</span></strong> directly back to the passenger's GCash / E-Wallet via PayMongo and release the reserved seat(s) back to open capacity.
+                    Rejecting booking <strong id="rejectBookingRefDisplay" style="color: #171717;">#SP-0000</strong> will <strong style="color: #E5484D;">request a refund of <span id="rejectRefundAmountDisplay">₱0.00</span></strong> through PayMongo. The booking is cancelled only when the provider accepts the request. A pending refund has not yet reached the passenger. Any held seats will be released.
                 </p>
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: #262626;">

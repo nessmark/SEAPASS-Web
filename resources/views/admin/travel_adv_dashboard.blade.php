@@ -15,9 +15,12 @@
         <div class="page-body">
             <div class="adv-header">
                 <div>
-                    <div class="card-title">Travel Advisory</div>
+                    <h1 class="workspace-page-title">Travel Advisory</h1>
+                    <p class="page-description">Keep passengers informed of weather, safety and sailing changes.</p>
                 </div>
             </div>
+
+            <div class="workspace-info">Advisories appear in the passenger app when published. SMS delivery depends on the configured provider. <a href="{{ url('/admin/sms') }}">Check SMS delivery status</a></div>
 
             <div class="adv-layout">
                 {{-- Create Advisory --}}
@@ -73,7 +76,7 @@
                             <div class="adv-field full-width adv-inline">
                                 <label>
                                     <input type="checkbox" id="adv_publish_push" checked>
-                                    <span>Publish immediately on passenger app and admin dashboard</span>
+                                    <span>Notify passengers by email and SMS when configured</span>
                                 </label>
                             </div>
                         </div>
@@ -106,7 +109,7 @@
                         </select>
                     </div>
 
-                    <table class="adv-table" id="advAlertsTable">
+                    <div class="workspace-table-scroll" role="region" aria-label="Scrollable report table" tabindex="0"><table class="adv-table" id="advAlertsTable">
                         <thead>
                             <tr>
                                 <th>Title</th>
@@ -114,7 +117,7 @@
                                 <th>Route</th>
                                 <th>Severity</th>
                                 <th>Status</th>
-                                <th>Delivery</th>
+                                <th>Email delivery</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -125,7 +128,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
                     {{-- Advisories currently go out as queued email (see AdvisoryMail); there is no
                          FCM/push client in the Flutter app yet. The Delivery column reflects what the
                          system actually does. Keep this note in the code, not on the screen. --}}

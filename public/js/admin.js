@@ -76,12 +76,14 @@ const SP_ICONS = {
     };
 
     toggle.addEventListener('click', toggleSidebar);
-    toggle.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggleSidebar();
-        }
-    });
+    // Native button keyboard activation already dispatches click.
+    const closeSidebar = () => {
+        document.body.classList.remove('sidebar-open');
+        setAriaExpanded(!isMobile() && !document.body.classList.contains('sidebar-collapsed'));
+    };
+    document.getElementById('sidebarBackdrop')?.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+    setAriaExpanded(isMobile() ? false : !document.body.classList.contains('sidebar-collapsed'));
 
     // Keep ARIA state correct on resize
     window.addEventListener('resize', () => {
@@ -111,6 +113,7 @@ const SP_ICONS = {
     userManagementToggle.addEventListener('click', function(e) {
         e.preventDefault();
         userManagementDropdown.classList.toggle('open');
+        userManagementToggle.setAttribute('aria-expanded', userManagementDropdown.classList.contains('open') ? 'true' : 'false');
     });
 
     // Close dropdown when clicking outside (optional)
@@ -128,3 +131,19 @@ const SP_ICONS = {
 function getCSSVariable(variable) {
     return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 }
+
+// Keep the stacked table layout understandable, including rows inserted by page scripts.
+(function () {
+    const labelRows = () => {
+        document.querySelectorAll('table').forEach(table => {
+            const headers = Array.from(table.querySelectorAll('thead th')).map(h => h.textContent.trim());
+            table.querySelectorAll('tbody tr').forEach(row => {
+                Array.from(row.children).forEach((cell, i) => {
+                    if (cell.tagName === 'TD' && !cell.hasAttribute('data-label') && cell.colSpan === 1 && headers[i]) cell.dataset.label = headers[i];
+                });
+            });
+        });
+    };
+    labelRows();
+    new MutationObserver(labelRows).observe(document.getElementById('main-content'), { childList: true, subtree: true });
+})();

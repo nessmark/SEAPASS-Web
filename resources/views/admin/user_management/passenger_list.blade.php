@@ -49,7 +49,8 @@
 @section('content')
     <div class="dashboard-grid full-width">
         <div class="page-body">
-            <div class="card-title">Passenger List</div>
+            <h1 class="workspace-page-title">Passenger List</h1>
+                    <p class="page-description">Find passenger accounts and review their registration details.</p>
 
             @if (session('success'))
                 <div class="alert" style="margin-top: 15px;">{{ session('success') }}</div>

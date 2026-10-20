@@ -15,7 +15,8 @@
         <div class="page-body">
             <div class="trip-header">
                 <div>
-                    <div class="card-title">Trip & Schedule Management</div>
+                    <h1 class="workspace-page-title">Trip &amp; Schedule Management</h1>
+                    <p class="page-description">Plan departures, manage seats and prepare passenger manifests.</p>
                 </div>
                 <button class="trip-button" type="button" id="openScheduleModal">Add Schedule</button>
             </div>

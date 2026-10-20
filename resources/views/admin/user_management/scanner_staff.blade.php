@@ -98,7 +98,8 @@
         <div class="page-body">
             <div class="boats-header">
                 <div>
-                    <div class="card-title">Scanner Staff Accounts</div>
+                    <h1 class="workspace-page-title">Scanner Staff Accounts</h1>
+                    <p class="page-description">Manage the staff who scan and validate boarding tickets.</p>
                 </div>
                 <button class="boats-button" type="button" id="openScannerModal">
                     <span>+ Add Scanner Staff</span>

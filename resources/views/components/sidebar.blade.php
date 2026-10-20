@@ -18,12 +18,14 @@
         return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">' . ($paths[$name] ?? '') . '</svg>';
     };
 @endphp
-<div class="sidebar">
-    <div class="sidebar-logo">SeaPass</div>
+<nav class="sidebar" id="sidebar" aria-label="Main navigation">
+    <a class="sidebar-logo" href="{{ route('admin.dashboard') }}">SeaPass</a>
+    <div class="sidebar-workspace"><span class="workspace-mark">SJ</span><span><strong>San Jose Port</strong><small>Operations workspace</small></span></div>
     <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('dashboard') !!}</span>
         <span>Dashboard</span>
     </a>
+    <div class="nav-group-label">Port operations</div>
     <a href="{{ route('admin.boats') }}" class="nav-item {{ request()->routeIs('admin.boats') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('fleet') !!}</span>
         <span>Fleet Management</span>
@@ -40,6 +42,8 @@
         <span class="nav-icon">{!! $icon('advisory') !!}</span>
         <span>Travel Advisory</span>
     </a>
+    <a href="{{ route('admin.sms') }}" class="nav-item {{ request()->routeIs('admin.sms') ? 'active' : '' }}"><span class="nav-icon">{!! $icon('advisory') !!}</span><span>SMS delivery</span></a>
+    <div class="nav-group-label">Management</div>
     <a href="{{ route('admin.fare-management') }}" class="nav-item {{ request()->routeIs('admin.fare-management*') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('fare') !!}</span>
         <span>Fare Management</span>
@@ -50,11 +54,11 @@
     </a>
     {{-- User Management Dropdown --}}
     <div class="nav-dropdown">
-        <div class="nav-item nav-dropdown-toggle {{ request()->routeIs('admin.user-management.*') ? 'active' : '' }}" id="userManagementToggle">
+        <button type="button" aria-controls="userManagementMenu" aria-expanded="{{ request()->routeIs('admin.user-management.*') ? 'true' : 'false' }}" class="nav-item nav-dropdown-toggle {{ request()->routeIs('admin.user-management.*') ? 'active' : '' }}" id="userManagementToggle">
             <span class="nav-icon">{!! $icon('users') !!}</span>
             <span>User Management</span>
             <span class="dropdown-arrow">{!! $icon('chevron') !!}</span>
-        </div>
+        </button>
         <div class="nav-dropdown-menu" id="userManagementMenu">
             <a href="{{ route('admin.user-management.passengers') }}" class="nav-dropdown-item {{ request()->routeIs('admin.user-management.passengers') ? 'active' : '' }}">
                 <span class="nav-icon">{!! $icon('passenger') !!}</span>
@@ -66,6 +70,8 @@
             </a>
         </div>
     </div>
+    <div class="sidebar-account">
+    <a class="account-profile" href="{{ route('admin.user-management.profile') }}"><span class="user-avatar">{{ mb_substr(auth()->user()->name ?? 'Admin', 0, 1) }}</span><span><strong>{{ auth()->user()->name ?? 'Administrator' }}</strong><small>{{ ucfirst(auth()->user()->role ?? 'Admin') }}</small></span></a>
     <form method="POST" action="{{ route('logout') }}" style="margin: 0; width: 100%;">
         @csrf
         <button type="submit" class="nav-item logout-btn">
@@ -73,4 +79,5 @@
             <span>Logout</span>
         </button>
     </form>
-</div>
+    </div>
+</nav>

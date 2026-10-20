@@ -12,7 +12,8 @@
         <div class="page-body">
             <div class="fare-header">
                 <div>
-                    <div class="card-title">Fare Management</div>
+                    <h1 class="workspace-page-title">Fare Management</h1>
+                    <p class="page-description">Set route fares and passenger discounts used at checkout.</p>
                 </div>
             </div>
 
