@@ -7,6 +7,14 @@ This repository is the `web/` half of the project. The Flutter passenger app liv
 [nessmark/SEAPASS-Mobile](https://github.com/nessmark/SEAPASS-Mobile); both are split out of the
 [nessmark/seapass](https://github.com/nessmark/seapass) monorepo.
 
+## Owner review, October 20, 2026
+
+Ready for code and demo review. Update this repository and SEAPASS-Mobile together, install dependencies and apply the included migrations using the setup below. Payment verification and signed-ticket API fields changed together with the passenger app.
+
+Local acceptance passed: 80 backend tests on SQLite and MariaDB, 41 Flutter tests, web/Android builds, and the complete browser mock checkout. See the [review inventory](docs/completion-2026-10-20/README.md) and [acceptance handoff](docs/completion-2026-10-20/CONTINUE.md).
+
+The owner still needs to configure PayMongo merchant/API keys and its signed webhook, plus the TextLink gateway and sending SIM, in the private `.env`. Live charge/refund, actual SMS delivery and physical-phone checks remain pending. `PAYMONGO_MOCK=true` is for local/testing demonstrations only; keep it false for live operation. No private provider credentials are included in Git.
+
 ## Stack
 - Laravel 12, PHP 8.2+, MySQL 8+ / MariaDB 10.5+
 - Vite for frontend asset bundling
