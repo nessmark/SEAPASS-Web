@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PayMongo Checkout - GCash / QR Ph</title>
+    <title>SeaPass local test checkout</title>
     @include('partials.head-icons')
     <style>
         * {
@@ -194,16 +194,16 @@
             <div class="brand">
                 <div class="brand-icon">P</div>
                 <div class="brand-text">
-                    <h1>PayMongo Checkout</h1>
-                    <p>SeaPass Ferry Port Portal</p>
+                    <h1>SeaPass test checkout</h1>
+                    <p>Local payment preview</p>
                 </div>
             </div>
-            <div class="badge">GCash / QR Ph</div>
+            <div class="badge">TEST MODE</div>
         </div>
 
         <div class="content">
             <div class="amount-container">
-                <div class="amount-label">Amount to Pay</div>
+                <div class="amount-label">Simulated amount</div>
                 <div class="amount-value">₱{{ number_format((float) $booking->amount_collected, 2) }}</div>
             </div>
 
@@ -226,14 +226,8 @@
                 </div>
             </div>
 
-            <!-- Dynamic QR Code (Simulated QR Ph / GCash Code) -->
-            <div class="qr-wrapper">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ urlencode('PAYMONGO_QRPH_DEMO_' . $booking->reference_number . '_' . $booking->amount_collected) }}" alt="Dynamic QR Code" />
-            </div>
-
             <div class="scan-instruction">
-                <span>📱</span>
-                <span>Scan this QR code using <strong>GCash</strong> or any <strong>QR Ph</strong> banking app</span>
+                <span>This is a local test. No GCash or bank payment will occur. Confirm below to simulate a successful payment.</span>
             </div>
 
             <!-- Simulated Payment Form -->
@@ -243,17 +237,16 @@
                 <input type="hidden" name="session_id" value="{{ $sessionId }}">
                 
                 <button type="submit" class="btn-pay">
-                    CONFIRM & SIMULATE GCASH PAYMENT
+                    Confirm test payment
                 </button>
             </form>
 
             <a href="{{ url('/payment/cancel?ref=' . $booking->reference_number) }}" class="btn-cancel">
-                Cancel Transaction
+                Leave test checkout
             </a>
 
             <div class="footer-note">
-                🔒 Protected by PayMongo 256-bit encryption.<br>
-                For testing/demo: Clicking confirm simulates instant GCash payment authorization.
+                SeaPass local preview. This screen does not connect to PayMongo or move real money.
             </div>
         </div>
     </div>

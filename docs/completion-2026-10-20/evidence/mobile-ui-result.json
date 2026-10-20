@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-20T13:55:22.611603+00:00",
+  "at": "2026-10-20T14:10:04.416036+00:00",
   "desktop_frame": {
     "width": 390,
     "height": 844,
@@ -34,7 +34,19 @@
     ],
     "qr_rendered": true
   },
-  "complete_browser_checkout": false,
-  "browser_checkout_limitation": "Task tab closed twice during acceptance. Local HTTP checkout/capture/ticket integration passed separately.",
-  "real_money_or_sms_sent": false
+  "complete_browser_checkout": true,
+  "real_money_or_sms_sent": false,
+  "browser_checkout": {
+    "reference": "SP-20261020-0083",
+    "trip": "2026-10-21 12:00",
+    "seat": "1A",
+    "amount_php": 100,
+    "mode": "explicit local mock",
+    "opened_actual_checkout_url": true,
+    "waiting_until_server_receipt": true,
+    "test_checkout_confirmed_in_browser": true,
+    "parent_polled_server_and_showed_booking_confirmed": true,
+    "sqlite_contention_fixed": "Preview WAL,5000ms busy timeout, IMMEDIATE transactions",
+    "no_fake_payment_qr_or_external_qr_service": true
+  }
 }

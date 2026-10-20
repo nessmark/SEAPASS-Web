@@ -23,7 +23,7 @@ No active source workers remain. Do not restart old Antigravity PIDs from histor
 
 - Phone browser: normal seeded session persisted, centered390x844 desktop frame, 360x800 full-width layout with scroll width360. Assistant initialized, accepted keyboard input, submitted provider-backed chat and navigated to October21 trips. Two passengers reached the actual booking details form. All three current-screen guide steps reached real controls. Passenger form entry and live seat map were reviewed.
 - Confirmed mock booking appeared in My Bookings and opened two individual boarding passes with QR codes, seats1A/1B. See evidence/mobile-ui-result.json and screenshots/mobile-{trips,bookings}-360.jpg.
-- Complete browser checkout remains unverified: the task tab closed twice before the final payment interaction. Browser recovery checks passed; reopening official Brave restored the bridge. No alternate browser or blocked file chooser workaround was used.
+- Complete browser checkout now PASSED on the final build: passenger details, seat1A selection, server-created hold, real checkout URL opened, explicit local test-payment confirmation, verified receipt poll and Booking Confirmed dialog. Reference SP-20261020-0083, October21 noon, PHP100. Earlier attempts were interrupted by browser restarts; official bridge recovery succeeded. No alternate browser or blocked file chooser workaround was used.
 - Actual local HTTP checkout passed: authenticated two-seat hold, server fare200 despite client amount1, no receipt/tickets while pending, explicit mock capture, verified receipt and two signed tickets. See evidence/checkout-runtime-result.json. This is local test evidence, not real merchant settlement.
 - Provider default routing timed out. The preview now opts into IPv4, with bounded connection setup. A subsequent real fare-tool and live audio probe passed at13:42UTC; latency remains provider/network dependent.
 - Release web build passed after final seat-map changes; analyzer clean; final Flutter41tests passed. Backend suites were rerun after the provider connection change:80tests454assertions pass on both databases.
@@ -57,4 +57,10 @@ Do not call the entire project production-ready while these gates remain. Local 
 
 ## Final saved state
 
-Source and acceptance are committed locally. Web acceptance checkpoint02e7d81 contains the evidence and screenshots; later documentation records the passing APK. Original palette files and owner phone-frame lock are preserved. Real merchant/SIM and physical-device gates remain open, and full browser checkout is still marked unverified. The local HTTP mock flow, actual phone ticket rendering and native compilation are separately evidenced.
+Source and acceptance are committed locally. Web acceptance checkpoint02e7d81 contains the evidence and screenshots; later documentation records the passing APK. Original palette files and owner phone-frame lock are preserved. Real merchant/SIM and physical-device gates remain open, and browser checkout is verified only in explicit local mock mode. The local HTTP mock flow, actual phone ticket rendering and native compilation are separately evidenced.
+
+## Final browser checkout repair
+
+The full browser flow exposed SQLite writer contention while the phone polled payment status. SQLite connection settings now support a5000ms busy timeout and optional journal/transaction modes. The local preview uses WAL and IMMEDIATE transactions; APP_DEBUG=false avoids displaying stack traces and request/session details. Retrying the rolled-back local test capture succeeded; the parent phone polled the verified receipt and displayed Booking Confirmed. Both80test backend suites passed again after this change.
+
+The mock page now says SeaPass test checkout / TEST MODE and no money will move. Removed the fake QR image, external QR service and instructions to scan it with GCash, plus the unsupported encryption claim. Production checkout still uses the actual provider URL and the same server-receipt verification.
