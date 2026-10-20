@@ -152,6 +152,16 @@ class PaymentIntegrityTest extends TestCase {
   $this->postJson('/api/bookings/verify-ticket',['reference_number'=>$tickets[1]['qr_payload']])->assertOk();
   $this->assertTrue($b->fresh()->is_boarded);$this->assertCount(2,$b->fresh()->boarded_seats);
  }
+ public function test_passenger_booking_response_carries_signed_tickets_and_verified_payment_state():void {
+  $booking=$this->checkout();
+  $this->getJson('/api/bookings')->assertOk()->assertJsonPath('pending.0.passenger_tickets',[])->assertJsonPath('pending.0.payment_received_at',null);
+  $this->webhook($booking)->assertOk();
+  $response=$this->getJson('/api/bookings')->assertOk()->assertJsonPath('confirmed.0.payment_review_required',false);
+  $this->assertNotNull($response->json('confirmed.0.payment_received_at'));
+  $payload=json_decode($response->json('confirmed.0.passenger_tickets.0.qr_payload'),true);
+  $this->assertNotEmpty($payload['boarding_token']);
+  $this->assertSame('1A',$payload['seat']);
+ }
  public function test_draft_and_archived_advisories_are_hidden_and_sms_is_not_falsely_sent():void {
   $admin=User::factory()->create(['role'=>'admin','is_active'=>true]);
   $this->actingAs($admin)->postJson('/admin/travel-advisory',['title'=>'Draft only','message'=>'Draft message','status'=>'Draft'])->assertOk()->assertJsonPath('push_status','Not Sent');

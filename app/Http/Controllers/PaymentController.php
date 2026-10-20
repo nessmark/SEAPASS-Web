@@ -189,6 +189,7 @@ class PaymentController extends Controller
                 'amount_collected' => (float) $booking->amount_collected,
                 'status' => $booking->status,
                 'has_discounts' => $booking->hasDiscounts(),
+                'reservation_expires_at' => $booking->reservation_expires_at?->toIso8601String(),
                 'seat_numbers' => $booking->seat_numbers,
             ],
         ], 200);
