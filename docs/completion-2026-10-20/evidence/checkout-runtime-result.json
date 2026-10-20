@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-20T13:51:55.980482+00:00",
+  "mode": "explicit local mock",
+  "reference": "SP-20261020-0082",
+  "server_fare_ignores_client_amount": true,
+  "amount_php": 200,
+  "seats": [
+    "1A",
+    "1B"
+  ],
+  "pending_before_payment": true,
+  "no_receipt_or_ticket_before_payment": true,
+  "verified_receipt_after_payment": true,
+  "confirmed_after_capture": true,
+  "signed_passenger_ticket_count": 2,
+  "real_money_or_sms_sent": false
+}

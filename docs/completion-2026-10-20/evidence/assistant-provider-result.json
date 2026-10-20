@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-20T13:42:37.620Z",
+  "chat": {
+    "responded": true,
+    "tools_used": [
+      "list_fares"
+    ],
+    "contains_current_regular_fare": true
+  },
+  "live": {
+    "ephemeral_minted": true,
+    "setup": true,
+    "audio": true,
+    "closed": true
+  }
+}

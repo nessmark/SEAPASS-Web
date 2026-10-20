@@ -1,0 +1,394 @@
+[
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/dashboard",
+    "title": "Port overview",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/boats",
+    "title": "Fleet Management",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/trip-schedules",
+    "title": "Trip & Schedule Management",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/tickets",
+    "title": "Ticketing & Bookings",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/travel-advisory",
+    "title": "Travel Advisory",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/fare-management",
+    "title": "Fare Management",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/reports-audit",
+    "title": "Reports & Audit",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/sms",
+    "title": "SMS delivery",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/passengers",
+    "title": "Passenger List",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/ScannerStaff",
+    "title": "Scanner Staff Accounts",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/profile",
+    "title": "Profile",
+    "width": 1280,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/dashboard",
+    "title": "Port overview",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/boats",
+    "title": "Fleet Management",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/trip-schedules",
+    "title": "Trip & Schedule Management",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/tickets",
+    "title": "Ticketing & Bookings",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/travel-advisory",
+    "title": "Travel Advisory",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/fare-management",
+    "title": "Fare Management",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/reports-audit",
+    "title": "Reports & Audit",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/sms",
+    "title": "SMS delivery",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/passengers",
+    "title": "Passenger List",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/ScannerStaff",
+    "title": "Scanner Staff Accounts",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/profile",
+    "title": "Profile",
+    "width": 360,
+    "theme": "dark"
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/dashboard",
+    "theme": "light",
+    "title": "Port overview",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/boats",
+    "theme": "light",
+    "title": "Fleet Management",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/trip-schedules",
+    "theme": "light",
+    "title": "Trip & Schedule Management",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/tickets",
+    "theme": "light",
+    "title": "Ticketing & Bookings",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/travel-advisory",
+    "theme": "light",
+    "title": "Travel Advisory",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/fare-management",
+    "theme": "light",
+    "title": "Fare Management",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/reports-audit",
+    "theme": "light",
+    "title": "Reports & Audit",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/sms",
+    "theme": "light",
+    "title": "SMS delivery",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/passengers",
+    "theme": "light",
+    "title": "Passenger List",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/ScannerStaff",
+    "theme": "light",
+    "title": "Scanner Staff Accounts",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/profile",
+    "theme": "light",
+    "title": "Profile",
+    "width": 1280
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/dashboard",
+    "theme": "light",
+    "title": "Port overview",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/boats",
+    "theme": "light",
+    "title": "Fleet Management",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/trip-schedules",
+    "theme": "light",
+    "title": "Trip & Schedule Management",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/tickets",
+    "theme": "light",
+    "title": "Ticketing & Bookings",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/travel-advisory",
+    "theme": "light",
+    "title": "Travel Advisory",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/fare-management",
+    "theme": "light",
+    "title": "Fare Management",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/reports-audit",
+    "theme": "light",
+    "title": "Reports & Audit",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/sms",
+    "theme": "light",
+    "title": "SMS delivery",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/passengers",
+    "theme": "light",
+    "title": "Passenger List",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/ScannerStaff",
+    "theme": "light",
+    "title": "Scanner Staff Accounts",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/profile",
+    "theme": "light",
+    "title": "Profile",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/reports-audit",
+    "theme": "light",
+    "title": "Reports & Audit",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/sms",
+    "theme": "light",
+    "title": "SMS delivery",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/passengers",
+    "theme": "light",
+    "title": "Passenger List",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/ScannerStaff",
+    "theme": "light",
+    "title": "Scanner Staff Accounts",
+    "width": 360
+  },
+  {
+    "error": false,
+    "overflow": false,
+    "path": "/admin/user-management/profile",
+    "theme": "light",
+    "title": "Profile",
+    "width": 360
+  }
+]

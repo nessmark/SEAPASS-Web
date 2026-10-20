@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-20T13:55:22.611603+00:00",
+  "desktop_frame": {
+    "width": 390,
+    "height": 844,
+    "centered": true
+  },
+  "phone_viewport": {
+    "width": 360,
+    "height": 800,
+    "frame_width": 360,
+    "document_scroll_width": 360
+  },
+  "seeded_passenger_session_persisted": true,
+  "assistant_initialized": true,
+  "assistant_keyboard_input_and_submit": true,
+  "assistant_live_navigation": {
+    "date": "2026-10-21",
+    "passenger_count_prefilled": 2
+  },
+  "guide_actual_controls": [
+    "route_selector",
+    "date_rail",
+    "schedules_list"
+  ],
+  "passenger_form_entry_completed": true,
+  "seat_selection_screen_rendered_live_map": true,
+  "confirmed_local_mock_booking_visible": true,
+  "individual_ticket_screen": {
+    "count": 2,
+    "seats": [
+      "1A",
+      "1B"
+    ],
+    "qr_rendered": true
+  },
+  "complete_browser_checkout": false,
+  "browser_checkout_limitation": "Task tab closed twice during acceptance. Local HTTP checkout/capture/ticket integration passed separately.",
+  "real_money_or_sms_sent": false
+}

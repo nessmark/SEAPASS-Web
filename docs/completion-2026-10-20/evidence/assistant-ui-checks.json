@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-20T03:34:55.282283+00:00",
+  "browser": "official Brave bridge",
+  "read_fare_answer": true,
+  "model_proposal_card_rendered": true,
+  "proposal_cancelled": true,
+  "fare_after_cancel": {
+    "regular": 100,
+    "student": 75,
+    "senior": 70
+  },
+  "guide_heading_first": true,
+  "guide_next_actual_Things_to_do": true,
+  "guide_panel_compacts_to_reveal_target": true,
+  "attachment_filechooser": "setFiles blocked Not allowed; no browser bypass attempted"
+}
