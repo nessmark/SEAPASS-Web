@@ -48,7 +48,7 @@ class PaymentController extends Controller
                 ], 400);
             }
 
-            try { return $this->dispatchPayMongoSession($booking); } catch (\Throwable $e) { return response()->json(['message' => 'Payment checkout is unavailable. Your reservation can be retried before it expires.'], 503); }
+            try { return $this->dispatchPayMongoSession($booking); } catch (\Throwable $e) { return $this->checkoutUnavailable($booking); }
         }
 
         // 2. Otherwise validate and reserve seats atomically
@@ -144,10 +144,21 @@ class PaymentController extends Controller
             Log::error("[PaymentController] Failed to initiate checkout: " . $e->getMessage(), [
                 'exception' => $e,
             ]);
-            return response()->json([
-                'message' => 'Payment checkout is unavailable. Please retry before the reservation expires.',
-            ], 503);
+            return $this->checkoutUnavailable($booking ?? null);
         }
+    }
+
+    private function checkoutUnavailable(?Booking $booking): JsonResponse
+    {
+        return response()->json([
+            'message' => 'Payment checkout is unavailable. Please retry before the reservation expires.',
+            // The authenticated creator can retry this hold instead of reserving duplicate seats.
+            'booking' => $booking ? [
+                'id' => $booking->id,
+                'reference_number' => $booking->reference_number,
+                'reservation_expires_at' => $booking->reservation_expires_at?->toIso8601String(),
+            ] : null,
+        ], 503);
     }
 
     /**

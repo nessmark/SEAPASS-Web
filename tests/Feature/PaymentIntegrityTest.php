@@ -38,6 +38,22 @@ class PaymentIntegrityTest extends TestCase {
   $b=$this->checkout(); $other=Passenger::create(['name'=>'Other','email'=>'other@example.com','password'=>bcrypt('password')]);Sanctum::actingAs($other);
   $this->postJson('/api/payments/checkout',['booking_id'=>$b->id])->assertForbidden();
  }
+ public function test_provider_failure_returns_owned_hold_for_retry_without_reserving_again():void {
+  Sanctum::actingAs($this->passenger);
+  config(['services.paymongo.mock'=>false,'services.paymongo.secret_key'=>'sk_test_fake']);
+  Http::fake(['*'=>Http::response([],503)]);
+  $failure=$this->postJson('/api/payments/checkout',$this->payload())->assertStatus(503);
+  $id=$failure->json('booking.id');
+  $this->assertNotNull($id);
+  $this->assertNotNull($failure->json('booking.reservation_expires_at'));
+  $this->assertEquals(4,$this->trip->fresh()->available_seats);
+  $this->postJson('/api/payments/checkout',['booking_id'=>$id])->assertStatus(503)->assertJsonPath('booking.id',$id);
+  $this->assertEquals(1,Booking::count());
+  config(['services.paymongo.mock'=>true]);
+  $this->postJson('/api/payments/checkout',['booking_id'=>$id])->assertOk()->assertJsonPath('booking.id',$id);
+  $this->assertEquals(4,$this->trip->fresh()->available_seats);
+  $this->assertEquals(1,Booking::count());
+ }
  public function test_staff_cannot_impersonate_passenger_by_matching_id():void {
   Sanctum::actingAs(User::factory()->create(['role'=>'admin','is_active'=>true]));
   $this->getJson('/api/bookings')->assertForbidden();
