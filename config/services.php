@@ -35,9 +35,18 @@ return [
         ],
     ],
 
+    'textlink' => [
+        'enabled' => env('TEXTLINK_ENABLED', false),
+        'api_key' => env('TEXTLINK_API_KEY'),
+        'sim_card_id' => env('TEXTLINK_SIM_CARD_ID'),
+        'webhook_secret' => env('TEXTLINK_WEBHOOK_SECRET'),
+    ],
+
     'paymongo' => [
-        'public_key' => env('PAYMONGO_PUBLIC_KEY', 'pk_test_sample'),
-        'secret_key' => env('PAYMONGO_SECRET_KEY', 'sk_test_sample'),
+        'mock' => env('PAYMONGO_MOCK', false),
+        'hold_minutes' => 30,
+        'public_key' => env('PAYMONGO_PUBLIC_KEY'),
+        'secret_key' => env('PAYMONGO_SECRET_KEY'),
         'webhook_secret' => env('PAYMONGO_WEBHOOK_SECRET'),
         'base_url' => env('PAYMONGO_BASE_URL', 'https://api.paymongo.com/v1'),
     ],

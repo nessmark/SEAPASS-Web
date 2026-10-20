@@ -293,7 +293,7 @@ class TripScheduleController extends Controller
             ], 422);
         }
 
-        $seatNumbers = $openSeats->take($validated['seat_count'])->map(fn ($n) => (int) $n)->values();
+        $seatNumbers = $openSeats->take($validated['seat_count'])->map(fn ($n) => (string) $n)->values();
 
         $request->merge([
             'seat_numbers' => $seatNumbers->all(),
@@ -303,7 +303,7 @@ class TripScheduleController extends Controller
             'payment_method' => 'Mobile App',
         ]);
 
-        return $this->bookSeats($request, $tripSchedule);
+        return $this->bookSeats($request, $tripSchedule, app(BookingService::class));
     }
 
     public function update(Request $request, TripSchedule $tripSchedule)
@@ -337,8 +337,17 @@ class TripScheduleController extends Controller
                 ->withErrors(['available_seats' => "Available seats cannot exceed boat capacity ({$maxSeats})"]);
         }
 
+        if ($tripSchedule->bookings()->exists() && ($validated['boat_id'] != $tripSchedule->boat_id || $validated['available_seats'] != $tripSchedule->available_seats)) return back()->withErrors(['available_seats'=>'A trip with bookings cannot change vessels or seat inventory. Use booking cancellation or rescheduling.']);
+        $oldDeparture = $tripSchedule->departure_time->copy();
         $tripSchedule->update($validated);
         $this->alignSeatMapAvailability($tripSchedule);
+        if (!$oldDeparture->equalTo($tripSchedule->departure_time)) {
+            foreach ($tripSchedule->activeBookings()->get() as $booking) {
+                $booking->update(['trip_date'=>$tripSchedule->departure_time->toDateString(),'departure_time_slot'=>$tripSchedule->departure_time->format('H:i'),'route'=>$tripSchedule->route]);
+                if ($booking->status === 'confirmed') $booking->generateQrCode();
+                app(\App\Services\SmsService::class)->send($booking->registered_contact_number, 'SeaPass: Booking '.$booking->reference_number.' now departs '.$tripSchedule->departure_time->format('M d H:i').'. Please check the updated ticket.', 'schedule-change:'.$booking->id.':'.$tripSchedule->departure_time->timestamp);
+            }
+        }
 
         AuditLog::record(
             'schedule',
@@ -364,6 +373,12 @@ class TripScheduleController extends Controller
         }
 
         $tripSchedule->update($validated);
+        if ($oldStatus !== $tripSchedule->status && $tripSchedule->status === 'Cancelled') {
+            foreach ($tripSchedule->activeBookings()->get() as $booking) {
+                app(\App\Services\SmsService::class)->send($booking->registered_contact_number, 'SeaPass: Trip '.$tripSchedule->route.' on '.$tripSchedule->departure_time->format('M d H:i').' has been cancelled. Contact the port office for refund or rebooking.', 'trip-cancel:'.$tripSchedule->id.':'.$booking->id);
+                if ($booking->paymongo_payment_id) $booking->update(['payment_review_required'=>true]);
+            }
+        }
 
         AuditLog::record(
             'schedule',
@@ -518,6 +533,9 @@ class TripScheduleController extends Controller
             'seat_map' => ['required', 'array'],
         ]);
 
+        if ($tripSchedule->bookings()->exists()) return back()->withErrors(['seat_map'=>'Seat maps with bookings cannot be overwritten. Manage the individual bookings.']);
+        $capacity = (int) $tripSchedule->boat?->passenger_capacity;
+        if (count($validated['seat_map']) > $capacity) return back()->withErrors(['seat_map'=>'Seat map exceeds vessel capacity.']);
         $tripSchedule->update([
             'seat_map' => $validated['seat_map'],
             'available_seats' => collect($validated['seat_map'])->where('booked', false)->count(),
@@ -529,6 +547,7 @@ class TripScheduleController extends Controller
 
     public function destroy(TripSchedule $tripSchedule)
     {
+        if ($tripSchedule->bookings()->exists()) return back()->with('error','Trips with booking history cannot be deleted. Cancel or reschedule the trip.');
         // Only allow deletion of scheduled trips
         if ($tripSchedule->status !== 'Scheduled') {
             return redirect()->route('admin.trip-schedules')

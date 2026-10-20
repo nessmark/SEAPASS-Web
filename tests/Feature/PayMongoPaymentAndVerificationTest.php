@@ -25,6 +25,8 @@ class PayMongoPaymentAndVerificationTest extends TestCase
         parent::setUp();
 
         Mail::fake();
+        config(['services.paymongo.mock'=>true,'services.paymongo.webhook_secret'=>'test-webhook-secret']);
+        \App\Models\Fare::create(['route'=>'Surigao to San Jose','regular'=>250,'student'=>200,'senior'=>200]);
 
         $this->boat = Boat::create([
             'name' => 'M/V Sea Express',
@@ -72,6 +74,8 @@ class PayMongoPaymentAndVerificationTest extends TestCase
             'notes' => 'Seats: 1A, 1B | Regular fares',
         ];
 
+        $passenger = \App\Models\Passenger::create(['name'=>'Juan','email'=>'juan@example.com','password'=>bcrypt('password')]);
+        \Laravel\Sanctum\Sanctum::actingAs($passenger);
         $response = $this->postJson('/api/payments/checkout', $payload);
 
         $response->assertStatus(200)
@@ -149,6 +153,7 @@ class PayMongoPaymentAndVerificationTest extends TestCase
                                     'id' => 'pay_test_reg_99999',
                                     'attributes' => [
                                         'amount' => 25000,
+                                        'currency' => 'PHP',
                                         'status' => 'paid',
                                         'payment_intent_id' => 'pi_test_reg_88888',
                                     ],
@@ -160,7 +165,7 @@ class PayMongoPaymentAndVerificationTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/paymongo/webhook', $webhookPayload);
+        $response = $this->signedWebhook($webhookPayload);
 
         $response->assertStatus(200);
 
@@ -221,6 +226,7 @@ class PayMongoPaymentAndVerificationTest extends TestCase
                                     'id' => 'pay_test_disc_77777',
                                     'attributes' => [
                                         'amount' => 20000,
+                                        'currency' => 'PHP',
                                         'status' => 'paid',
                                         'payment_intent_id' => 'pi_test_disc_66666',
                                     ],
@@ -232,7 +238,7 @@ class PayMongoPaymentAndVerificationTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/paymongo/webhook', $webhookPayload);
+        $response = $this->signedWebhook($webhookPayload);
 
         $response->assertStatus(200);
 
@@ -314,7 +320,7 @@ class PayMongoPaymentAndVerificationTest extends TestCase
             'amount_collected' => 200.00,
             'payment_method' => 'GCash / QR Ph (PayMongo)',
             'status' => 'to_be_confirmed',
-            'paymongo_payment_id' => 'pay_fake_99999',
+            'paymongo_payment_id' => 'pay_mock_99999',
         ]);
         $booking->ensureReferenceNumber();
 
@@ -363,5 +369,11 @@ class PayMongoPaymentAndVerificationTest extends TestCase
         Mail::assertQueued(BookingRefundedMail::class, function ($mail) use ($booking) {
             return $mail->hasTo($booking->email);
         });
+    }
+    private function signedWebhook(array $payload) {
+        $body = json_encode($payload);
+        $timestamp = time();
+        $signature = hash_hmac('sha256', $timestamp.'.'.$body, 'test-webhook-secret');
+        return $this->call('POST','/api/paymongo/webhook',[],[],[],['CONTENT_TYPE'=>'application/json','HTTP_ACCEPT'=>'application/json','HTTP_PAYMONGO_SIGNATURE'=>"t={$timestamp},te={$signature}"],$body);
     }
 }

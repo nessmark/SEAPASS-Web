@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias(['role' => \App\Http\Middleware\RequireRole::class, 'passenger' => \App\Http\Middleware\RequirePassenger::class]);
         // Trust all proxies — required for ngrok tunnel to work correctly.
         // Without this, Laravel sees HTTP instead of HTTPS and CSRF tokens fail (419).
         $middleware->trustProxies(at: '*');

@@ -17,10 +17,19 @@ use App\Http\Controllers\UserManagementController;
 // Public & Authentication Routes
 Route::get('/', [AuthController::class, 'rootRedirect']);
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1')->name('login.post');
 
 // Protected Admin Web Routes
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/discount-id/{file}', function (string $file) {
+        abort_unless(preg_match('/^[A-Za-z0-9._-]+$/', $file), 404);
+        $path = 'discount_ids/'.$file;
+        abort_unless(\Illuminate\Support\Facades\Storage::disk('local')->exists($path),404);
+        return \Illuminate\Support\Facades\Storage::disk('local')->response($path, null, ['Cache-Control'=>'private, no-store']);
+    })->name('admin.discount-id');
+    Route::post('/admin/sms/{smsMessage}/retry', [\App\Http\Controllers\SmsController::class, 'retry'])->middleware('throttle:10,1')->name('admin.sms.retry');
+    Route::get('/admin/sms', [\App\Http\Controllers\SmsController::class, 'index'])->name('admin.sms');
+    Route::get('/admin/trip-schedules/{tripSchedule}/manifest', [\App\Http\Controllers\ManifestController::class, 'show'])->name('admin.trip-schedules.manifest');
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // User Management Routes
@@ -90,6 +99,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/bookings/{booking}/reject-refund', [\App\Http\Controllers\AdminBookingController::class, 'rejectAndRefundBooking'])->name('admin.bookings.reject-refund');
 
     // Travel Advisory Dashboard
+    Route::get('/admin/travel-advisory/list', [AdvisoryController::class, 'adminList'])->name('admin.travel-advisory.list');
+    Route::patch('/admin/travel-advisory/{advisory}/archive', [AdvisoryController::class, 'archive'])->name('admin.travel-advisory.archive');
     Route::get('/admin/travel-advisory', [AdvisoryController::class, 'adminIndex'])->name('admin.travel-advisory');
     Route::post('/admin/travel-advisory', [AdvisoryController::class, 'store'])->name('admin.travel-advisory.store');
     Route::post('/admin/travel-advisory/send-push', [TravelAdvisoryController::class, 'sendPushNotification'])->name('admin.travel-advisory.send-push');
@@ -110,6 +121,8 @@ Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->nam
 // PayMongo Dynamic QR Checkout & Payment Landing Routes (Public / Web)
 Route::get('/payment/mock-checkout', [\App\Http\Controllers\PaymentController::class, 'showMockCheckout'])->name('payment.mock-checkout');
 Route::post('/payment/mock-checkout/pay', [\App\Http\Controllers\PaymentController::class, 'processMockPayment'])->name('payment.mock-checkout.pay');
-Route::get('/payment/success', [\App\Http\Controllers\PaymentController::class, 'paymentSuccess'])->name('payment.success');
-Route::get('/payment/cancel', [\App\Http\Controllers\PaymentController::class, 'paymentCancel'])->name('payment.cancel');
+Route::get('/payment/success', [\App\Http\Controllers\PaymentController::class, 'paymentSuccess'])->middleware('signed')->name('payment.success');
+Route::get('/payment/cancel', [\App\Http\Controllers\PaymentController::class, 'paymentCancel'])->middleware('signed')->name('payment.cancel');
 
+
+if (file_exists(__DIR__.'/assistant.php')) require __DIR__.'/assistant.php';

@@ -23,11 +23,6 @@ class ReportsAuditController extends Controller
             'San Jose(Dinagat) → Surigao',
         ];
 
-        // Ensure there are audit logs populated for system visibility
-        if (AuditLog::count() === 0) {
-            $this->seedInitialAuditLogs();
-        }
-
         // Filter Inputs
         $filterDate = $request->input('filter_date');
         $filterBoat = $request->input('filter_boat');

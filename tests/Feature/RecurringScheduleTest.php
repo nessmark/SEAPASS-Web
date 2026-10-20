@@ -133,7 +133,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_cascade_delete_removes_unbooked_future_trips(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
         $generator = app(RecurringScheduleGenerator::class);
 
         $template = ScheduleTemplate::create([
@@ -160,7 +160,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_cascade_delete_auto_reschedules_booked_trips_to_prior_available_date(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         // Target prior trip (e.g. 2 days from now)
         $priorDate = now('Asia/Manila')->addDays(2)->setTime(10, 30);
@@ -248,7 +248,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_auto_reschedule_falls_back_to_next_date_when_no_prior_trip(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $template = ScheduleTemplate::create([
             'boat_id' => $this->boat->id,
@@ -309,7 +309,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_updating_template_time_cascades_to_future_trips_and_bookings(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $template = ScheduleTemplate::create([
             'boat_id' => $this->boat->id,
@@ -377,7 +377,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_updating_recurrence_days_removes_unbooked_trips_on_excluded_days(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         // Create daily template
         $template = ScheduleTemplate::create([
@@ -435,7 +435,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_admin_can_create_recurring_schedule_via_endpoint(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $response = $this->actingAs($admin)->post('/admin/recurring-schedules', [
             'boat_id' => $this->boat->id,
@@ -461,7 +461,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_admin_can_toggle_template_active_status(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $template = ScheduleTemplate::create([
             'boat_id' => $this->boat->id,
@@ -483,7 +483,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_admin_can_trigger_manual_generation(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $template = ScheduleTemplate::create([
             'boat_id' => $this->boat->id,
@@ -500,7 +500,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_past_or_departed_trips_are_strictly_preserved_during_cascade(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $template = ScheduleTemplate::create([
             'boat_id' => $this->boat->id,
@@ -556,7 +556,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_admin_can_update_recurring_schedule_via_standard_put_route(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $template = ScheduleTemplate::create([
             'boat_id' => $this->boat->id,
@@ -588,7 +588,7 @@ class RecurringScheduleTest extends TestCase
     public function test_admin_can_update_recurring_schedule_via_fallback_put_root_route(): void
     {
         // This directly tests the 405 fix when the form posts to /admin/recurring-schedules with template_id
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $template = ScheduleTemplate::create([
             'boat_id' => $this->boat->id,
@@ -620,7 +620,7 @@ class RecurringScheduleTest extends TestCase
 
     public function test_admin_can_update_recurring_schedule_via_post_with_template_id(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $template = ScheduleTemplate::create([
             'boat_id' => $this->boat->id,

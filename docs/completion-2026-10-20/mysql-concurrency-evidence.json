@@ -1,0 +1,50 @@
+{
+    "timestamp": "2026-10-20T11:36:20+08:00",
+    "database_engine": "11.8.9-MariaDB-2 from Debian",
+    "connection": "mysql",
+    "socket": "/home/kiuren/.local/share/seapass-preview/mysql-test.sock",
+    "database_name": "seapass_verification",
+    "concurrency_tests": {
+        "seat_oversell": {
+            "capacity": 2,
+            "workers": 10,
+            "results": {
+                "reserved": 2,
+                "unavailable": 8
+            },
+            "final_available_seats": 0,
+            "total_bookings_created": 2,
+            "oversell_prevented": true
+        },
+        "duplicate_payment_capture_idempotence": {
+            "booking_id": 28,
+            "workers": 8,
+            "results": {
+                "captured": 8
+            },
+            "financial_audit_count": 1,
+            "status": "confirmed",
+            "idempotent": true
+        },
+        "concurrent_per_seat_boarding": {
+            "booking_id": 30,
+            "seats": [
+                "1A",
+                "1B"
+            ],
+            "workers_per_seat": 4,
+            "total_workers": 8,
+            "results": {
+                "rejected": 6,
+                "boarded": 2
+            },
+            "boarded_seats_recorded": [
+                "1B",
+                "1A"
+            ],
+            "fully_boarded": true,
+            "replay_prevented": true
+        }
+    },
+    "status": "ALL_INVARIANTS_VERIFIED"
+}

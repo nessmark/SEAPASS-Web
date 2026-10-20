@@ -7,7 +7,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Booking extends Model
 {
+    public function getStatusAttribute($value): string { return strtolower(trim((string) $value)); }
+
+    public function setStatusAttribute($value): void { $this->attributes['status'] = strtolower(trim((string) $value)); }
+
+    public function scopeEarning($query) { return $query->whereRaw("LOWER(status) IN ('confirmed','completed','approved')"); }
+
     protected $fillable = [
+        'payment_received_at',
+        'payment_review_required',
+        'reservation_expires_at',
         'reference_number',
         'trip_schedule_id',
         'passenger_id',
@@ -22,6 +31,7 @@ class Booking extends Model
         'discount_id_photos',
         'status',
         'is_boarded',
+        'boarded_seats',
         'boarded_at',
         'boarded_by',
         'qr_code',
@@ -39,9 +49,13 @@ class Booking extends Model
     ];
 
     protected $casts = [
+        'payment_received_at' => 'datetime',
+        'reservation_expires_at' => 'datetime',
+        'payment_review_required' => 'boolean',
         'trip_date' => 'date',
         'is_boarded' => 'boolean',
         'boarded_at' => 'datetime',
+        'boarded_seats' => 'array',
         'seat_numbers' => 'array',
         'seat_breakdown' => 'array',
         'discount_id_photos' => 'array',
@@ -106,6 +120,8 @@ class Booking extends Model
     /**
      * Generate scannable QR Code payload for the booking.
      */
+    public function boardingToken(?string $seat = null): string { return hash_hmac('sha256', $this->id.'|'.$this->reference_number.'|'.$this->created_at?->timestamp.'|'.($seat ?? '*'), (string) config('app.key')); }
+
     public function generateQrCode(): string
     {
         $this->ensureReferenceNumber();
@@ -116,6 +132,7 @@ class Booking extends Model
         $tripDateFormatted = $this->trip_date ? $this->trip_date->format('Y-m-d') : '';
 
         $payload = json_encode([
+            'boarding_token' => $this->boardingToken(),
             'reference_number' => $this->reference_number,
             'passenger_name' => $this->passenger_name,
             'route' => $this->route,
@@ -237,6 +254,7 @@ class Booking extends Model
                     'passenger_name' => $pName,
                     'vessel' => $vessel,
                     'seat' => (string) $pSeat,
+                    'boarding_token' => $this->boardingToken((string) $pSeat),
                     'status' => 'CONFIRMED',
                 ];
 
@@ -289,6 +307,7 @@ class Booking extends Model
                         'passenger_name' => $pName,
                         'vessel' => $vessel,
                         'seat' => (string) $pSeat,
+                        'boarding_token' => $this->boardingToken((string) $pSeat),
                         'status' => 'CONFIRMED',
                     ];
 
@@ -323,6 +342,7 @@ class Booking extends Model
                 'passenger_name' => $pName,
                 'vessel' => $vessel,
                 'seat' => (string) $seat,
+                'boarding_token' => $this->boardingToken((string) $seat),
                 'status' => 'CONFIRMED',
             ];
 
@@ -345,6 +365,7 @@ class Booking extends Model
                 'passenger_name' => $this->passenger_name ?: 'Passenger',
                 'vessel' => $vessel,
                 'seat' => '1C',
+                'boarding_token' => $this->boardingToken('1C'),
                 'status' => 'CONFIRMED',
             ];
             $tickets[] = [

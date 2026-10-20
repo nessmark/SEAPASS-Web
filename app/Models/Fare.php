@@ -26,6 +26,7 @@ class Fare extends Model
 
     public static function canonicalRoute(string $route): string
     {
+        $route = preg_replace('/\s+to\s+/i', '|', $route);
         $normalized = str_replace(['–', '—', '−', '->', '→'], '|', $route);
         $parts = array_map('trim', explode('|', $normalized, 2));
 

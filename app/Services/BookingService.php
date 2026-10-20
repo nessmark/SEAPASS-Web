@@ -55,6 +55,9 @@ class BookingService
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            if (!in_array(strtolower((string) $tripSchedule->status), ['scheduled', 'boarding', 'active']) || $tripSchedule->departure_time->lte(now())) {
+                throw new SeatUnavailableException('This trip is no longer accepting reservations.', []);
+            }
             // 2. Load / Fallback Initialize Seat Map
             $seatMap = $tripSchedule->seat_map;
             if (empty($seatMap) && $tripSchedule->boat) {
@@ -107,12 +110,33 @@ class BookingService
                 $assignedSeats = $openSeats->take($seatCount)->values();
             }
 
+            if ($assignedSeats->count() !== (int) ($data['seat_count'] ?? $assignedSeats->count())) {
+                throw new SeatUnavailableException('Seat count does not match selected seats.', []);
+            }
             // 5. Parse Seat Breakdown & Primary Passenger Name
             $seatBreakdown = $data['seat_breakdown'] ?? null;
             if (is_string($seatBreakdown)) {
                 $seatBreakdown = json_decode($seatBreakdown, true);
             }
 
+            if (!empty($data['calculate_fare'])) {
+                $fare = \App\Models\Fare::query()->get()->first(fn($fare) => \App\Models\Fare::canonicalRoute($fare->route) === \App\Models\Fare::canonicalRoute($tripSchedule->route));
+                if (!$fare || (float) $fare->regular <= 0) throw new SeatUnavailableException('Fares are not configured for this route. Please contact the port office.', []);
+                if (!empty($seatBreakdown) && (!is_array($seatBreakdown) || count($seatBreakdown) !== $assignedSeats->count())) throw new SeatUnavailableException('Provide one passenger for each selected seat.', []);
+                $total = 0;
+                $normalized = [];
+                foreach ($assignedSeats as $idx => $seat) {
+                    $person = $seatBreakdown[$idx] ?? [];
+                    $category = strtolower(trim((string) ($person['category'] ?? 'regular')));
+                    if (!in_array($category, ['regular', 'student', 'senior', 'pwd', 'senior citizen'])) throw new SeatUnavailableException('Invalid passenger fare category.', []);
+                    $rate = (float) $fare->{in_array($category, ['senior', 'senior citizen', 'pwd']) ? 'senior' : $category};
+                    if ($rate <= 0) throw new SeatUnavailableException('The selected fare category is unavailable.', []);
+                    $person['category'] = $category; $person['seat'] = $seat; $person['individual_fare'] = $rate;
+                    $normalized[] = $person; $total += $rate;
+                }
+                $seatBreakdown = $normalized;
+                $data['amount_collected'] = round($total, 2);
+            }
             $primaryPassenger = !empty($data['passenger_name']) ? trim((string) $data['passenger_name']) : null;
             if (empty($primaryPassenger) && !empty($seatBreakdown) && is_array($seatBreakdown)) {
                 $firstP = $seatBreakdown[0]['passenger_name'] ?? null;
@@ -158,6 +182,7 @@ class BookingService
                 'seat_numbers' => $assignedSeats->all(),
                 'seat_breakdown' => $seatBreakdown,
                 'status' => $data['status'] ?? 'pending',
+                'reservation_expires_at' => ($data['status'] ?? 'pending') === 'pending' ? now()->addMinutes((int) config('services.paymongo.hold_minutes', 30)) : null,
                 'payment_method' => $data['payment_method'] ?? 'Walk-in',
                 'amount_collected' => $data['amount_collected'] ?? 0,
                 'notes' => $data['notes'] ?? null,
@@ -239,7 +264,7 @@ class BookingService
             // Re-fetch booking under exclusive lock to prevent race-condition double cancellations
             $booking = Booking::where('id', $booking->id)->lockForUpdate()->firstOrFail();
 
-            if ($booking->status === 'cancelled') {
+            if (in_array($booking->status, ['cancelled', 'expired'])) {
                 return $booking;
             }
 
@@ -282,6 +307,7 @@ class BookingService
 
             // Mark booking status as cancelled
             $booking->status = 'cancelled';
+            $booking->qr_code = null;
             $booking->save();
 
             // Record audit log

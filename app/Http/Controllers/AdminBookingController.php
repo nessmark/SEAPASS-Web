@@ -40,13 +40,14 @@ class AdminBookingController extends Controller
             ], 422);
         }
 
-        if ($booking->status === 'cancelled') {
+        if ($booking->status === 'cancelled' && !$booking->payment_review_required) {
             return response()->json([
                 'success' => false,
                 'message' => "Cannot approve a cancelled booking.",
             ], 422);
         }
 
+        if ($booking->status !== 'to_be_confirmed' || (!$booking->paymongo_payment_id && !$booking->payment_received_at)) return response()->json(['message' => 'Only paid bookings awaiting ID verification can be approved.'], 422);
         $booking->status = 'confirmed';
         $booking->ensureReferenceNumber();
         $booking->generateQrCode();
@@ -58,6 +59,7 @@ class AdminBookingController extends Controller
             "Admin approved discounted booking #{$booking->reference_number} for {$booking->passenger_name} ({$booking->route}). Boarding QR generated."
         );
 
+        app(\App\Services\SmsService::class)->bookingUpdate($booking, 'confirmed');
         // 1. Dispatch confirmation email
         $this->sendConfirmationEmail($booking);
 
@@ -92,7 +94,20 @@ class AdminBookingController extends Controller
      */
     public function rejectAndRefundBooking(Request $request, Booking $booking): JsonResponse
     {
-        if ($booking->status === 'cancelled') {
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $booking) {
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            return $this->rejectLockedBooking($request, $locked);
+        });
+    }
+
+    private function rejectLockedBooking(Request $request, Booking $booking): JsonResponse
+    {
+        if ($booking->refund_status === 'unknown') return response()->json(['success'=>false,'message'=>'The previous refund response was interrupted. Verify the payment in PayMongo before attempting another refund.'],409);
+        if ($booking->paymongo_refund_id) {
+            $prior=$this->payMongoService->getRefund($booking->paymongo_refund_id);
+            if ($booking->refund_status !== 'failed' || ($prior['attributes']['status'] ?? '') !== 'failed') return response()->json(['success'=>false,'message'=>'A refund has already been initiated.','refund_status'=>$booking->refund_status],422);
+        }
+        if ($booking->status === 'cancelled' && !$booking->payment_review_required) {
             return response()->json([
                 'success' => false,
                 'message' => "Booking #{$booking->reference_number} has already been cancelled.",
@@ -111,7 +126,7 @@ class AdminBookingController extends Controller
         $refundAmount = (float) $booking->amount_collected;
 
         // 1. Execute automated PayMongo refund if payment was recorded
-        $paymentIdentifier = $booking->paymongo_payment_id ?: ($booking->paymongo_payment_intent_id ?: 'pay_mock_' . $booking->id);
+        $paymentIdentifier = $booking->paymongo_payment_id ?: ($booking->paymongo_payment_intent_id ?: '');
         $refundResult = [
             'refund_id' => null,
             'status' => 'refunded',
@@ -126,6 +141,11 @@ class AdminBookingController extends Controller
             );
         }
 
+        if ($refundAmount > 0 && !($refundResult['success'] ?? false)) {
+            $booking->update(['refund_status' => $refundResult['status'] ?? 'unknown', 'refund_reason' => $reason, 'payment_review_required'=>true]);
+            return response()->json(['success' => false, 'message' => 'Refund was not accepted by PayMongo. Booking remains unchanged. Verify provider history before retrying.', 'refund_status' => $refundResult['status'] ?? 'unknown'], 502);
+        }
+
         // 2. Atomically cancel booking and release seats back to the vessel
         $this->bookingService->cancelBooking($booking);
 
@@ -137,6 +157,7 @@ class AdminBookingController extends Controller
             'refund_amount' => $refundAmount,
             'refund_reason' => $reason,
             'rejection_reason' => $reason,
+            'payment_review_required' => false,
         ]);
 
         AuditLog::record(
@@ -145,6 +166,7 @@ class AdminBookingController extends Controller
             "Admin rejected discounted booking #{$booking->reference_number} for {$booking->passenger_name} (Reason: {$reason}). Automated PayMongo refund of ₱" . number_format($refundAmount, 2) . " initiated."
         );
 
+        app(\App\Services\SmsService::class)->bookingUpdate($booking, 'refunded');
         // 4. Dispatch Refund Notification Email
         $this->sendRefundEmail($booking, $reason, $refundAmount);
 

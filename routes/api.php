@@ -39,7 +39,7 @@ Route::prefix('passenger')->group(function () {
 
     // Authenticate passenger (rate limited: 10 requests/minute)
     Route::post('/login', [AuthController::class, 'loginPassenger'])
-        ->middleware('throttle:10,1')
+        ->middleware('throttle:5,1')
         ->name('api.passenger.login');
 });
 
@@ -56,7 +56,7 @@ Route::post('/advisories/{id}/read', [\App\Http\Controllers\AdvisoryController::
 Route::delete('/advisories/{id}', [\App\Http\Controllers\AdvisoryController::class, 'dismissAdvisory'])->name('api.advisories.dismiss');
 
 // Boarding QR Ticket Verification for Scanner Staff (requires staff token)
-Route::middleware('auth:sanctum,api')->group(function () {
+Route::middleware(['auth:sanctum,api', 'role:admin,staff,scanner,scanner_staff,crew'])->group(function () {
     Route::post('/bookings/verify-ticket', [BookingVerificationController::class, 'verifyTicket'])
         ->name('api.bookings.verify-ticket');
 });
@@ -74,24 +74,27 @@ Route::middleware('auth:sanctum,api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logoutApi'])->name('api.logout');
     Route::post('/passenger/logout', [AuthController::class, 'logoutApi'])->name('api.passenger.logout');
 
+    Route::patch('/passenger/profile', [AuthController::class, 'updateProfile'])->middleware('passenger');
+    Route::put('/passenger/password', [AuthController::class, 'updatePassword'])->middleware(['passenger','throttle:5,1']);
     // Authenticated passenger profile
     Route::get('/passenger/profile', [AuthController::class, 'profile'])->name('api.passenger.profile');
 
     // Scoped booking management
-    Route::get('/bookings', [BookingController::class, 'getPassengerBookings'])->name('api.bookings.index');
-    Route::post('/bookings', [BookingController::class, 'storeBooking'])->name('api.bookings.store');
+    Route::get('/bookings', [BookingController::class, 'getPassengerBookings'])->middleware('passenger')->name('api.bookings.index');
+    Route::post('/bookings', [BookingController::class, 'storeBooking'])->middleware('passenger')->name('api.bookings.store');
 
     // Compatibility aliases for mobile app client
-    Route::get('/passenger/bookings', [BookingController::class, 'getPassengerBookings'])->name('api.passenger.bookings.index');
-    Route::post('/passenger/bookings', [BookingController::class, 'storeBooking'])->name('api.passenger.bookings.store');
+    Route::get('/passenger/bookings', [BookingController::class, 'getPassengerBookings'])->middleware('passenger')->name('api.passenger.bookings.index');
+    Route::post('/passenger/bookings', [BookingController::class, 'storeBooking'])->middleware('passenger')->name('api.passenger.bookings.store');
 
     // PayMongo Payment Checkout
-    Route::post('/payments/checkout', [\App\Http\Controllers\PaymentController::class, 'createCheckout'])->name('api.payments.checkout');
+    Route::post('/payments/checkout', [\App\Http\Controllers\PaymentController::class, 'createCheckout'])->middleware('passenger')->name('api.payments.checkout');
 });
 
 // PayMongo Webhook (Public, CSRF-exempt)
 Route::post('/paymongo/webhook', [\App\Http\Controllers\PayMongoWebhookController::class, 'handle'])->name('api.paymongo.webhook');
 
-// Fallback public checkout endpoint (accepts passenger session in body if token refresh occurs)
-Route::post('/payments/checkout', [\App\Http\Controllers\PaymentController::class, 'createCheckout'])->name('api.payments.checkout.public');
 
+if (file_exists(__DIR__.'/assistant-api.php')) require __DIR__.'/assistant-api.php';
+
+Route::post('/textlink/failed', [\App\Http\Controllers\TextLinkWebhookController::class, 'failed'])->middleware('throttle:60,1');

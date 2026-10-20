@@ -29,7 +29,8 @@ class PaymentController extends Controller
     public function createCheckout(Request $request): JsonResponse
     {
         $passenger = $request->user();
-        $passengerId = $passenger?->id ?? $request->input('passenger_id');
+        $passengerId = $passenger?->id;
+        abort_unless($passenger instanceof \App\Models\Passenger, 403);
 
         // 1. If existing booking ID is provided
         if ($request->filled('booking_id')) {
@@ -38,15 +39,16 @@ class PaymentController extends Controller
                 return response()->json(['message' => 'Booking not found.'], 404);
             }
 
-            // Ensure only pending or to_be_confirmed bookings can be paid
-            if ($booking->status === 'confirmed') {
+            abort_unless((int) $booking->passenger_id === (int) $passengerId, 403);
+            // Paid, cancelled and expired bookings cannot open checkout.
+            if ($booking->status !== 'pending' || $booking->payment_received_at || ($booking->reservation_expires_at && $booking->reservation_expires_at->isPast())) {
                 return response()->json([
                     'message' => 'This booking has already been paid and confirmed.',
                     'booking' => $booking,
                 ], 400);
             }
 
-            return $this->dispatchPayMongoSession($booking);
+            try { return $this->dispatchPayMongoSession($booking); } catch (\Throwable $e) { return response()->json(['message' => 'Payment checkout is unavailable. Your reservation can be retried before it expires.'], 503); }
         }
 
         // 2. Otherwise validate and reserve seats atomically
@@ -58,7 +60,7 @@ class PaymentController extends Controller
             'seat_count' => ['required', 'integer', 'min:1'],
             'seat_numbers' => ['nullable'],
             'seat_breakdown' => ['nullable'],
-            'amount_collected' => ['required', 'numeric', 'min:0'],
+            'amount_collected' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
         ]);
 
@@ -84,9 +86,10 @@ class PaymentController extends Controller
         $storedPhotoPaths = [];
         foreach ($request->allFiles() as $key => $file) {
             if (str_starts_with($key, 'passenger_id_photos_')) {
+                \Illuminate\Support\Facades\Validator::make(['photo'=>$file], ['photo'=>'required|image|mimes:jpg,jpeg,png,webp|max:5120'])->validate();
                 $index = (int) str_replace('passenger_id_photos_', '', $key);
-                $path = $file->store('discount_ids', 'public');
-                $storedPhotoPaths[$index] = '/storage/' . $path;
+                $path = $file->store('discount_ids', 'local');
+                $storedPhotoPaths[$index] = '/admin/discount-id/' . basename($path);
             }
         }
 
@@ -114,7 +117,8 @@ class PaymentController extends Controller
                 'seat_count' => $validated['seat_count'],
                 'seat_numbers' => $seatNumbers,
                 'seat_breakdown' => $seatBreakdown,
-                'amount_collected' => $validated['amount_collected'],
+                'amount_collected' => 0,
+                'calculate_fare' => true,
                 'payment_method' => 'GCash / QR Ph (PayMongo)',
                 'status' => 'pending',
                 'notes' => $validated['notes'] ?? null,
@@ -141,8 +145,8 @@ class PaymentController extends Controller
                 'exception' => $e,
             ]);
             return response()->json([
-                'message' => 'Unable to initialize checkout session: ' . $e->getMessage(),
-            ], 500);
+                'message' => 'Payment checkout is unavailable. Please retry before the reservation expires.',
+            ], 503);
         }
     }
 
@@ -151,10 +155,15 @@ class PaymentController extends Controller
      */
     private function dispatchPayMongoSession(Booking $booking): JsonResponse
     {
-        $session = $this->payMongoService->createCheckoutSession($booking);
+        $session = \Illuminate\Support\Facades\DB::transaction(function () use ($booking) {
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            if ($locked->status !== 'pending' || $locked->payment_received_at) throw new \RuntimeException('This reservation cannot be paid.');
+            return $this->payMongoService->createCheckoutSession($locked);
+        });
 
         return response()->json([
             'success' => true,
+            'mock' => $session['mock'] ?? false,
             'message' => 'PayMongo checkout session created successfully.',
             'checkout_url' => $session['checkout_url'],
             'checkout_session_id' => $session['checkout_session_id'],
@@ -181,21 +190,11 @@ class PaymentController extends Controller
      */
     public function showMockCheckout(Request $request)
     {
-        $ref = $request->query('ref');
+        abort_unless($this->payMongoService->isMockEnvironment(), 404);
+        $request->validate(['ref' => 'required|string', 'session_id' => 'required|string']);
         $sessionId = $request->query('session_id');
-
-        $booking = Booking::with(['tripSchedule.boat'])
-            ->where(function ($query) use ($ref, $sessionId) {
-                if ($ref) $query->where('reference_number', $ref);
-                if ($sessionId) $query->orWhere('paymongo_checkout_session_id', $sessionId);
-            })
-            ->latest('id')
-            ->first();
-
-        if (!$booking) {
-            abort(404, 'Booking not found for payment session.');
-        }
-
+        abort_unless(str_starts_with($sessionId, 'cs_mock_'), 404);
+        $booking = Booking::where('reference_number', $request->query('ref'))->where('paymongo_checkout_session_id', $sessionId)->firstOrFail();
         return view('payment.mock_checkout', [
             'booking' => $booking,
             'sessionId' => $sessionId,
@@ -210,42 +209,13 @@ class PaymentController extends Controller
      */
     public function processMockPayment(Request $request)
     {
-        $ref = $request->input('ref');
+        abort_unless($this->payMongoService->isMockEnvironment(), 404);
+        $request->validate(['ref' => 'required|string', 'session_id' => 'required|string']);
         $sessionId = $request->input('session_id');
-
-        $booking = Booking::where(function ($query) use ($ref, $sessionId) {
-                if ($ref) $query->where('reference_number', $ref);
-                if ($sessionId) $query->orWhere('paymongo_checkout_session_id', $sessionId);
-            })
-            ->latest('id')
-            ->firstOrFail();
-
-        // Simulate PayMongo payment identifiers
-        $paymentId = 'pay_sim_' . \Illuminate\Support\Str::random(24);
-        $paymentIntentId = $booking->paymongo_payment_intent_id ?: ('pi_sim_' . \Illuminate\Support\Str::random(24));
-
-        $booking->update([
-            'payment_method' => 'GCash / QR Ph (PayMongo)',
-            'paymongo_payment_id' => $paymentId,
-            'paymongo_payment_intent_id' => $paymentIntentId,
-        ]);
-
-        $hasDiscounts = $booking->hasDiscounts();
-
-        if ($hasDiscounts) {
-            // Holding state for Admin verification
-            $booking->update([
-                'status' => 'to_be_confirmed',
-            ]);
-        } else {
-            // Regular tickets auto-confirm
-            $booking->update([
-                'status' => 'confirmed',
-            ]);
-            $booking->generateQrCode();
-        }
-
-        return redirect("/payment/success?ref={$booking->reference_number}&status=paid");
+        abort_unless(str_starts_with($sessionId, 'cs_mock_'), 404);
+        $booking = Booking::where('reference_number', $request->input('ref'))->where('paymongo_checkout_session_id', $sessionId)->firstOrFail();
+        app(\App\Services\PaymentCaptureService::class)->capture($booking, $sessionId, 'pay_mock_'.\Illuminate\Support\Str::random(24), (int) round((float) $booking->amount_collected * 100), 'PHP', $booking->paymongo_payment_intent_id);
+        return redirect(\Illuminate\Support\Facades\URL::temporarySignedRoute('payment.success', now()->addHours(2), ['ref'=>$booking->reference_number]));
     }
 
     /**
@@ -258,44 +228,7 @@ class PaymentController extends Controller
         $ref = $request->query('ref');
         $booking = Booking::where('reference_number', $ref)->first();
 
-        // If booking is still pending upon landing on success page, verify PayMongo status
-        if ($booking && $booking->status === 'pending') {
-            $isPaid = $request->query('status') === 'paid';
-            $paymentId = null;
-
-            if ($booking->paymongo_checkout_session_id) {
-                $session = $this->payMongoService->getCheckoutSession($booking->paymongo_checkout_session_id);
-                if ($session) {
-                    $attributes = $session['attributes'] ?? [];
-                    $payments = $attributes['payments'] ?? [];
-                    if (!empty($payments)) {
-                        $isPaid = true;
-                        $paymentId = $payments[0]['id'] ?? null;
-                    } elseif (($attributes['status'] ?? '') === 'paid') {
-                        $isPaid = true;
-                    }
-                }
-            }
-
-            if ($isPaid) {
-                $updateData = [
-                    'payment_method' => 'GCash / QR Ph (PayMongo)',
-                ];
-                if ($paymentId) {
-                    $updateData['paymongo_payment_id'] = $paymentId;
-                }
-
-                if ($booking->hasDiscounts()) {
-                    $updateData['status'] = 'to_be_confirmed';
-                    $booking->update($updateData);
-                } else {
-                    $updateData['status'] = 'confirmed';
-                    $booking->update($updateData);
-                    $booking->generateQrCode();
-                }
-            }
-        }
-
+        // The browser redirect is informational only. Only a verified provider event can confirm payment.
         return view('payment.success', [
             'booking' => $booking,
             'ref' => $ref,

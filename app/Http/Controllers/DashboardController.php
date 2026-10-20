@@ -22,11 +22,11 @@ class DashboardController extends Controller
 
         // 1. KPI Metrics
         $todayBookings = Booking::whereDate('created_at', $today)
-            ->whereIn('status', ['confirmed', 'completed', 'Approved'])
+            ->earning()
             ->get();
 
         $todayRevenue = $todayBookings->sum('amount_collected');
-        $totalSalesAllTime = Booking::whereIn('status', ['confirmed', 'completed', 'Approved'])->sum('amount_collected');
+        $totalSalesAllTime = Booking::earning()->sum('amount_collected');
 
         $activeBoatsCount = Boat::where('status', 'Active')->count();
         $totalBoatsCount = Boat::count();
@@ -58,7 +58,7 @@ class DashboardController extends Controller
             $date = Carbon::today('Asia/Manila')->subDays($i);
             $dayName = $date->format('D (M d)');
             $dayRevenue = Booking::whereDate('trip_date', $date)
-                ->whereIn('status', ['confirmed', 'completed', 'Approved'])
+                ->earning()
                 ->sum('amount_collected');
             
             $weeklyData[] = [
@@ -68,6 +68,9 @@ class DashboardController extends Controller
         }
 
         return view('admin.welcome_dashboard', [
+            'pendingReviewCount' => Booking::where(fn($q) => $q->whereRaw("LOWER(status) = 'to_be_confirmed'")->orWhere('payment_review_required',true))->count(),
+            'pendingPaymentCount' => Booking::whereRaw("LOWER(status) = 'pending'")->count(),
+            'upcomingTrips' => TripSchedule::with('boat')->where('departure_time', '>', now())->whereRaw("LOWER(status) IN ('scheduled','boarding','active')")->orderBy('departure_time')->take(5)->get(),
             'todayRevenue' => $todayRevenue,
             'totalSalesAllTime' => $totalSalesAllTime,
             'activeBoatsCount' => $activeBoatsCount,

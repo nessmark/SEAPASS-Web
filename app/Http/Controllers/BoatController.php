@@ -121,6 +121,7 @@ class BoatController extends Controller
 
     public function destroy(Boat $boat)
     {
+        if (\App\Models\TripSchedule::where('boat_id', $boat->id)->exists()) return back()->with('error','Vessels with trip history cannot be deleted. Set the vessel inactive instead.');
         // Delete image if exists
         if ($boat->image) {
             $this->deleteImage($boat->image);

@@ -23,6 +23,7 @@ class BookingVerificationController extends Controller
             ?? $request->input('code')
             ?? $request->getContent();
 
+        $boardingToken = $request->input('boarding_token');
         $referenceNumber = null;
         $fallbackPassengerName = null;
         $fallbackVessel = null;
@@ -34,6 +35,7 @@ class BookingVerificationController extends Controller
             if (str_starts_with($trimmed, '{') && str_ends_with($trimmed, '}')) {
                 $decoded = json_decode($trimmed, true);
                 if (is_array($decoded)) {
+                    $boardingToken = $decoded['boarding_token'] ?? $boardingToken;
                     $referenceNumber = trim((string) ($decoded['booking_ref'] ?? $decoded['reference_number'] ?? $decoded['ref'] ?? ''));
                     $fallbackPassengerName = $decoded['passenger_name'] ?? null;
                     $fallbackVessel = $decoded['vessel'] ?? $decoded['vessel_name'] ?? null;
@@ -44,6 +46,7 @@ class BookingVerificationController extends Controller
                 $referenceNumber = $trimmed;
             }
         } elseif (is_array($rawPayload)) {
+            $boardingToken = $rawPayload['boarding_token'] ?? $boardingToken;
             $referenceNumber = trim((string) ($rawPayload['booking_ref'] ?? $rawPayload['reference_number'] ?? $rawPayload['ref'] ?? ''));
             $fallbackPassengerName = $rawPayload['passenger_name'] ?? null;
             $fallbackVessel = $rawPayload['vessel'] ?? $rawPayload['vessel_name'] ?? null;
@@ -84,11 +87,18 @@ class BookingVerificationController extends Controller
             ], 404);
         }
 
+        $manual = $request->boolean('manual_lookup') && $request->user()?->role === 'admin';
+        if (!$manual && (!is_string($boardingToken) || !hash_equals($booking->boardingToken($fallbackSeat ? strtoupper(trim((string) $fallbackSeat)) : null), $boardingToken))) return response()->json(['success'=>false,'status'=>'INVALID_SIGNATURE','message'=>'This boarding QR is invalid. Ask the passenger to refresh their ticket.'],422);
+        if ($booking->tripSchedule && strtolower($booking->tripSchedule->status) === 'cancelled') return response()->json(['success'=>false,'status'=>'TRIP_CANCELLED','message'=>'This trip has been cancelled.'],422);
+
         $vesselName = $booking->tripSchedule?->boat?->name ?? 'Commercial Vessel';
         $seatList = is_array($booking->seat_numbers) 
             ? implode(', ', $booking->seat_numbers) 
             : ($booking->seat_numbers ?: 'General Allocation');
 
+        $scanSeat = $fallbackSeat ? strtoupper(trim((string) $fallbackSeat)) : null;
+        if ($scanSeat && !in_array($scanSeat, $booking->seat_numbers ?? [], true)) return response()->json(['success'=>false,'status'=>'INVALID_SEAT','message'=>'Seat does not belong to this booking.'],422);
+        if ($scanSeat) $seatList = $scanSeat;
         $tripDateFormatted = $booking->trip_date ? $booking->trip_date->format('Y-m-d') : null;
         $todayFormatted = now('Asia/Manila')->format('Y-m-d');
 
@@ -295,10 +305,18 @@ class BookingVerificationController extends Controller
         $scannerUser = $request->user('sanctum') ?? $request->user();
         $boardedTimestamp = now();
 
-        $booking->is_boarded = true;
-        $booking->boarded_at = $boardedTimestamp;
-        $booking->boarded_by = $scannerUser?->id;
-        $booking->save();
+        $updated = \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $scanSeat, $boardedTimestamp, $scannerUser) {
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            if ($locked->status !== 'confirmed' || $locked->is_boarded) return false;
+            $already = $locked->boarded_seats ?? [];
+            $seats = $scanSeat ? [$scanSeat] : ($locked->seat_numbers ?? []);
+            foreach ($seats as $seat) if (isset($already[$seat])) return false;
+            foreach ($seats as $seat) $already[$seat] = $boardedTimestamp->toIso8601String();
+            $allBoarded = count($already) >= count($locked->seat_numbers ?? []);
+            $locked->update(['boarded_seats'=>$already,'is_boarded'=>$allBoarded,'boarded_at'=>$allBoarded ? $boardedTimestamp : null,'boarded_by'=>$scannerUser?->id]);
+            return true;
+        });
+        if (!$updated) return response()->json(['success'=>false,'status'=>'ALREADY_BOARDED','message'=>'This ticket has already been used or is no longer valid.'],409);
 
         // 7. Record Boarding Audit Log
         AuditLog::record(

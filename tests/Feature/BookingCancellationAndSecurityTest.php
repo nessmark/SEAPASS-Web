@@ -83,7 +83,7 @@ class BookingCancellationAndSecurityTest extends TestCase
      */
     public function test_admin_booking_status_endpoint_cancellation_reclaims_seats(): void
     {
-        $user = \App\Models\User::factory()->create();
+        $user = \App\Models\User::factory()->create(['role'=>'admin','is_active'=>true]);
 
         $boat = Boat::create([
             'name' => 'M/V FastCat',

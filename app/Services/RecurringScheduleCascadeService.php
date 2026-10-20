@@ -434,6 +434,8 @@ class RecurringScheduleCascadeService
             }
         }
 
+        app(SmsService::class)->send($booking->registered_contact_number, $body, 'reschedule:'.$booking->id.':'.$newTrip->id.':'.$newTrip->departure_time->timestamp);
+
         // 2. Email Notification
         if (!empty($booking->email)) {
             try {

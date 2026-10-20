@@ -20,6 +20,15 @@ class AdvisoryController extends Controller
      * GET /admin/travel-advisory
      * Display travel advisory dashboard for admin.
      */
+    public function adminList(): JsonResponse { return response()->json(['success'=>true, 'data'=>\App\Models\TravelAdvisory::latest()->get()]); }
+
+    public function archive(\App\Models\TravelAdvisory $advisory): JsonResponse {
+        $advisory->update(['status'=>'Archived']);
+        Advisory::where('title',$advisory->title)->where('route',$advisory->route)->update(['is_published'=>false]);
+        \App\Models\AuditLog::record('advisory','Advisory Archived','Archived advisory #'.$advisory->id);
+        return response()->json(['success'=>true,'advisory'=>$advisory]);
+    }
+
     public function adminIndex(): View
     {
         $advisories = \App\Models\TravelAdvisory::orderBy('created_at', 'desc')->get();
@@ -34,12 +43,6 @@ class AdvisoryController extends Controller
         $user = $request->user('sanctum') ?? auth('sanctum')->user();
         if ($user instanceof Passenger) {
             return $user;
-        }
-
-        $userId = $user?->id ?? $request->user()?->id;
-        if ($userId) {
-            $p = Passenger::find($userId);
-            if ($p) return $p;
         }
 
         $token = $request->bearerToken();
@@ -237,7 +240,7 @@ class AdvisoryController extends Controller
             'until' => 'nullable|string',
             'message' => 'nullable|string',
             'content' => 'nullable|string',
-            'status' => 'nullable|string',
+            'status' => 'nullable|in:Published,Draft',
             'publish_push' => 'nullable|boolean',
         ]);
 
@@ -269,7 +272,7 @@ class AdvisoryController extends Controller
                 'success' => true,
                 'message' => 'This advisory has already been published. Duplicate publish prevented.',
                 'advisory' => $recentDuplicate,
-                'push_status' => 'Sent',
+                'push_status' => 'Not Sent',
                 'is_duplicate' => true,
             ]);
         }
@@ -299,7 +302,7 @@ class AdvisoryController extends Controller
                 'affected_route' => $route,
                 'effective_from' => $data['effective_from'] ?? null,
                 'until' => $data['until'] ?? null,
-                'is_published' => 1,
+                'is_published' => $publishedAt !== null,
                 'published_at' => $publishedAt,
             ]
         );
@@ -315,7 +318,7 @@ class AdvisoryController extends Controller
                     'until' => $data['until'] ?? null,
                     'severity' => ucfirst($severity),
                     'status' => $status,
-                    'push_status' => $publishedAt ? 'Sent' : 'Not Sent',
+                    'push_status' => 'Not Sent',
                     'message' => $data['message'] ?? $title,
                 ]
             );
@@ -323,23 +326,16 @@ class AdvisoryController extends Controller
             Log::warning("[AdvisoryController] TravelAdvisory sync note: " . $e->getMessage());
         }
 
-        // 3. Dispatch broadcast email only once per advisory (deduplicated by Cache lock)
-        $shouldPush = $publishedAt && ($request->boolean('publish_push') || $request->input('publish_push') === true);
-        if ($shouldPush) {
-            $lockKey = 'advisory_push_sent_' . md5($title . '_' . $route . '_' . date('Y-m-d'));
-            if (!\Illuminate\Support\Facades\Cache::has($lockKey)) {
-                \Illuminate\Support\Facades\Cache::put($lockKey, true, now()->addMinutes(15));
-                $this->dispatchAdvisoryEmails($advisory, $data['message'] ?? $data['title']);
-            } else {
-                Log::info("[AdvisoryController] Suppressed duplicate email broadcast for title: {$title}");
-            }
+        $pushStatus = 'Not Sent';
+        if ($publishedAt && $request->boolean('publish_push')) {
+            $travel = \App\Models\TravelAdvisory::where('title', $title)->first();
+            if ($travel) $pushStatus = app(\App\Services\AdvisoryDeliveryService::class)->broadcast($travel);
         }
-
         return response()->json([
             'success' => true,
             'message' => 'Advisory published successfully.',
             'advisory' => $advisory,
-            'push_status' => $shouldPush ? 'Sent' : 'Not Sent',
+            'push_status' => $pushStatus,
         ]);
     }
 

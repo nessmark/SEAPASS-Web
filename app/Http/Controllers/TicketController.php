@@ -29,9 +29,9 @@ class TicketController extends Controller
 
         $bookings = $query->get();
 
-        $pendingBookings = $bookings->filter(fn ($b) => in_array(strtolower((string) $b->status), ['pending', 'to_be_confirmed']));
+        $pendingBookings = $bookings->filter(fn ($b) => in_array(strtolower((string) $b->status), ['pending', 'to_be_confirmed']) || $b->payment_review_required);
         $confirmedBookings = $bookings->filter(fn ($b) => strtolower((string) $b->status) === 'confirmed');
-        $cancelledBookings = $bookings->filter(fn ($b) => strtolower((string) $b->status) === 'cancelled');
+        $cancelledBookings = $bookings->filter(fn ($b) => in_array(strtolower((string) $b->status), ['cancelled','expired']) && !$b->payment_review_required);
         $toBeConfirmedCount = $bookings->filter(fn ($b) => strtolower((string) $b->status) === 'to_be_confirmed')->count();
 
         return view('admin.ticket_book_dashboard', [

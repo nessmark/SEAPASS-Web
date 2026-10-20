@@ -20,3 +20,6 @@ Schedule::command('trips:sync-statuses')->everyMinute();
  */
 Schedule::command('schedules:generate-recurring --days=90')->dailyAt('00:00');
 
+
+Schedule::command('bookings:expire')->everyMinute()->withoutOverlapping();
+Schedule::command('payments:sync-refunds')->everyFiveMinutes()->withoutOverlapping();

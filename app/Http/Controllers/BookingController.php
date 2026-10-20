@@ -51,26 +51,15 @@ class BookingController extends Controller
             $seatBreakdown = json_decode($seatBreakdown, true);
         }
 
-        // Process uploaded discount ID photos from mobile app
-        $discountDir = public_path('discount_ids');
-        if (!File::exists($discountDir)) {
-            File::makeDirectory($discountDir, 0755, true);
-        }
-
         $storedPhotoPaths = [];
         if (is_array($seatBreakdown)) {
             foreach ($seatBreakdown as $idx => $item) {
-                $file = $request->file("passenger_id_photos_{$idx}")
-                    ?? $request->file("passenger_id_photos.{$idx}")
-                    ?? ($request->file('passenger_id_photos')[$idx] ?? null);
-
-                if ($file && $file->isValid()) {
-                    $ext = $file->getClientOriginalExtension() ?: 'jpg';
-                    $filename = 'id_' . time() . "_{$idx}_" . Str::random(8) . '.' . $ext;
-                    $file->move($discountDir, $filename);
-                    $relativeUrl = '/discount_ids/' . $filename;
-                    $seatBreakdown[$idx]['id_photo_url'] = $relativeUrl;
-                    $storedPhotoPaths[] = $relativeUrl;
+                $file = $request->file("passenger_id_photos_{$idx}") ?? $request->file("passenger_id_photos.{$idx}");
+                if ($file) {
+                    \Illuminate\Support\Facades\Validator::make(['photo'=>$file], ['photo'=>'required|image|mimes:jpg,jpeg,png,webp|max:5120'])->validate();
+                    $path = $file->store('discount_ids', 'local');
+                    $seatBreakdown[$idx]['id_photo_url'] = '/admin/discount-id/'.basename($path);
+                    $storedPhotoPaths[] = '/admin/discount-id/'.basename($path);
                 }
             }
         }
@@ -103,6 +92,7 @@ class BookingController extends Controller
                 'seat_numbers' => $seatNumbers,
                 'seat_breakdown' => $seatBreakdown,
                 'amount_collected' => $validated['amount_collected'] ?? 0,
+                'calculate_fare' => true,
                 'payment_method' => 'Mobile App',
                 'status' => 'pending',
                 'notes' => $validated['notes'] ?? null,
@@ -178,7 +168,7 @@ class BookingController extends Controller
             ->where(function ($q) use ($passenger) {
                 $q->where('passenger_id', $passenger->id);
                 if (!empty($passenger->email)) {
-                    $q->orWhere('email', $passenger->email);
+                    $q->orWhere(fn($legacy) => $legacy->whereNull('passenger_id')->where('email', $passenger->email));
                 }
             })
             ->orderBy('created_at', 'desc');
@@ -199,14 +189,17 @@ class BookingController extends Controller
                 'seat_breakdown'      => $booking->seat_breakdown,
                 'amount_collected'    => (float) $booking->amount_collected,
                 'status'              => $booking->status,
+                'reservation_expires_at' => $booking->reservation_expires_at?->toIso8601String(),
+                'refund_status' => $booking->refund_status,
+                'refund_amount' => (float) $booking->refund_amount,
                 'qr_code'             => $booking->qr_code,
                 'notes'               => $booking->notes,
             ];
         });
 
-        $pending   = $transformed->where('status', 'pending')->values();
+        $pending   = $transformed->whereIn('status', ['pending', 'to_be_confirmed'])->values();
         $confirmed = $transformed->where('status', 'confirmed')->values();
-        $cancelled = $transformed->where('status', 'cancelled')->values();
+        $cancelled = $transformed->whereIn('status', ['cancelled', 'expired'])->values();
 
         return response()->json([
             'all'       => $transformed->values(),
@@ -237,6 +230,7 @@ class BookingController extends Controller
         ]);
 
         $status = $validated['status'];
+        if ($status === 'confirmed' && str_contains((string) $booking->payment_method, 'PayMongo') && !$booking->payment_received_at) return response()->json(['message' => 'Payment must be verified by PayMongo before confirmation.'], 422);
 
         if ($status === 'confirmed') {
             $booking->status = 'confirmed';
@@ -272,6 +266,7 @@ class BookingController extends Controller
             ], 422);
         }
 
+        if (str_contains((string) $booking->payment_method, 'PayMongo') && !$booking->payment_received_at) return response()->json(['message' => 'Payment must be verified by PayMongo before confirmation.'], 422);
         $booking->status = 'confirmed';
         $booking->ensureReferenceNumber();
         $booking->generateQrCode();
@@ -282,6 +277,7 @@ class BookingController extends Controller
             "Approved booking #{$booking->reference_number} for {$booking->passenger_name} ({$booking->route})"
         );
 
+        app(\App\Services\SmsService::class)->bookingUpdate($booking, 'confirmed');
         // Dispatch asynchronous confirmation email to passenger
         $this->sendBookingConfirmationEmail($booking);
 

@@ -128,19 +128,18 @@ class AuthController extends Controller
         }
 
         $email = $request->string('email')->lower()->toString();
-        $otp = sprintf("%06d", mt_rand(100000, 999999));
+        $otp = sprintf("%06d", random_int(100000, 999999));
 
         // Cache OTP for 10 minutes
         Cache::put('otp_' . $email, $otp, now()->addMinutes(10));
 
-        // Log OTP code for debugging / local testing
-        Log::info("SeaPass OTP generated for {$email}: {$otp}");
 
         // Dispatch OTP email immediately to recipient
         try {
-            Mail::to($email)->send(new SendOtpMail($otp));
+            Mail::to($email)->queue(new SendOtpMail($otp));
         } catch (\Throwable $e) {
-            Log::error("Failed to send OTP email to {$email}: " . $e->getMessage());
+            Cache::forget('otp_' . $email);
+            return response()->json(['message' => 'Email verification is unavailable. Please retry later.'], 503);
         }
 
         return response()->json([
@@ -237,6 +236,21 @@ class AuthController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
+    public function updateProfile(Request $request) {
+        $data = $request->validate(['name'=>'sometimes|required|string|max:255','phone'=>['sometimes','required','regex:/^(?:\+?63|0)9[0-9]{9}$/']]);
+        $request->user()->update($data);
+        return response()->json(['message'=>'Profile updated.','data'=>$request->user()->fresh()]);
+    }
+
+    public function updatePassword(Request $request) {
+        $data = $request->validate(['current_password'=>'required|string','password'=>'required|string|min:8|confirmed']);
+        if (!Hash::check($data['current_password'], $request->user()->password)) return response()->json(['message'=>'The current password is incorrect.'],422);
+        $request->user()->update(['password'=>Hash::make($data['password'])]);
+        $currentId = $request->user()->currentAccessToken()?->id;
+        $request->user()->tokens()->when($currentId, fn($q) => $q->where('id','!=',$currentId))->delete();
+        return response()->json(['message'=>'Password updated. Other sessions have been signed out.']);
+    }
+
     public function profile(Request $request)
     {
         $passenger = $request->user();
