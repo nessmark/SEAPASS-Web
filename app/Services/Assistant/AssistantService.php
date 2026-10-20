@@ -59,7 +59,7 @@ class AssistantService
             $requestTimeout = (int) min(40, max(5, floor($remaining)));
 
             try {
-                $response = Http::timeout($requestTimeout)->withHeaders(['x-goog-api-key' => config('assistant.api_key')])->post('https://generativelanguage.googleapis.com/v1beta/models/'.rawurlencode(config('assistant.chat_model')).':generateContent', [
+                $response = Http::connectTimeout(10)->timeout($requestTimeout)->withOptions(config('assistant.force_ipv4') ? ['force_ip_resolve' => 'v4'] : [])->withHeaders(['x-goog-api-key' => config('assistant.api_key')])->post('https://generativelanguage.googleapis.com/v1beta/models/'.rawurlencode(config('assistant.chat_model')).':generateContent', [
                     'systemInstruction' => ['parts' => [['text' => $this->prompt($user, $context)]]],
                     'contents' => $history,
                     'tools' => [['functionDeclarations' => $this->tools->definitions($user)]],
@@ -133,7 +133,7 @@ class AssistantService
         $this->tools->role($user);
         abort_unless(config('assistant.api_key'), 503, 'Live voice is not connected. Text chat may be available once an AI provider is configured.');
         try {
-            $response = Http::timeout(12)->withHeaders(['x-goog-api-key' => config('assistant.api_key')])->post('https://generativelanguage.googleapis.com/v1alpha/auth_tokens', [
+            $response = Http::connectTimeout(10)->timeout(12)->withOptions(config('assistant.force_ipv4') ? ['force_ip_resolve' => 'v4'] : [])->withHeaders(['x-goog-api-key' => config('assistant.api_key')])->post('https://generativelanguage.googleapis.com/v1alpha/auth_tokens', [
                 'uses' => 1,
                 'expireTime' => now()->addMinutes(30)->toIso8601String(),
                 'newSessionExpireTime' => now()->addMinutes(2)->toIso8601String(),
