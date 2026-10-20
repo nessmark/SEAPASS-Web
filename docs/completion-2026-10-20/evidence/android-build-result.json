@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-20T14:02:46.997462+00:00",
+  "artifact": "/home/kiuren/Projects/NESMARK/mobile/build/app/outputs/flutter-apk/app-debug.apk",
+  "bytes": 199318096,
+  "sha256": "3ad55650359fce011650b1207a7803a93150d4461c6bb9dc018a92761d567d46",
+  "build": "debug",
+  "source_commit": "1637290",
+  "compile_sdk": 36,
+  "target_sdk": 36,
+  "min_sdk": 24,
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64"
+  ],
+  "apk_signature_v2_verified": true,
+  "installed_on_device": false,
+  "physical_device_acceptance": false,
+  "api_base_url": "http://127.0.0.1:8000",
+  "network_note": "Loopback preview requires adb reverse tcp:8000 tcp:8000 on an attached phone, or selecting a reachable API server in app connection settings."
+}

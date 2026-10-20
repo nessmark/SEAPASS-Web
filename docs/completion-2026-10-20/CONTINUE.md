@@ -28,7 +28,7 @@ No active source workers remain. Do not restart old Antigravity PIDs from histor
 - Provider default routing timed out. The preview now opts into IPv4, with bounded connection setup. A subsequent real fare-tool and live audio probe passed at13:42UTC; latency remains provider/network dependent.
 - Release web build passed after final seat-map changes; analyzer clean; final Flutter41tests passed. Backend suites were rerun after the provider connection change:80tests454assertions pass on both databases.
 
-Android compilation is being completed separately; the final result will be appended below. Do not infer an APK from SDK installation.
+Android debug APK compilation passed in301seconds after SDK repair. APK Signature Scheme v2 verification passed. Artifact: mobile/build/app/outputs/flutter-apk/app-debug.apk, approximately191MiB. Minimum Android API24, target/compile36, arm64-v8a/armeabi-v7a/x86_64. SHA256 and exact size are in evidence/android-build-result.json. No device installation or physical acceptance was performed. This local debug build points at127.0.0.1:8000; a phone requires adb reverse tcp:8000 tcp:8000 or a reachable API selected in connection settings.
 
 ## Local runtime
 
@@ -50,7 +50,11 @@ Do not call the entire project production-ready while these gates remain. Local 
 
 ## Saved continuation safeguards
 
-- Web source additions: 2ce4c02 cache refresh and connected state; b9671be configurable provider IPv4 route. Mobile latest integrity checkpoint3e718e7.
+- Web source additions: 2ce4c02 cache refresh and connected state; b9671be configurable provider IPv4 route. Mobile latest integrity checkpoint3e718e7; acceptance/ignore checkpoint1637290.
 - SDK extraction repair restored35 symlinks from the checksum-verified official NDK archive. Clang19 now runs. Flutter's global SDK setting and ignored android/local.properties point to the actual ~/.local/share/android-sdk, not the stale ~/.local/lib path.
 - Run PHP tests through php-cli vendor/bin/phpunit, and add --configuration phpunit.mysql.xml for MariaDB. The artisan test subprocess omits the extracted runtime configuration unless PHPRC is explicitly provided.
 - Browser synthetic fill/type did not reliably update nested frame inputs. Real keyboard pressSequentially worked after the Flutter focus/semantics update settled. This did not justify bypassing authentication or changing form data through JavaScript.
+
+## Final saved state
+
+Source and acceptance are committed locally. Web acceptance checkpoint02e7d81 contains the evidence and screenshots; later documentation records the passing APK. Original palette files and owner phone-frame lock are preserved. Real merchant/SIM and physical-device gates remain open, and full browser checkout is still marked unverified. The local HTTP mock flow, actual phone ticket rendering and native compilation are separately evidenced.
