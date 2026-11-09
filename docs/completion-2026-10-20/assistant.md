@@ -105,6 +105,7 @@ Following the root integration audit, all identified material defects in the bac
 | `get_delivery_status` | `admin` | `immediate` | `status`, `limit` | 2026-11-09. SMS configured flag, exact counts by status (all time and last 24 hours), recent problem messages with masked numbers and purpose, and the last five advisory push statuses. Message text is never returned. Read only: retries stay on the SMS page. |
 | `list_staff_accounts` | `admin` | `immediate` | `role`, `port`, `active`, `limit` | 2026-11-09. Staff and admin accounts with role, assigned port and active state. Never passwords or tokens. |
 | `set_staff_active` | `admin` | `staged` | `staff_id`, `active` (both required) | 2026-11-09. Proposes activating or deactivating a port staff (scanner) account. Admin accounts, your own account and no-op changes are refused at staging and rechecked at confirmation. Applies through `UserManagementController::toggleScannerStaff` and records `Staff Account Activated` or `Staff Account Deactivated` plus the generic Assistant audit entry. |
+| `mark_notifications_read` | `passenger`, `staff`, `admin` | `staged` | passenger also `advisory_id` | 2026-11-09. Proposes marking your own unread items as read: all of them, or one advisory. Passengers: in-app notifications plus visible advisories (published after registration), written to `advisory_user_reads` exactly like `AdvisoryController::markAsRead`, so the app badge drops. Staff and admin: their own in-app notifications only. Hidden, draft or already read advisories and an empty unread list are refused at staging and rechecked at confirmation. Audited by the generic Assistant entry. |
 
 ### 2026-11-09 parity additions (web-tools stream)
 
@@ -114,6 +115,8 @@ Compared against DIELCO `src/services/assistant/tools.js`, `prompt.js` and `repo
 
 **Privacy.** New read tools never return passenger contact numbers or emails, QR payloads, boarding tokens, PayMongo payment or refund IDs, discount ID photos or SMS message text. Staff never receive passenger names from the manifest summary; `lookup_ticket` shows the ticket holder names a gate scan already shows.
 
+**Accuracy.** The `update_trip` description now says that a confirmed reschedule or cancellation texts the affected passengers (that is what the confirm branch does). The admin prompt says which confirmed changes notify passengers automatically; every role is told it cannot write or send its own SMS, email or push messages.
+
 **Prompt.** `AssistantService::prompt()` now states the role brief (passenger, staff with port, admin), the current Manila time, the staged tools actually offered to that role, a never-claim-unconfirmed-actions rule, a brief-by-default rule for quick questions, and the DIELCO strategic report structure: one format question (PDF or detailed) unless already chosen, fresh role-scoped data, "Strategic report" then a two-sentence executive brief, then Current position, Priority risks, Recommended actions, Next 24 hours, Measures and limitations, with ranked actions and recommended owners and timeframes labeled as recommendations. Heading names match `public/js/assistant/report.js` so PDF export styles them.
 
 **Deliberately not added.**
@@ -121,7 +124,9 @@ Compared against DIELCO `src/services/assistant/tools.js`, `prompt.js` and `repo
 - Reject and refund, and SMS retry. Both exist (`AdminBookingController::rejectAndRefundBooking`, `SmsController::retry`) but send real PayMongo refunds or SMS. They remain on their own pages; the assistant reads their queues.
 - Pending account approval. SeaPass has no pending-account state; scanner accounts are created active by an admin.
 
-Tests: `tests/Feature/AssistantOperationsToolsTest.php` (role gates, other port, other passenger, read-only lookup, staged confirm once, decline, recheck at confirm, privacy strings, prompt per role).
+- Admin manual boarding. `verifyTicket` accepts `manual_lookup` for admins, but the assistant has never issued boarding clearance, so this stays on the scanner page.
+
+Tests: `tests/Feature/AssistantOperationsToolsTest.php` (role gates, other port, other passenger, read-only lookup, staged confirm once, decline, recheck at confirm, privacy strings, prompt per role, mark read for own records only).
 
 ---
 

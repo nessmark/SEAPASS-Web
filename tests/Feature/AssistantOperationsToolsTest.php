@@ -538,6 +538,8 @@ class AssistantOperationsToolsTest extends TestCase
 
         $this->assertStringContainsString('Authoritative role: passenger', $passenger);
         $this->assertStringContainsString('get_my_upcoming_trip', $passenger);
+        $this->assertStringContainsString('mark_notifications_read', $passenger);
+        $this->assertStringNotContainsString('notify passengers automatically', $passenger);
         foreach (['set_staff_active', 'get_payment_reviews', 'approve_discount', 'lookup_ticket'] as $hidden) $this->assertStringNotContainsString($hidden, $passenger);
 
         $this->assertStringContainsString('Authoritative role: staff', $staff);
@@ -547,5 +549,104 @@ class AssistantOperationsToolsTest extends TestCase
 
         $this->assertStringContainsString('Authoritative role: admin', $admin);
         foreach (['set_staff_active', 'get_payment_reviews', 'get_delivery_status', 'approve_discount'] as $shown) $this->assertStringContainsString($shown, $admin);
+        $this->assertStringContainsString('notify passengers automatically', $admin);
+    }
+
+    // ---------------------------------------------------------------------
+    // Staged: mark_notifications_read (own records only)
+    // ---------------------------------------------------------------------
+
+    public function test_mark_notifications_read_is_offered_to_every_role_with_advisories_for_passengers_only(): void
+    {
+        $tools = $this->tools();
+        $byRole = [
+            'passenger' => array_column($tools->definitions($this->passenger()), null, 'name'),
+            'staff' => array_column($tools->definitions($this->staff()), null, 'name'),
+            'admin' => array_column($tools->definitions($this->admin()), null, 'name'),
+        ];
+        foreach ($byRole as $role => $defs) {
+            $this->assertArrayHasKey('mark_notifications_read', $defs, $role);
+            $this->assertContains('mark_notifications_read', $tools->staged());
+        }
+        $this->assertArrayHasKey('advisory_id', (array) $byRole['passenger']['mark_notifications_read']['parameters']['properties']);
+        $this->assertArrayNotHasKey('advisory_id', (array) $byRole['staff']['mark_notifications_read']['parameters']['properties']);
+    }
+
+    public function test_passenger_marks_only_their_own_notifications_read_after_one_confirmation(): void
+    {
+        Advisory::create(['title' => 'Before signup', 'content' => 'Old.', 'severity' => 'info', 'route' => 'All Routes', 'is_published' => true, 'published_at' => now()->subDays(3)]);
+        $juan = $this->passenger();
+        $pedro = $this->passenger('pedro@example.test', 'Pedro Other');
+        $a1 = Advisory::create(['title' => 'Surigao delay', 'content' => 'Delay.', 'severity' => 'warning', 'route' => 'All Routes', 'is_published' => true, 'published_at' => now()->addMinute()]);
+        $a2 = Advisory::create(['title' => 'Wharf works', 'content' => 'Gate 2.', 'severity' => 'info', 'route' => 'All Routes', 'is_published' => true, 'published_at' => now()->addMinute()]);
+        $push = app(FcmPushService::class);
+        $push->createInAppNotification($juan, 'Booking confirmed', 'Your booking is confirmed.', []);
+        $push->createInAppNotification($pedro, 'Pedro private', 'Pedro booking.', []);
+        Carbon::setTestNow(now()->addMinutes(5));
+
+        $proposal = $this->tools()->execute($juan, 'mark_notifications_read');
+        $this->assertSame('awaiting_user_confirmation', $proposal['status']);
+        $this->assertSame(['scope' => 'all', 'unread_notifications' => 1, 'unread_advisories' => 2], $proposal['confirmation']['args']);
+        $this->assertSame(0, AdvisoryUserRead::count(), 'Nothing changes before confirmation.');
+
+        // Another passenger cannot use the token.
+        $this->actingAs($pedro, 'sanctum')->postJson('/api/assistant/tool', ['confirmation_token' => $proposal['confirmation']['token'], 'approved' => true])->assertForbidden();
+
+        $this->actingAs($juan, 'sanctum')->postJson('/api/assistant/tool', ['confirmation_token' => $proposal['confirmation']['token'], 'approved' => true])
+            ->assertOk()->assertJsonPath('status', 'confirmed')->assertJsonPath('result.marked_notifications', 1)->assertJsonPath('result.marked_advisories', 2);
+        $this->actingAs($juan, 'sanctum')->postJson('/api/assistant/tool', ['confirmation_token' => $proposal['confirmation']['token'], 'approved' => true])->assertForbidden();
+
+        $after = $this->tools()->execute($juan, 'get_notifications')['result'];
+        $this->assertSame(0, $after['unread_in_app']);
+        $this->assertSame(0, $after['unread_advisories']);
+        $this->assertEqualsCanonicalizing([$a1->id, $a2->id], AdvisoryUserRead::where('user_id', $juan->id)->pluck('advisory_id')->all());
+        $this->assertSame(0, AdvisoryUserRead::where('user_id', $pedro->id)->count());
+        $this->assertSame(1, $this->tools()->execute($pedro, 'get_notifications')['result']['unread_in_app'], 'Other passengers keep their unread state.');
+        $this->assertDatabaseHas('audit_logs', ['category' => 'Assistant', 'action' => 'mark_notifications_read']);
+
+        // Nothing left to mark.
+        $this->actingAs($juan, 'sanctum')->postJson('/api/assistant/tool', ['name' => 'mark_notifications_read'])->assertUnprocessable();
+    }
+
+    public function test_mark_one_advisory_read_rejects_hidden_read_and_non_passenger_targets(): void
+    {
+        $old = Advisory::create(['title' => 'Before signup', 'content' => 'Old.', 'severity' => 'info', 'route' => 'All Routes', 'is_published' => true, 'published_at' => now()->subDays(3)]);
+        $draft = Advisory::create(['title' => 'Draft', 'content' => 'Not out.', 'severity' => 'info', 'route' => 'All Routes', 'is_published' => false]);
+        $juan = $this->passenger();
+        $a1 = Advisory::create(['title' => 'Surigao delay', 'content' => 'Delay.', 'severity' => 'warning', 'route' => 'All Routes', 'is_published' => true, 'published_at' => now()->addMinute()]);
+        $a2 = Advisory::create(['title' => 'Wharf works', 'content' => 'Gate 2.', 'severity' => 'info', 'route' => 'All Routes', 'is_published' => true, 'published_at' => now()->addMinute()]);
+        Carbon::setTestNow(now()->addMinutes(5));
+
+        $this->actingAs($juan, 'sanctum')->postJson('/api/assistant/tool', ['name' => 'mark_notifications_read', 'args' => ['advisory_id' => $old->id]])->assertNotFound();
+        $this->actingAs($juan, 'sanctum')->postJson('/api/assistant/tool', ['name' => 'mark_notifications_read', 'args' => ['advisory_id' => $draft->id]])->assertNotFound();
+        $this->actingAs($juan, 'sanctum')->postJson('/api/assistant/tool', ['name' => 'mark_notifications_read', 'args' => ['advisory_id' => 'x']])->assertUnprocessable();
+
+        $one = $this->tools()->execute($juan, 'mark_notifications_read', ['advisory_id' => $a1->id]);
+        $this->assertSame(['advisory_id' => $a1->id, 'advisory' => 'Surigao delay'], $one['confirmation']['args']);
+        $this->assertSame(['marked_notifications' => 0, 'marked_advisories' => 1], array_intersect_key($this->tools()->confirm($juan, $one['confirmation']['token'], true)['result'], array_flip(['marked_notifications', 'marked_advisories'])));
+        $this->assertSame([$a1->id], AdvisoryUserRead::where('user_id', $juan->id)->pluck('advisory_id')->all(), 'Only the chosen advisory is marked.');
+        $this->actingAs($juan, 'sanctum')->postJson('/api/assistant/tool', ['name' => 'mark_notifications_read', 'args' => ['advisory_id' => $a1->id]])->assertUnprocessable();
+
+        // Declining changes nothing.
+        $declined = $this->tools()->execute($juan, 'mark_notifications_read', ['advisory_id' => $a2->id]);
+        $this->assertSame('cancelled', $this->tools()->confirm($juan, $declined['confirmation']['token'], false)['status']);
+        $this->assertFalse(AdvisoryUserRead::where('user_id', $juan->id)->where('advisory_id', $a2->id)->exists());
+    }
+
+    public function test_staff_mark_read_covers_only_their_own_in_app_notifications(): void
+    {
+        $advisory = Advisory::create(['title' => 'Wharf works', 'content' => 'Gate 2.', 'severity' => 'info', 'route' => 'All Routes', 'is_published' => true, 'published_at' => now()]);
+        // Staff have no advisories to mark, and only their own in-app notifications.
+        $staff = $this->staff();
+        $other = $this->staff('San Jose Port', 'other@example.test');
+        $this->actingAs($staff, 'api')->postJson('/api/assistant/tool', ['name' => 'mark_notifications_read', 'args' => ['advisory_id' => $advisory->id]])->assertUnprocessable();
+        $this->actingAs($staff, 'api')->postJson('/api/assistant/tool', ['name' => 'mark_notifications_read'])->assertUnprocessable();
+        $push = app(FcmPushService::class);
+        $push->createInAppNotification($staff, 'Shift note', 'Gate 2 today.', []);
+        $push->createInAppNotification($other, 'Other note', 'Not yours.', []);
+        $staged = $this->tools()->execute($staff, 'mark_notifications_read');
+        $this->assertSame(['scope' => 'all', 'unread_notifications' => 1], $staged['confirmation']['args']);
+        $this->assertSame(1, $this->tools()->confirm($staff, $staged['confirmation']['token'], true)['result']['marked_notifications']);
+        $this->assertSame(1, $this->tools()->execute($other, 'get_notifications')['result']['unread_in_app']);
     }
 }
