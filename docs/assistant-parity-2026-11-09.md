@@ -73,3 +73,14 @@ Assistant asset version: `v=20261109-parity`.
   a moment for trailing text, and that late text no longer reopens the turn or trips the "took too long" timer.
 - Tests: PHP 119 / 1582 assertions, JS 64 / 64. Real check: two typed admin questions answered over Live
   (session minted, websocket opened, tool called through /assistant/tool, the text endpoint never used).
+
+### Final verification on 5292449 (web) and bf08e35 (mobile), 2026-11-10
+
+- PHP 119 / 1582, JS 64 / 64, Flutter 105 pass, flutter analyze clean.
+- Admin smoke, 1280x720 and 360x800 on dashboard, trips, tickets and fleet: launcher shows, panel opens, Esc closes,
+  no horizontal scroll, no console errors. Tour from the account button crossed dashboard to trips with the arrow
+  key, Esc ended it, and nothing was written during the tour.
+- Passenger phone app at 390x844: signed in as the seeded passenger, opened Ask SeaPass, asked "Do I have any upcoming
+  trips?". Answered over Live (session, websocket, get_my_upcoming_trip), steps line "Checked your next trip".
+- Local phone preview must be built with the local API, or a fresh browser goes to the old ngrok address:
+  `flutter build web --release --dart-define=SEAPASS_API_BASE_URL=http://127.0.0.1:8000`
