@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "notes": "Single source for console guide anchors and tours. Read by App\\Services\\Assistant\\GuideRegistry (tool validation and prompt) and injected per role into the page for public/js/assistant/guide-engine.js. Every anchor id must appear as data-guide=\"id\" in resources/views. UI copy rule: plain short English, no em dashes, en dashes or middots.",
+  "pages": {
+    "/admin/dashboard": { "label": "Dashboard", "roles": ["admin"] },
+    "/admin/boats": { "label": "Fleet Management", "roles": ["admin"] },
+    "/admin/trip-schedules": { "label": "Trip and Schedule", "roles": ["admin"] },
+    "/admin/tickets": { "label": "Ticketing and Booking", "roles": ["admin"] },
+    "/admin/travel-advisory": { "label": "Travel Advisory", "roles": ["admin"] },
+    "/admin/sms": { "label": "SMS delivery", "roles": ["admin"] },
+    "/admin/fare-management": { "label": "Fare Management", "roles": ["admin"] },
+    "/admin/reports-audit": { "label": "Reports and Audit", "roles": ["admin"] },
+    "/admin/user-management/passengers": { "label": "Passenger List", "roles": ["admin"] },
+    "/admin/user-management/scanner-staff": { "label": "Scanner Staff", "roles": ["admin"], "aliases": ["/admin/user-management/ScannerStaff"] },
+    "/admin/user-management/profile": { "label": "Profile", "roles": ["admin"], "aliases": ["/admin/profile"] }
+  },
+  "anchors": {
+    "shell.nav": { "label": "Sidebar", "description": "The console menu. Every page is listed here, port operations first and then management.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "shell.menu": { "label": "Menu button", "description": "Opens or collapses the sidebar. On a small screen it opens the page menu.", "roles": ["admin"], "page": null },
+    "shell.advisories": { "label": "Advisories shortcut", "description": "The bell opens Travel Advisory, where you prepare and publish passenger notices.", "roles": ["admin"], "page": null },
+    "shell.theme": { "label": "Light or dark switch", "description": "Switches the console between light and dark.", "roles": ["admin"], "page": null },
+    "shell.account": { "label": "Your profile", "description": "Your initial. Opens your profile with your account details.", "roles": ["admin"], "page": null },
+    "account.tour": { "label": "Take the tour", "description": "Starts the guided tour of the console. It works without the AI connection.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "account.signout": { "label": "Logout", "description": "Signs you out of the console on this device.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "assistant.launcher": { "label": "Assistant", "description": "Opens this assistant. Ask a question or ask it to show you a part of the console.", "roles": ["admin"], "page": null },
+
+    "nav.dashboard": { "label": "Dashboard link", "description": "Opens the port overview with things to do, departures and recent bookings.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "nav.fleet": { "label": "Fleet Management link", "description": "Opens the vessel list with capacity and availability.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "nav.trips": { "label": "Trip and Schedule link", "description": "Opens departures, recurring rules, seat maps and manifests.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "nav.tickets": { "label": "Ticketing and Booking link", "description": "Opens bookings, discount ID checks, the counter and refund requests.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "nav.advisories": { "label": "Travel Advisory link", "description": "Opens passenger notices with drafts, published alerts and sending status.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "nav.sms": { "label": "SMS delivery link", "description": "Opens the SMS connection and message activity.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "nav.fares": { "label": "Fare Management link", "description": "Opens the route fare matrix used at checkout.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "nav.reports": { "label": "Reports and Audit link", "description": "Opens sales, passenger counts and the audit log.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+    "nav.users": { "label": "User Management menu", "description": "Opens the passenger list and scanner staff accounts.", "roles": ["admin"], "page": null, "fallback": "shell.menu" },
+
+    "dash.counter": { "label": "Open booking counter", "description": "Goes to Ticketing and Booking to help a walk-in passenger book.", "roles": ["admin"], "page": "/admin/dashboard" },
+    "dash.attention": { "label": "Things to do", "description": "Start here for booking checks, departure preparation and passenger updates. Each row opens the screen where that work happens.", "roles": ["admin"], "page": "/admin/dashboard" },
+    "dash.departures": { "label": "Upcoming departures", "description": "The next sailings in departure order with time, vessel and a manifest download.", "roles": ["admin"], "page": "/admin/dashboard" },
+    "dash.manifest": { "label": "Manifest download", "description": "Downloads the confirmed passenger list for that trip as a CSV file.", "roles": ["admin"], "page": "/admin/dashboard", "fallback": "dash.departures" },
+    "dash.bookings": { "label": "Recent bookings", "description": "The latest passenger and counter bookings. Pending payment and ID review are different states.", "roles": ["admin"], "page": "/admin/dashboard" },
+    "dash.today": { "label": "Today at the port", "description": "Collected today, departures today, active vessels and bookings awaiting payment. Collected amounts are booking records, not a bank settlement.", "roles": ["admin"], "page": "/admin/dashboard" },
+    "dash.fleet": { "label": "Your fleet", "description": "Each vessel with its capacity. The dot shows whether it is active.", "roles": ["admin"], "page": "/admin/dashboard" },
+    "dash.updates": { "label": "Port updates", "description": "Published travel advisories, newest first.", "roles": ["admin"], "page": "/admin/dashboard" },
+
+    "fleet.add": { "label": "Add Boat", "description": "Opens the form for a new vessel with its name, capacity and availability. Opening it saves nothing.", "roles": ["admin"], "page": "/admin/boats" },
+    "fleet.list": { "label": "Vessels", "description": "Each vessel with its capacity, registry details and status.", "roles": ["admin"], "page": "/admin/boats" },
+    "fleet.status": { "label": "Vessel status", "description": "Sets a vessel to Active, Under Maintenance or Out of Service. Resolve upcoming bookings before taking a vessel out of service.", "roles": ["admin"], "page": "/admin/boats", "fallback": "fleet.list" },
+
+    "trips.add": { "label": "Add Schedule", "description": "Opens the schedule form. Choose an active vessel, route, date and time slot for one departure or a recurring rule.", "roles": ["admin"], "page": "/admin/trip-schedules" },
+    "trips.tabs": { "label": "Trip tabs", "description": "Switch between scheduled, active and recently completed trips, and recurring rules.", "roles": ["admin"], "page": "/admin/trip-schedules" },
+    "trips.recurring": { "label": "Recurring Rules", "description": "Rules that generate individual departures on the days you choose.", "roles": ["admin"], "page": "/admin/trip-schedules" },
+    "trips.list": { "label": "Scheduled trips", "description": "Upcoming departures with times, vessel and seats left.", "roles": ["admin"], "page": "/admin/trip-schedules" },
+    "trips.seats": { "label": "Seats", "description": "Opens the seat map for a departure to see which seats are taken.", "roles": ["admin"], "page": "/admin/trip-schedules", "fallback": "trips.list" },
+    "trips.manifest": { "label": "Passenger manifest", "description": "Downloads the confirmed passenger list for that departure as a CSV file.", "roles": ["admin"], "page": "/admin/trip-schedules", "fallback": "trips.list" },
+
+    "tickets.date": { "label": "Trip date filter", "description": "Choose a trip date to list its bookings.", "roles": ["admin"], "page": "/admin/tickets" },
+    "tickets.tabs": { "label": "Booking tabs", "description": "Switch between pending, confirmed and cancelled bookings. Only confirmed tickets can board.", "roles": ["admin"], "page": "/admin/tickets" },
+    "tickets.pending": { "label": "Pending bookings", "description": "Unpaid reservations, late payment reviews and paid discounted tickets waiting for an ID check.", "roles": ["admin"], "page": "/admin/tickets" },
+    "tickets.details": { "label": "Passenger details", "description": "Opens the passengers on a booking with their fare type and the uploaded discount ID photo.", "roles": ["admin"], "page": "/admin/tickets", "fallback": "tickets.pending" },
+    "tickets.approve": { "label": "Approve", "description": "Approves a student, senior or PWD ID after you check the photo, then issues the boarding pass.", "roles": ["admin"], "page": "/admin/tickets", "fallback": "tickets.pending" },
+    "tickets.counter": { "label": "Counter booking", "description": "Book seats for a walk-in passenger. Choose the departure and fare categories, then check the amount and seats.", "roles": ["admin"], "page": "/admin/tickets" },
+    "tickets.refunds": { "label": "Refund requests", "description": "Cancellation and refund requests from passengers. Refunds go through PayMongo, not the assistant.", "roles": ["admin"], "page": "/admin/tickets" },
+
+    "adv.form": { "label": "Create Advisory", "description": "Enter the type, affected route, severity and clear instructions for passengers.", "roles": ["admin"], "page": "/admin/travel-advisory" },
+    "adv.draft": { "label": "Save as Draft", "description": "Keeps the advisory out of the passenger feed until you publish it.", "roles": ["admin"], "page": "/admin/travel-advisory" },
+    "adv.publish": { "label": "Publish Advisory", "description": "Publishes the advisory to passengers. Email and SMS go out only when that box is ticked and sending is configured.", "roles": ["admin"], "page": "/admin/travel-advisory" },
+    "adv.list": { "label": "Manage Alerts", "description": "Drafts, published and archived advisories with their sending status. A queued SMS does not prove a passenger received it.", "roles": ["admin"], "page": "/admin/travel-advisory" },
+
+    "fares.matrix": { "label": "Fare matrix", "description": "Regular, student and senior fares for each route and direction. Checkout calculates the fare on the server.", "roles": ["admin"], "page": "/admin/fare-management" },
+    "fares.save": { "label": "Save All Fares", "description": "Saves every changed fare in the matrix. Nothing changes until you save.", "roles": ["admin"], "page": "/admin/fare-management" },
+
+    "reports.filters": { "label": "Report filters", "description": "Set the date or period before reading or exporting totals.", "roles": ["admin"], "page": "/admin/reports-audit" },
+    "reports.export": { "label": "Export CSV", "description": "Downloads the filtered sales transactions as a CSV file.", "roles": ["admin"], "page": "/admin/reports-audit" },
+    "reports.sales": { "label": "Sales report", "description": "Recorded collections and refunds for the chosen period.", "roles": ["admin"], "page": "/admin/reports-audit" },
+    "reports.passengers": { "label": "Passenger count report", "description": "Passengers carried against each vessel's capacity.", "roles": ["admin"], "page": "/admin/reports-audit" },
+    "reports.audit": { "label": "Audit log", "description": "Recorded actions such as schedule, fare and booking changes.", "roles": ["admin"], "page": "/admin/reports-audit" },
+
+    "sms.connection": { "label": "SMS connection", "description": "Shows whether TextLink sending is configured. Not configured means SeaPass cannot send SMS yet.", "roles": ["admin"], "page": "/admin/sms" },
+    "sms.log": { "label": "Message activity", "description": "Queued, accepted, failed or unknown messages. Check TextLink before retrying an uncertain message.", "roles": ["admin"], "page": "/admin/sms" },
+
+    "users.search": { "label": "Passenger search", "description": "Find a passenger account by name or email.", "roles": ["admin"], "page": "/admin/user-management/passengers" },
+    "users.passengers": { "label": "Passenger list", "description": "Registered passenger accounts.", "roles": ["admin"], "page": "/admin/user-management/passengers" },
+    "users.staffAdd": { "label": "Add scanner staff", "description": "Opens the form for a new scanner staff account. Opening it saves nothing.", "roles": ["admin"], "page": "/admin/user-management/scanner-staff" },
+    "users.staff": { "label": "Scanner staff accounts", "description": "Scanner staff accounts and whether each one is active.", "roles": ["admin"], "page": "/admin/user-management/scanner-staff" },
+    "profile.details": { "label": "Profile details", "description": "Your name, email, role and how long you have used SeaPass.", "roles": ["admin"], "page": "/admin/user-management/profile" }
+  },
+  "tours": {
+    "admin": {
+      "getting_started": {
+        "title": "Getting started",
+        "steps": [
+          { "target": "shell.nav", "body": "Use the sidebar to move between port work. Port operations come first, then management." },
+          { "target": "dash.attention", "body": "Start each day here. Each row opens the screen where that work happens." },
+          { "target": "dash.departures", "body": "Check the next sailings and download a passenger manifest for a departure." },
+          { "target": "dash.today", "body": "See today's collections, departures and active vessels at a glance." },
+          { "target": "trips.add", "body": "Add Schedule opens the form for a new departure or a recurring rule. This tour does not open it." },
+          { "target": "trips.list", "body": "Scheduled departures show seats left, the seat map and the manifest." },
+          { "target": "tickets.tabs", "body": "Bookings are split into pending, confirmed and cancelled. Only confirmed tickets can board." },
+          { "target": "tickets.counter", "body": "Use the counter to book seats for walk-in passengers." },
+          { "target": "adv.form", "body": "Prepare weather, route or sailing notices here. Save a draft or publish it." },
+          { "target": "fares.matrix", "body": "Set the route fares and discount rates used at checkout." },
+          { "target": "reports.filters", "body": "Choose a period, then read or export sales and passenger counts." },
+          { "target": "account.tour", "body": "Take this tour again from here at any time." },
+          { "target": "assistant.launcher", "body": "Ask the assistant a question or ask it to show you a part of the console." }
+        ]
+      },
+      "create_trip": {
+        "title": "Schedule a trip",
+        "steps": [
+          { "target": "trips.add", "body": "Add Schedule opens the form. Choose an active vessel, the route, the date and a time slot, then check the seats. This tour does not open or save it." },
+          { "target": "trips.recurring", "body": "For a regular sailing, choose a recurring rule in the form instead. Rules create each departure for you." },
+          { "target": "trips.tabs", "body": "New departures appear under Scheduled Trips." },
+          { "target": "trips.list", "body": "Check the departure time, vessel and seats left." },
+          { "target": "trips.seats", "body": "Open the seat map to see which seats are taken." },
+          { "target": "trips.manifest", "body": "Download the confirmed passenger manifest before boarding." }
+        ]
+      },
+      "verify_discount": {
+        "title": "Verify a discount ID",
+        "steps": [
+          { "target": "tickets.date", "body": "Choose the trip date to list its bookings." },
+          { "target": "tickets.tabs", "body": "Paid discounted tickets waiting for an ID check are under Pending." },
+          { "target": "tickets.pending", "body": "Look for bookings marked ID Verification." },
+          { "target": "tickets.details", "body": "Open the passengers to see each fare type and the uploaded ID photo. Check the name and the ID type." },
+          { "target": "tickets.approve", "body": "Approve only when the ID matches. Approval issues the boarding pass. This tour approves nothing." },
+          { "target": "tickets.refunds", "body": "If the ID does not qualify, Reject and Refund starts a PayMongo refund. Follow it here." }
+        ]
+      },
+      "publish_advisory": {
+        "title": "Publish an advisory",
+        "steps": [
+          { "target": "adv.form", "body": "Choose the advisory type, the affected route and the severity, then write clear instructions." },
+          { "target": "adv.draft", "body": "Save as Draft keeps it out of the passenger feed while you review it." },
+          { "target": "adv.publish", "body": "Publish puts it in the passenger feed. Email and SMS go out only when that box is ticked and sending is configured." },
+          { "target": "adv.list", "body": "Check its status here. A queued SMS does not prove a passenger received it." },
+          { "target": "sms.log", "body": "Check SMS delivery for failed or uncertain messages before you retry." }
+        ]
+      }
+    }
+  }
+}
