@@ -14,6 +14,14 @@ use Illuminate\Support\Str;
 /** Authoritative tool policy. Model instructions and client role claims never authorize access. */
 class Tools
 {
+    /** Tools that only stage a change. The change runs after the one-time confirmation token is approved. */
+    public const STAGED = ['update_profile', 'set_boat_status', 'update_fare', 'create_trip', 'update_trip', 'publish_advisory', 'approve_discount', 'cancel_booking'];
+
+    public function staged(): array
+    {
+        return array_merge(self::STAGED, OperationsTools::STAGED);
+    }
+
     public function role(Authenticatable $user): string
     {
         if ($user instanceof Passenger) return 'passenger';
@@ -91,7 +99,7 @@ class Tools
         $role = $this->role($user);
         abort_unless(in_array($name, array_column($this->definitions($user), 'name')), 403, 'That tool is not available to your role.');
 
-        if (in_array($name, array_merge(['update_profile', 'set_boat_status', 'update_fare', 'create_trip', 'update_trip', 'publish_advisory', 'approve_discount', 'cancel_booking'], OperationsTools::STAGED))) {
+        if (in_array($name, $this->staged(), true)) {
             return $this->stage($user, $name, $args);
         }
 
