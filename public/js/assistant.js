@@ -115,7 +115,10 @@ function init(){
   micNoticeShown=false;
   if(micBlocked){if(await micPermission()==='denied'){say(MIC_DENIED);return;}micBlocked=false;}
   voiceWanted=true;liveState='connecting';renderVoice();say(LIVE_COPY.connecting);
-  try{playback=createPlaybackQueue();await playback.resume();}catch(e){stopVoice();say(friendlyError(e,'Voice is not supported in this browser. You can still type.'));return;}
+  const queue=createPlaybackQueue();playback=queue;
+  try{await queue.resume();}catch(e){if(playback===queue){stopVoice();say(friendlyError(e,'Voice is not supported in this browser. You can still type.'));}return;}
+  // Stop voice may have been tapped while audio was starting.
+  if(!voiceWanted||playback!==queue)return;
   const conn=createLiveConnection({mintSession:()=>api('session',{context:context()}),seedTurns:()=>historyToSeed(current?.messages),canSwitchBack:()=>!busy&&voiceWanted&&!panel.hidden,audioMimeType:AUDIO_INPUT_MIME_TYPE});
   live=conn;wireLive(conn);
   // The mic is asked for first, so a denied mic never costs a session token.

@@ -348,6 +348,9 @@ export function createLiveConnection(options = {}) {
     if (status === 401 || status === 419) { toUnavailable(LIVE_COPY.signIn); return; }
     if (status === 403) { toUnavailable(friendlyError(err, LIVE_COPY.unavailable)); return; }
     if (status === 503) { toFallback(friendlyError(err, LIVE_COPY.fallback)); return; }
+    // /assistant/* shares one per-minute throttle with typed chat, so quick
+    // retries would only lock typing out too. Text mode now, probe in a minute.
+    if (status === 429) { toFallback(LIVE_COPY.quota); return; }
     if (!online.isOnline()) { goOffline(); return; }
     recordFailure(kind === 'replacement' ? null : LIVE_COPY.reconnecting);
   }

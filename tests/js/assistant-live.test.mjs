@@ -264,6 +264,24 @@ test('a 503 from /assistant/session goes straight to Text mode with the server r
   h.conn.disconnect();
 });
 
+test('a 429 from /assistant/session goes to Text mode without burning more requests', async () => {
+  const h = harness({ mint: async () => { const e = new Error('Too many requests.'); e.status = 429; throw e; } });
+  h.conn.connect();
+  await flush();
+  assert.equal(h.conn.state, 'fallback');
+  assert.equal(h.notices().at(-1), LIVE_COPY.quota);
+  assert.equal(h.mints.length, 1, 'no quick retries');
+  await h.clock.advance(LIVE_DEFAULTS.probeMs - 1);
+  assert.equal(h.mints.length, 1);
+  h.setMint(async n => SESSION(n));
+  await h.clock.advance(1);
+  assert.equal(h.mints.length, 2, 'the background probe tries again after a minute');
+  await handshake(h.sockets.at(-1));
+  assert.equal(h.conn.state, 'ready');
+  assert.equal(h.of('ready').at(-1).recovered, true);
+  h.conn.disconnect();
+});
+
 test('an expired sign in makes Live unavailable with no retries', async () => {
   const h = harness({ mint: async () => { const e = new Error('Unauthenticated.'); e.status = 401; throw e; } });
   h.conn.connect();
