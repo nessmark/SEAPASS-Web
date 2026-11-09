@@ -107,8 +107,9 @@ class OperationsTools
     {
         $port = trim((string) preg_replace('/\(\s*dinagat\s*\)/i', '', $port));
         $port = trim((string) preg_replace('/\s+(City\s+)?Port$/i', '', $port));
-        if (strcasecmp($port, 'Dinagat') === 0 || strcasecmp($port, 'San Jose') === 0) return 'San Jose';
-        if (strcasecmp($port, 'Surigao') === 0 || strcasecmp($port, 'Surigao City') === 0) return 'Surigao';
+        // SeaPass has two ports. Free-text assignments such as "Port of San Jose, Dinagat" still map.
+        if (stripos($port, 'surigao') !== false) return 'Surigao';
+        if (stripos($port, 'san jose') !== false || stripos($port, 'dinagat') !== false) return 'San Jose';
         return $port;
     }
 

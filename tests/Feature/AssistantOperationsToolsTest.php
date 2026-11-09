@@ -167,6 +167,10 @@ class AssistantOperationsToolsTest extends TestCase
         $this->assertSame([$inbound->id], array_column($sanJose['trips'], 'trip_id'));
         $this->assertSame(2, $sanJose['totals']['confirmed_seats']);
 
+        // Free-text port assignments map to the same port.
+        $freeText = $this->tools()->execute($this->staff('Port of San Jose, Dinagat Islands', 'sj3@example.test'), 'get_port_departures')['result'];
+        $this->assertSame([$inbound->id], array_column($freeText['trips'], 'trip_id'));
+
         // A staff member cannot widen the scope with the port argument.
         $forced = $this->tools()->execute($this->staff('San Jose Port', 'sj2@example.test'), 'get_port_departures', ['port' => 'Surigao'])['result'];
         $this->assertSame([$inbound->id], array_column($forced['trips'], 'trip_id'));
