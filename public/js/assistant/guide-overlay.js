@@ -1,7 +1,7 @@
 // Console guide overlay: dimmed cut-out, ring, arrow and a step card in a native modal dialog.
 // Import-safe under node. Nothing touches the DOM until mountConsoleGuide() is called.
 // The overlay never clicks, types or submits on the page; the modal layer blocks page input.
-import { clean, createRegistry, createGuide, currentStep, currentPageTour, validateGuide, placeGuide } from './guide-engine.js?v=20261109-parity';
+import { clean, createRegistry, createGuide, currentStep, currentPageTour, validateGuide, placeGuide } from './guide-engine.js?v=20261110-live';
 
 const SVG = 'http://www.w3.org/2000/svg';
 

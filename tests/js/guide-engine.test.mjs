@@ -276,14 +276,14 @@ test('placement keeps the card inside a 360px phone and off the target', () => {
 });
 
 test('the overlay module is import safe under node', async () => {
-  const mod = await import('../../public/js/assistant/guide-overlay.js?v=20261109-parity');
+  const mod = await import('../../public/js/assistant/guide-overlay.js?v=20261110-live');
   assert.equal(typeof mod.mountConsoleGuide, 'function');
   assert.equal(typeof globalThis.document, 'undefined');
   assert.deepEqual(mod.readRegistry({ getElementById: () => ({ textContent: '{bad' }) }), {});
 });
 
 test('overlay captures focus before opening dialog, restores panel and handles mobile sidebar fallback', async () => {
-  const { mountConsoleGuide, isVisibleElement } = await import('../../public/js/assistant/guide-overlay.js?v=20261109-parity');
+  const { mountConsoleGuide, isVisibleElement } = await import('../../public/js/assistant/guide-overlay.js?v=20261110-live');
   let mobile = false, sidebarOpen = false;
   const listeners = new Map(), docListeners = new Map(), frames = [];
   const doc = {

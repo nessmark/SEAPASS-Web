@@ -53,3 +53,23 @@ Assistant asset version: `v=20261109-parity`.
 - **Provider latency:** Live voice setup and Gemini tool-call round-trip times depend on external network routing and Gemini API latency (local preview forces IPv4 with bounded timeouts).
 - **MariaDB test run in this round:** `seapass-mysql-test.service` was inactive during this integration pass, so the 119 PHPUnit tests ran against SQLite only this round (previous 80-test baseline passed on both SQLite and MariaDB).
 - **PayMongo merchant and SMS SIM gates (from `docs/completion-2026-10-20/CONTINUE.md`):** Production PayMongo merchant credentials, live webhook reconciliation, real charge/refund settlement, and physical TextLink sending phone/SIM delivery remain open external gates.
+
+## 2026-11-10 follow-up: sidebar, thinking display, everything on Live
+
+- **Admin sidebar.** No scrollbar on a 1366x768 laptop. "Take the tour" is now a small compass button beside the
+  account name. Sidebar items no longer shrink, which is what clipped the SeaPass logo. Short screens get tighter
+  spacing, and below 720px tall the static "San Jose Port" card hides.
+- **Thinking display (admin panel and phone app, same panel).** While a reply is being made, one row sits where it will
+  land and says what is happening: "Connecting…", "Thinking…", then the real tool running ("Checking the fleet…",
+  "Looking up trips…", one label per tool). The reply then carries a small "Checked the fleet" line that opens to the
+  list of steps it really took. Send turns into Stop while it works; a failure shows a Retry button. Steps are saved with
+  the chat history.
+- **Model routing (Jay's decision: everything on Live).** Typed messages go over the Gemini Live websocket, the same as
+  voice. Typed questions get text replies (the transcript of the answer); audio plays only after the mic is used.
+  Live opens when you start typing or press Voice and is released one minute after the panel closes, because every
+  open Live session counts against quota (seen on DIELCO, 2026-09-26). The text endpoint is only the backup: Text mode
+  after a quota close or outage, messages with attachments, and when Live is not ready within 6 seconds.
+- **Found in the real check:** Google sends the transcribed reply after it marks the turn complete. The panel now waits
+  a moment for trailing text, and that late text no longer reopens the turn or trips the "took too long" timer.
+- Tests: PHP 119 / 1582 assertions, JS 64 / 64. Real check: two typed admin questions answered over Live
+  (session minted, websocket opened, tool called through /assistant/tool, the text endpoint never used).

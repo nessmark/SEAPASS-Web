@@ -173,7 +173,7 @@ class AssistantGuideTest extends TestCase
         $rowAnchors = ['dash.manifest', 'fleet.status', 'trips.seats', 'trips.manifest', 'tickets.details', 'tickets.approve'];
         foreach ($data['pages'] as $path => $page) {
             $html = $this->actingAs($admin)->get($path)->assertOk()->assertSee('id="sp-guide-registry"', false)
-                ->assertSee('data-sp-tour="getting_started"', false)->assertSee('js/assistant.js?v=20261109-parity', false)->getContent();
+                ->assertSee('data-sp-tour="getting_started"', false)->assertSee('js/assistant.js?v=20261110-live', false)->getContent();
             foreach ($data['anchors'] as $id => $a) {
                 if (($a['page'] === $path || $a['page'] === null) && !in_array($id, $rowAnchors, true)) $this->assertStringContainsString('data-guide="'.$id.'"', $html, "$path $id");
             }

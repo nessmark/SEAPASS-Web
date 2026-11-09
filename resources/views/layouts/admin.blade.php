@@ -16,7 +16,7 @@
     
     {{-- Additional Styles --}}
     @stack('styles')
-    <link rel="stylesheet" href="{{ asset('css/workspace.css') }}?v=20261020">
+    <link rel="stylesheet" href="{{ asset('css/workspace.css') }}?v=20261110-ui">
     
     {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

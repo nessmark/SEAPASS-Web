@@ -745,3 +745,43 @@ test('the module imports cleanly without a DOM', async () => {
   assert.equal(typeof mod.createLiveConnection, 'function');
   assert.throws(() => mod.createLiveConnection({}), /mintSession/);
 });
+
+test('typed text goes over Live as a complete user turn only while ready, and the reply comes back as transcript', async () => {
+  const h = harness();
+  assert.equal(h.conn.sendText('Trips tomorrow?'), false, 'nothing is sent before the connection is ready');
+  const socket = await connectReady(h);
+  assert.equal(h.conn.sendText('   '), false, 'blank text is ignored');
+  assert.equal(h.conn.sendText(' Trips tomorrow? '), true);
+  assert.deepEqual(socket.sent.at(-1), { clientContent: { turns: [{ role: 'user', parts: [{ text: 'Trips tomorrow?' }] }], turnComplete: true } });
+  assert.equal(h.conn.turnOpen, true);
+  socket.serverSend({ serverContent: { outputTranscription: { text: 'Two trips leave tomorrow.' } } });
+  socket.serverSend({ serverContent: { turnComplete: true } });
+  await flush();
+  assert.deepEqual(h.of('outputTranscript').map(p => p.text), ['Two trips leave tomorrow.']);
+  assert.deepEqual(h.of('turnComplete').at(-1), { ok: true });
+  h.conn.disconnect();
+  assert.equal(h.conn.sendText('After close'), false);
+});
+
+test('a typed turn the model never answers is ended by the watchdog', async () => {
+  const h = harness();
+  await connectReady(h);
+  h.conn.sendText('Hello?');
+  await h.clock.advance(LIVE_DEFAULTS.turnWatchdogMs);
+  assert.deepEqual(h.of('turnComplete').at(-1), { ok: false, error: LIVE_COPY.tooLong, timeout: true });
+  h.conn.disconnect();
+});
+
+test('transcription that trails turnComplete is passed on as late and does not reopen the turn or arm the watchdog', async () => {
+  const h = harness();
+  const socket = await connectReady(h);
+  h.conn.sendText('Boats?');
+  socket.serverSend({ serverContent: { turnComplete: true } });
+  socket.serverSend({ serverContent: { outputTranscription: { text: 'Two boats.' } } });
+  await flush();
+  assert.deepEqual(h.of('outputTranscript').at(-1), { text: 'Two boats.', late: true });
+  assert.equal(h.conn.turnOpen, false);
+  await h.clock.advance(LIVE_DEFAULTS.turnWatchdogMs + 1);
+  assert.deepEqual(h.of('turnComplete'), [{ ok: true }], 'no watchdog failure after a finished turn');
+  h.conn.disconnect();
+});

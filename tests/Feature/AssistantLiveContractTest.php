@@ -88,10 +88,10 @@ class AssistantLiveContractTest extends TestCase
         $embed = file_get_contents($root . '/resources/views/assistant-embed.blade.php');
         $panel = file_get_contents($root . '/resources/views/components/assistant.blade.php');
         $script = file_get_contents($root . '/public/js/assistant.js');
-        $this->assertStringContainsString('/js/assistant.js?v=20261109-parity"', $embed);
-        $this->assertStringContainsString("asset('js/assistant.js') }}?v=20261109-parity\"", $panel);
-        $this->assertStringContainsString("from './assistant/live.js?v=20261109-parity'", $script);
-        $this->assertDoesNotMatchRegularExpression('/\?v=(?!20261109-parity)/', $script, 'every assistant module import carries the same version');
+        $this->assertStringContainsString('/js/assistant.js?v=20261110-live"', $embed);
+        $this->assertStringContainsString("asset('js/assistant.js') }}?v=20261110-live\"", $panel);
+        $this->assertStringContainsString("from './assistant/live.js?v=20261110-live'", $script);
+        $this->assertDoesNotMatchRegularExpression('/\?v=(?!20261110-live)/', $script, 'every assistant module import carries the same version');
         $this->get('/assistant/embed')->assertOk()->assertSee('/js/assistant.js?v=', false);
     }
 }

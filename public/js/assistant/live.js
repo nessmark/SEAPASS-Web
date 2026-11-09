@@ -205,6 +205,7 @@ export function createLiveConnection(options = {}) {
   let audioQueue = [];
   let turnOpen = false;     // the model owes the user a reply
   let turnSeq = 0;          // counts turns, so a goAway replacement can tell it fell behind
+  let settled = false;      // the last turn completed; transcription can still trail in after it
   const tools = new Map();  // key -> { rec, id, name, controller }
   let toolSeq = 0;
   let unsubscribeOnline = null;
@@ -234,6 +235,7 @@ export function createLiveConnection(options = {}) {
   }
 
   function openTurn() {
+    settled = false;
     if (!turnOpen) { turnOpen = true; turnSeq += 1; }
   }
 
@@ -301,6 +303,18 @@ export function createLiveConnection(options = {}) {
     if (!QUEUE_STATES.has(state)) return false;
     audioQueue.push(data);
     if (audioQueue.length > cfg.maxQueuedAudio) audioQueue.splice(0, audioQueue.length - cfg.maxQueuedAudio);
+    return true;
+  }
+
+  // Typed messages (Jay, 2026-11-10: typed chat runs over Live too). Sent as a
+  // complete user turn; the reply arrives as output transcription. Only sent
+  // while ready: the caller uses the text path in every other state.
+  function sendText(text) {
+    const value = typeof text === 'string' ? text.trim() : '';
+    if (closed || !value || state !== 'ready') return false;
+    if (!sendOn(active, { clientContent: { turns: [{ role: 'user', parts: [{ text: value }] }], turnComplete: true } })) return false;
+    openTurn();
+    armWatchdog();
     return true;
   }
 
@@ -626,9 +640,12 @@ export function createLiveConnection(options = {}) {
       if (typeof data === 'string' && data) { openTurn(); emit('audio', { data, mimeType: part.inlineData.mimeType }); }
     }
     const said = textOf(sc.outputTranscription);
-    if (said) { openTurn(); emit('outputTranscript', { text: said }); }
+    // Google sends output transcription independently of the model turn, so it can arrive after turnComplete.
+    // Late text belongs to the turn that just finished: it must not reopen a turn (and arm the watchdog).
+    if (said) { if (!settled) openTurn(); emit('outputTranscript', settled ? { text: said, late: true } : { text: said }); }
     if (sc.turnComplete) {
       turnOpen = false;
+      settled = true;
       clearWatchdog();
       emit('turnComplete', { ok: true });
       if (rec.replaceAfterTurn) { rec.replaceAfterTurn = false; startReplacement(); }
@@ -687,6 +704,7 @@ export function createLiveConnection(options = {}) {
     disconnect,
     close: disconnect,
     sendAudio,
+    sendText,
     respondTool,
     on,
     off,

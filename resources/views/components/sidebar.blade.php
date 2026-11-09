@@ -72,11 +72,10 @@
         </div>
     </div>
     <div class="sidebar-account">
+    <div class="account-row">
     <a class="account-profile" href="{{ route('admin.user-management.profile') }}"><span class="user-avatar">{{ mb_substr(auth()->user()->name ?? 'Admin', 0, 1) }}</span><span><strong>{{ auth()->user()->name ?? 'Administrator' }}</strong><small>{{ ucfirst(auth()->user()->role ?? 'Admin') }}</small></span></a>
-    <button type="button" class="nav-item sp-tour-launch" data-sp-tour="getting_started" data-guide="account.tour">
-        <span class="nav-icon">{!! $icon('tour') !!}</span>
-        <span>Take the tour</span>
-    </button>
+    <button type="button" class="account-tour sp-tour-launch" data-sp-tour="getting_started" data-guide="account.tour" aria-label="Take the tour" title="Take the tour">{!! $icon('tour') !!}</button>
+    </div>
     <form method="POST" action="{{ route('logout') }}" style="margin: 0; width: 100%;">
         @csrf
         <button type="submit" class="nav-item logout-btn" data-guide="account.signout">

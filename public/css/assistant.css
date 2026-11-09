@@ -31,6 +31,22 @@
 .sp-tour-actions button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media(max-width:600px){.sp-tour-actions button{min-height:44px}}
 @media(prefers-reduced-motion:no-preference){.sp-tour-ring{animation:sp-tour-pulse 1.8s ease-in-out infinite}@keyframes sp-tour-pulse{50%{box-shadow:0 0 0 2px var(--accent),0 0 26px 7px var(--accent-tint)}}}
-.sidebar-account .sp-tour-launch{width:100%;border:0;background:transparent;text-align:left;color:var(--text-2);font-family:inherit;cursor:pointer;min-height:36px;font-size:12px}
 .sp-welcome p{margin:0 0 10px}
 .sp-assistant .sp-welcome-tour{border:1px solid var(--accent);border-radius:999px;padding:7px 14px}
+
+/* Thinking row, steps line, failure row and Stop (10 November 2026). Tokens only, no new hues. A pulsing mark and
+   plain words sit where the reply will land; no bouncing dots. One saturated thing per card: the action button. */
+.sp-pending{display:flex;align-items:center;gap:10px;margin:0 0 18px;color:var(--text-2);font-size:13px}
+.sp-pending-mark{width:16px;height:16px;flex-shrink:0;border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--accent) 0 35%,var(--accent-tint) 36% 100%)}
+@media(prefers-reduced-motion:no-preference){.sp-pending-mark{animation:sp-think 1.4s ease-in-out infinite}@keyframes sp-think{0%,100%{transform:scale(.8);opacity:.65}50%{transform:scale(1.05);opacity:1}}}
+.sp-message .sp-steps{margin:0 0 6px;font-size:12px;color:var(--text-2)}
+.sp-message .sp-steps summary{margin:0;color:var(--text-2);list-style:none;display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--surface-2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-message .sp-steps summary::-webkit-details-marker{display:none}
+.sp-message .sp-steps summary::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--success-fg,var(--accent));flex-shrink:0}
+.sp-message .sp-steps[open] summary{color:var(--text)}
+.sp-message .sp-steps ol{margin:6px 0 4px;padding-left:22px}
+.sp-message .sp-steps li{margin:2px 0}
+.sp-failure{display:flex;align-items:center;gap:10px;margin:0 0 18px;padding:10px 12px;border-radius:12px;background:var(--surface-2)}
+.sp-failure p{margin:0;flex:1;font-size:13px;color:var(--text)}
+.sp-assistant .sp-failure button{background:var(--accent);color:var(--on-accent);padding:6px 14px;flex-shrink:0}
+.sp-assistant .sp-assistant-compose button[data-mode=stop]{background:var(--surface-2);color:var(--text);border:1px solid var(--hairline)}

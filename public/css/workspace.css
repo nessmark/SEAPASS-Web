@@ -21,6 +21,41 @@ button.nav-dropdown-toggle.active { background:var(--accent-tint); }
 .account-profile { display:flex;align-items:center;gap:10px;text-decoration:none;padding:12px 8px; }
 .account-profile .user-avatar { margin:0;flex-shrink:0; }
 .sidebar-account .logout-btn { min-height:36px;font-size:12px; }
+/* Sidebar fit, 10 November 2026 (Jay: "why does the sidebar have a scroll", "the logo is cut").
+   Items never shrink (a shrinking overflow:hidden logo was what clipped it), the scrollbar stays hidden, and short
+   laptop screens (1366x768) get tighter spacing so everything fits without scrolling. */
+.sidebar { scrollbar-width:none; }
+.sidebar::-webkit-scrollbar { display:none; }
+.sidebar > * { flex-shrink:0; }
+.account-row { display:flex;align-items:center;gap:4px; }
+.account-row .account-profile { flex:1;min-width:0; }
+.account-profile strong,.account-profile small { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.account-tour { display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border:0;border-radius:10px;background:transparent;color:var(--text-2);cursor:pointer; }
+.account-tour svg { width:19px;height:19px; }
+.account-tour:hover { background:var(--surface-2);color:var(--text); }
+.account-tour:focus-visible { outline:2px solid var(--accent);outline-offset:2px; }
+@media (min-width:901px) { body.sidebar-collapsed .account-row { flex-direction:column; } }
+@media (max-height:1000px) {
+    .sidebar { padding-top:16px;padding-bottom:12px;gap:2px; }
+    .sidebar-logo { padding-top:0;padding-bottom:14px; }
+    .sidebar-workspace { padding:8px 10px;margin-bottom:10px; }
+    .workspace-mark { width:28px;height:28px; }
+    .nav-group-label { padding:12px 12px 5px; }
+    .nav-item { min-height:36px;padding-block:7px; }
+    .nav-dropdown-item { min-height:34px; }
+    .sidebar-account { padding-top:10px; }
+    .account-profile { padding-block:6px; }
+    .sidebar-account .logout-btn { min-height:34px;margin-top:0; }
+}
+@media (max-height:720px) {
+    .sidebar { padding-top:12px; }
+    .sidebar-logo { padding-bottom:10px; }
+    .sidebar-workspace { display:none; }
+    .nav-group-label { padding:9px 12px 4px; }
+    .nav-item { min-height:34px;padding-block:6px; }
+    .nav-dropdown-item { min-height:32px; }
+    .sidebar-account { padding-top:6px; }
+}
 .main-content { min-width:0;padding:24px 40px 20px; }
 .header { width:calc(100% + 80px);margin:-24px -40px 32px;padding:13px 40px;border:0;min-height:66px; }
 .header-location { font-size:12px;color:var(--text-2); }
