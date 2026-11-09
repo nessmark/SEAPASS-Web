@@ -72,7 +72,7 @@ function init(){
   // Settles once the first step is shown, missing or on another page (about 4s at most). The tour then runs on its own.
   // result.guide rides back on a Live tool response: shown, started, not_found, elsewhere or cancelled.
   const run=async p=>{try{result.guide=await p;}catch(e){say(e.message);result.guide={status:'error',message:e.message};}};
-  if(a.type==='highlight_element'){if(a.tour)await run(consoleGuide.showTour(a.tour));else guide(a.args.target,a.args.message);}
+  if(a.type==='highlight_element'){if(a.tour)await run(consoleGuide.showTour(a.tour));else await run(consoleGuide.highlight({target:a.args.target,message:a.args.message,label:targets().find(t=>t.id===a.args.target)?.label}));}
   if(a.type==='start_tour')await run(consoleGuide.showTour(a.tour||{preset:'current_page'}));
  }
  function setBusy(value){busy=value;panel.querySelectorAll('nav button,#sp-assistant-history button').forEach(b=>b.disabled=value);if(value)$('sp-assistant-history').hidden=true;$('sp-assistant-send').disabled=value;state(value?'Thinking…':voice?'Live voice connected':'Trips, tickets and a little guidance');}
@@ -91,7 +91,7 @@ function init(){
   ws.onerror=()=>{stopVoice();say('Live voice could not connect. You can still use text chat.');};ws.onclose=()=>{stopVoice();say('Voice disconnected. You can still use text chat.');};
  }catch(e){stopVoice();say(e.message);}}
  function open(value){if(embeddedConfig&&!value){stopVoice();hostEvent({type:'close'});return;}panel.hidden=!value;$('sp-assistant-launch').setAttribute('aria-expanded',String(value));if(value)input.focus();else{stopVoice();closeGuide();$('sp-assistant-launch').focus();}}
- panel.addEventListener('click',e=>{const action=e.target.closest('[data-sp]')?.dataset.sp;if(action==='close')open(false);if(action==='new'&&!busy)newChat();if(action==='history'&&!busy)history();if(action==='tour')guide();if(action==='voice')startVoice();});$('sp-assistant-launch').onclick=()=>open(panel.hidden);document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGuide();open(false);}});window.addEventListener('pagehide',()=>{stopVoice();save();});
+ panel.addEventListener('click',e=>{const action=e.target.closest('[data-sp]')?.dataset.sp;if(action==='close')open(false);if(action==='new'&&!busy)newChat();if(action==='history'&&!busy)history();if(action==='tour')guide();if(action==='voice')startVoice();});$('sp-assistant-launch').onclick=()=>open(panel.hidden);document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGuide();if(!panel.hidden)open(false);}});window.addEventListener('pagehide',()=>{stopVoice();save();});
  current=chats[0];if(!current)newChat();else{current.messages.forEach(m=>bubble(m.role,m.text,false));welcome();}api('status').then(s=>{if(!s.configured)say('The AI provider is not connected yet. Page guidance still works.');}).catch(e=>say(e.message));
  consoleGuide?.resume();
 }

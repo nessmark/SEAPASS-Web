@@ -231,9 +231,10 @@ export function createGuide({ registry, env, timeoutMs = 4000, pollMs = 100, fal
     // tour: a validated tour object; options.gesture: started by a user click, so it may change page.
     async begin(tour, { gesture = false, index = 0 } = {}) {
       if (!tour?.steps?.length) throw new Error('There is no guided walkthrough for this page yet.');
-      api.exit();
+      const wasActive = state.active;
+      stopLookup();
+      if (!wasActive) onOpen();
       emit({ type: 'start', tour, index });
-      onOpen();
       await show(gesture);
       return api.result(tour);
     },

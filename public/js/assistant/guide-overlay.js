@@ -1,12 +1,13 @@
 // Console guide overlay: dimmed cut-out, ring, arrow and a step card in a native modal dialog.
 // Import-safe under node. Nothing touches the DOM until mountConsoleGuide() is called.
 // The overlay never clicks, types or submits on the page; the modal layer blocks page input.
-import { createRegistry, createGuide, currentStep, currentPageTour, validateGuide, placeGuide } from './guide-engine.js?v=20261109-parity';
+import { clean, createRegistry, createGuide, currentStep, currentPageTour, validateGuide, placeGuide } from './guide-engine.js?v=20261109-parity';
 
 const SVG = 'http://www.w3.org/2000/svg';
 
 export function isVisibleElement(el, win) {
   if (!el || !el.isConnected) return false;
+  if (win.matchMedia?.('(max-width: 900px)').matches && el.closest?.('.sidebar') && !el.ownerDocument?.body?.classList?.contains('sidebar-open')) return false;
   const r = el.getBoundingClientRect();
   if (!(r.width > 0 && r.height > 0) || r.right <= 0 || r.left >= win.innerWidth) return false;
   const style = win.getComputedStyle(el);
@@ -48,10 +49,16 @@ export function mountConsoleGuide({ doc = document, win = window, registryData =
     },
     onClose() {
       guiding = false;
+      const wasPanel = restorePanel;
       if (restorePanel) { panel.hidden = false; launcher?.setAttribute('aria-expanded', 'true'); }
       restorePanel = false;
       const back = previousFocus; previousFocus = null;
-      if (back?.isConnected && isVisibleElement(back, win)) back.focus();
+      if (back && back !== doc.body && back !== doc.documentElement && back.isConnected && isVisibleElement(back, win)) back.focus();
+      else if (wasPanel) (panel?.querySelector?.('#sp-assistant-input') || launcher)?.focus?.();
+      else {
+        const menu = doc.getElementById?.('sidebarToggle');
+        (menu && isVisibleElement(menu, win) ? menu : launcher)?.focus?.();
+      }
     },
   });
 
@@ -133,11 +140,11 @@ export function mountConsoleGuide({ doc = document, win = window, registryData =
     if (!s.active || !layer) return;
     const width = win.innerWidth, height = win.innerHeight;
     let el = s.target;
-    if (el && !el.isConnected) el = guide.refresh();
+    if (el && !isVisibleElement(el, win)) el = guide.refresh();
     let rect = null;
-    if (el && el.isConnected) {
+    if (el && isVisibleElement(el, win)) {
       const r = el.getBoundingClientRect();
-      if (r.width && r.height && r.bottom > 0 && r.top < height) {
+      if (r.width && r.height && r.bottom > 0 && r.top < height && r.right > 0 && r.left < width) {
         const x = Math.max(4, r.left - 6), y = Math.max(4, r.top - 6);
         rect = { x, y, width: Math.max(0, Math.min(width - 4, r.right + 6) - x), height: Math.max(0, Math.min(height - 4, r.bottom + 6) - y) };
       }
@@ -242,8 +249,9 @@ export function mountConsoleGuide({ doc = document, win = window, registryData =
       // Older auto-generated page targets (data-sp-guide) from the page context.
       const selector = `[data-sp-guide="${esc(target)}"]`;
       if (!doc.querySelector(selector)) return Promise.reject(new Error('That guide target is not on this page.'));
-      const text = String(message || '').trim();
-      return guide.begin({ title: label || 'Here', single: true, preset: null, dropped: [], steps: [{ selector, title: String(label || 'Here').slice(0, 100), body: (text || 'This is the part you asked about.').slice(0, 600) }] }, { gesture });
+      const titleText = clean(label, 100) || 'Here';
+      const bodyText = clean(message, 600) || 'This is the part you asked about.';
+      return guide.begin({ title: titleText, single: true, preset: null, dropped: [], steps: [{ selector, title: titleText, body: bodyText }] }, { gesture });
     },
     exit: () => guide.exit(),
     resume: () => guide.resume().catch(() => null),

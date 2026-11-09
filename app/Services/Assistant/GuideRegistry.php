@@ -182,7 +182,8 @@ class GuideRegistry
             if ($only !== null && $a['page'] !== null && $a['page'] !== $only) continue;
             $rows[] = ['id' => $id, 'label' => $a['label'], 'description' => $a['description'], 'page' => $a['page'] ? $reg['pages'][$a['page']]['label'] ?? $a['page'] : 'Every page', 'on_current_page' => $a['page'] === null || $a['page'] === $current];
         }
-        usort($rows, fn($x, $y) => ($y['on_current_page'] <=> $x['on_current_page']));
+        $rank = fn(array $r) => ($current !== null && ($reg['anchors'][$r['id']]['page'] ?? null) === $current) ? 2 : (($reg['anchors'][$r['id']]['page'] ?? null) === null ? 1 : 0);
+        usort($rows, fn($x, $y) => ($rank($y) <=> $rank($x)));
         return [
             'current_page' => $current ? $reg['pages'][$current]['label'] : null,
             'targets' => $rows,

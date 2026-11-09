@@ -249,6 +249,7 @@ test('begin refuses an empty tour and a new tour replaces the old one', async ()
   await h.guide.highlight({ target: 'shell.menu' });
   assert.equal(currentStep(h.guide.state).target, 'shell.menu');
   assert.equal(h.guide.state.single, true);
+  assert.deepEqual(h.counts(), { opened: 1, closed: 0 }, 'replacing an active tour keeps the session open');
 });
 
 test('placement keeps the card inside a 360px phone and off the target', () => {
@@ -279,6 +280,118 @@ test('the overlay module is import safe under node', async () => {
   assert.equal(typeof mod.mountConsoleGuide, 'function');
   assert.equal(typeof globalThis.document, 'undefined');
   assert.deepEqual(mod.readRegistry({ getElementById: () => ({ textContent: '{bad' }) }), {});
+});
+
+test('overlay captures focus before opening dialog, restores panel and handles mobile sidebar fallback', async () => {
+  const { mountConsoleGuide, isVisibleElement } = await import('../../public/js/assistant/guide-overlay.js?v=20261109-parity');
+  let mobile = false, sidebarOpen = false;
+  const listeners = new Map(), docListeners = new Map(), frames = [];
+  const doc = {
+    activeElement: null,
+    body: {
+      classList: {
+        contains: c => c === 'sidebar-open' && sidebarOpen,
+        remove: c => { if (c === 'sidebar-open') sidebarOpen = false; },
+      },
+      append(el) { el.isConnected = true; },
+    },
+    documentElement: {},
+    createElement(tag) {
+      const attrs = new Map(), children = [];
+      const el = {
+        tag, className: '', id: '', textContent: '', hidden: false, disabled: false, open: false, tabIndex: 0, offsetHeight: 180,
+        dataset: {}, style: {}, isConnected: true, ownerDocument: doc,
+        classList: { add() {}, remove() {}, contains: () => false },
+        setAttribute: (k, v) => attrs.set(k, v),
+        getAttribute: k => attrs.get(k) ?? null,
+        append(...items) { for (const c of items) { c.parent = el; children.push(c); } },
+        contains(other) { for (let p = other; p; p = p.parent) if (p === el) return true; return false; },
+        matches: sel => sel === 'button' && tag === 'button',
+        querySelector: sel => (sel === 'svg' ? children[0] : null),
+        showModal() { el.open = true; },
+        close() { el.open = false; },
+        focus() { doc.activeElement = el; },
+        addEventListener() {},
+      };
+      return el;
+    },
+    createElementNS(_, tag) { return doc.createElement(tag); },
+    addEventListener(type, fn) { docListeners.set(type, fn); },
+    removeEventListener(type, fn) { if (docListeners.get(type) === fn) docListeners.delete(type); },
+    getElementById: id => elements.get(id) || null,
+    querySelector: sel => (sel === '[data-sp-guide="target-0"]' ? legacyTarget : null),
+    querySelectorAll(sel) {
+      if (sel === '[data-sp-guide="target-0"]') return [legacyTarget];
+      const m = /^\[data-guide="(.+)"\]$/.exec(sel);
+      return m && anchors.has(m[1]) ? [anchors.get(m[1])] : [];
+    },
+  };
+  const makeNode = (id, { inSidebar = false, rect = { left: 20, top: 20, right: 120, bottom: 60, width: 100, height: 40 } } = {}) => ({
+    id, hidden: false, isConnected: true, ownerDocument: doc,
+    getBoundingClientRect: () => (typeof rect === 'function' ? rect() : rect),
+    closest: sel => (sel === '.sidebar' && inSidebar ? {} : null),
+    scrollIntoView() {},
+    setAttribute() {},
+    focus() { doc.activeElement = this; },
+  });
+  const sidebar = makeNode('sidebar', { inSidebar: true, rect: () => ({ left: 0, top: 0, right: 240, bottom: 600, width: 240, height: 600 }) });
+  const menuBtn = makeNode('sidebarToggle');
+  const tourBtn = makeNode('tourBtn', { inSidebar: true });
+  const panelInput = makeNode('sp-assistant-input');
+  const panelBtn = makeNode('panelBtn');
+  const launcher = makeNode('sp-assistant-launch');
+  const legacyTarget = makeNode('target-0');
+  const panel = { hidden: false, querySelector: sel => (sel === '#sp-assistant-input' ? panelInput : null) };
+  const elements = new Map([['sidebarToggle', menuBtn]]);
+  const anchors = new Map([['shell.nav', sidebar], ['shell.menu', menuBtn], ['fares.save', makeNode('fares.save')]]);
+  const timers = [];
+  const win = {
+    innerWidth: 1280, innerHeight: 720,
+    location: { pathname: '/admin/fare-management', assign() {} },
+    matchMedia: q => ({ matches: q === '(max-width: 900px)' && mobile }),
+    getComputedStyle: () => ({ visibility: 'visible', display: 'block' }),
+    sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+    setTimeout: (fn, ms) => { const id = timers.length + 1; timers.push({ id, fn, ms }); return id; },
+    clearTimeout: id => { const i = timers.findIndex(t => t.id === id); if (i >= 0) timers.splice(i, 1); },
+    requestAnimationFrame: fn => { frames.push(fn); return frames.length; },
+    cancelAnimationFrame: () => { frames.length = 0; },
+    addEventListener(type, fn) { listeners.set(type, fn); },
+    removeEventListener(type, fn) { if (listeners.get(type) === fn) listeners.delete(type); },
+  };
+
+  const overlay = mountConsoleGuide({ doc, win, registryData: slice('admin'), identity: 'App\\Models\\User:1', panel, launcher });
+
+  // 1. Focus captured before render() moves focus to dialog card, and restored along with panel on exit.
+  doc.activeElement = panelBtn;
+  await overlay.highlight({ target: 'fares.save', message: 'Save here — now.' });
+  assert.equal(panel.hidden, true, 'assistant panel hides during the tour');
+  assert.notEqual(doc.activeElement, panelBtn);
+  overlay.exit();
+  assert.equal(panel.hidden, false, 'assistant panel reopens after the tour');
+  assert.equal(doc.activeElement, panelBtn, 'focus returns to the trigger button, not the closed dialog card');
+
+  // 2. When activeElement was doc.body (e.g. disabled Send button), closing a panel-started tour focuses #sp-assistant-input.
+  doc.activeElement = doc.body;
+  await overlay.highlight({ target: 'target-0', message: 'Legacy — dash', label: 'Save — button' });
+  assert.equal(overlay.guide.state.steps[0].body, 'Legacy, dash');
+  assert.equal(overlay.guide.state.steps[0].title, 'Save, button');
+  overlay.exit();
+  assert.equal(doc.activeElement, panelInput);
+
+  // 3. On a <=900px screen, closing the mobile drawer hides .sidebar immediately (even mid-transition) and falls back to shell.menu.
+  panel.hidden = true;
+  mobile = false; win.innerWidth = 1280; sidebarOpen = false;
+  doc.activeElement = tourBtn;
+  await overlay.highlight({ target: 'shell.nav' });
+  assert.equal(overlay.guide.state.target, sidebar);
+  mobile = true; win.innerWidth = 360; sidebarOpen = true;
+  assert.equal(isVisibleElement(sidebar, win), true);
+  doc.body.classList.remove('sidebar-open');
+  assert.equal(isVisibleElement(sidebar, win), false, 'off-canvas sidebar is not visible once sidebar-open is removed');
+  frames.shift()?.();
+  assert.equal(overlay.guide.state.target, menuBtn, 'position() refreshes target to shell.menu when sidebar becomes hidden on mobile');
+  overlay.exit();
+  assert.equal(doc.activeElement, menuBtn, 'restores focus to #sidebarToggle when sidebar trigger is hidden');
 });
 
 test('registry copy follows the UI copy rule', () => {

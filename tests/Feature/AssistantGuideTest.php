@@ -51,9 +51,13 @@ class AssistantGuideTest extends TestCase
         $admin = $this->admin();
         $rows = $this->tool($admin, 'list_guide_targets', [], ['path' => '/admin/tickets'])->assertOk()->assertJsonPath('result.current_page', 'Ticketing and Booking')->json('result.targets');
         $pages = array_column($rows, 'page');
+        $this->assertSame('Ticketing and Booking', $pages[0]);
         $lastTicket = max(array_keys($pages, 'Ticketing and Booking'));
+        $firstShell = min(array_keys($pages, 'Every page'));
+        $lastShell = max(array_keys($pages, 'Every page'));
         $firstDashboard = min(array_keys($pages, 'Dashboard'));
-        $this->assertLessThan($firstDashboard, $lastTicket);
+        $this->assertLessThan($firstShell, $lastTicket);
+        $this->assertLessThan($firstDashboard, $lastShell);
         $this->assertContains('getting_started', array_column($this->tool($admin, 'list_guide_targets')->json('result.presets'), 'preset'));
 
         $fares = array_column($this->tool($admin, 'list_guide_targets', ['page' => 'Fare Management'])->assertOk()->json('result.targets'), 'id');
