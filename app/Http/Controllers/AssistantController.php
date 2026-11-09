@@ -14,7 +14,7 @@ class AssistantController extends Controller
     }
     private function contextRules(): array
     {
-        return ['context'=>'sometimes|array','context.path'=>'nullable|string|max:250','context.label'=>'nullable|string|max:200','context.text'=>'nullable|string|max:6000','context.targets'=>'sometimes|array|max:24','context.targets.*.id'=>'required|string|max:100','context.targets.*.label'=>'required|string|max:160'];
+        return ['context'=>'sometimes|array','context.path'=>'nullable|string|max:250','context.label'=>'nullable|string|max:200','context.text'=>'nullable|string|max:6000','context.targets'=>'sometimes|array|max:24','context.targets.*.id'=>'required|string|max:100','context.targets.*.label'=>'required|string|max:160','context.targets.*.description'=>'nullable|string|max:240'];
     }
     public function chat(Request $request)
     {

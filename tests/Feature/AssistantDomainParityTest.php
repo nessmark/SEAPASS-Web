@@ -853,4 +853,43 @@ class AssistantDomainParityTest extends TestCase
         ])->assertStatus(503)
           ->assertJsonPath('message', 'The request could not be completed within the time limit. Please try asking for one thing at a time.');
     }
+
+    public function test_mobile_host_contract_preserves_target_descriptions_and_passenger_navigation_aliases(): void
+    {
+        $passenger = $this->passenger();
+
+        // 1. Mobile AssistantGuideTarget.toContext() includes description alongside id and label
+        $this->actingAs($passenger, 'sanctum')->postJson('/api/assistant/tool', [
+            'name' => 'get_page_context',
+            'context' => [
+                'path' => 'checkout',
+                'label' => 'Booking Checkout',
+                'targets' => [
+                    [
+                        'id' => 'confirm_pay',
+                        'label' => 'Pay Button',
+                        'description' => 'Button that reserves the seats and opens payment',
+                    ],
+                ],
+            ],
+        ])->assertOk()
+          ->assertJsonPath('result.targets.0.description', 'Button that reserves the seats and opens payment');
+
+        // 2. Passenger tab aliases resolve to canonical mobile tab keys
+        $tools = app(Tools::class);
+        $this->assertSame('profile', $tools->execute($passenger, 'navigate_to', ['page' => 'account'])['client_action']['page']);
+        $this->assertSame('bookings', $tools->execute($passenger, 'navigate_to', ['page' => 'tickets'])['client_action']['page']);
+        $this->assertSame('trips', $tools->execute($passenger, 'navigate_to', ['page' => 'schedules'])['client_action']['page']);
+        $this->assertSame('advisories', $tools->execute($passenger, 'navigate_to', ['page' => 'notices'])['client_action']['page']);
+
+        // 3. start_booking forwards from/to port prefill fields
+        $res = $tools->execute($passenger, 'start_booking', [
+            'from' => 'San Jose',
+            'to' => 'Surigao',
+            'seats' => 2,
+        ]);
+        $this->assertSame('San Jose', $res['client_action']['args']['from']);
+        $this->assertSame('Surigao', $res['client_action']['args']['to']);
+        $this->assertSame(2, $res['client_action']['args']['seats']);
+    }
 }

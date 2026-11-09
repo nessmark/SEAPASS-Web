@@ -77,7 +77,7 @@ class Tools
         if ($role === 'passenger') {
             $spec['get_bookings'] = ['Read your own bookings. Optional status (pending, confirmed, to_be_confirmed, cancelled, expired) and date YYYY-MM-DD.', ['status' => 'string', 'date' => 'string']];
             $spec['get_booking'] = ['Read one authorized booking by reference. Never exposes other passengers.', ['reference' => 'string']];
-            $spec['start_booking'] = ['Open the booking flow for an upcoming active bookable trip with prefilled date, route, or trip ID. The passenger selects seats and pays in the app. Never captures payment or charges.', ['trip_id' => 'integer', 'date' => 'string', 'route' => 'string', 'seats' => 'integer']];
+            $spec['start_booking'] = ['Open the booking flow for an upcoming active bookable trip with prefilled date, route, origin/destination ports, or trip ID. The passenger selects seats and pays in the app. Never captures payment or charges.', ['trip_id' => 'integer', 'date' => 'string', 'route' => 'string', 'from' => 'string', 'to' => 'string', 'seats' => 'integer']];
             $spec['cancel_booking'] = ['Propose cancelling an unpaid pending booking. Requires user confirmation in app.', ['reference' => 'string', 'reason' => 'string']];
         }
 
@@ -162,15 +162,23 @@ class Tools
                     'roles' => '/admin/user-management/roles-permissions',
                     'sms' => '/admin/sms',
                 ]
-                : ($role === 'passenger' ? ['trips'=>'trips', 'bookings'=>'bookings', 'advisories'=>'advisories', 'profile'=>'profile'] : ['scanner'=>'scanner']);
-            $page = $args['page'] ?? '';
+                : ($role === 'passenger'
+                    ? [
+                        'trips' => 'trips', 'home' => 'trips', 'trip' => 'trips', 'schedules' => 'trips',
+                        'bookings' => 'bookings', 'booking' => 'bookings', 'tickets' => 'bookings', 'my_bookings' => 'bookings',
+                        'advisories' => 'advisories', 'advisory' => 'advisories', 'notices' => 'advisories',
+                        'profile' => 'profile', 'account' => 'profile', 'my_account' => 'profile',
+                    ]
+                    : ['scanner' => 'scanner']);
+            $page = strtolower(trim((string) ($args['page'] ?? '')));
             abort_unless(isset($pages[$page]), 422, 'Choose an allowed page.');
+            $canonicalPage = $role === 'passenger' ? $pages[$page] : $page;
             $navArgs = is_array($args['args'] ?? null) ? $args['args'] : [];
             $path = $pages[$page];
             if (!empty($navArgs)) {
                 $path .= (str_contains($path, '?') ? '&' : '?') . http_build_query($navArgs);
             }
-            return ['client_action' => ['type'=>'navigate', 'page'=>$page, 'path'=>$path, 'args'=>$navArgs], 'status'=>'ready_for_client'];
+            return ['client_action' => ['type'=>'navigate', 'page'=>$canonicalPage, 'path'=>$path, 'args'=>$navArgs], 'status'=>'ready_for_client'];
         }
 
         if ($name === 'start_booking') {
@@ -178,6 +186,8 @@ class Tools
                 'trip_id' => 'nullable|integer|exists:trip_schedules,id',
                 'date' => 'nullable|date_format:Y-m-d',
                 'route' => 'nullable|string|max:100',
+                'from' => 'nullable|string|max:100',
+                'to' => 'nullable|string|max:100',
                 'seats' => 'nullable|integer|min:1|max:10',
             ])->validate();
 
@@ -208,6 +218,12 @@ class Tools
                 }
                 if (!empty($data['route'])) {
                     $params['route'] = $data['route'];
+                }
+                if (!empty($data['from'])) {
+                    $params['from'] = trim($data['from']);
+                }
+                if (!empty($data['to'])) {
+                    $params['to'] = trim($data['to']);
                 }
             }
             if (!empty($data['seats'])) {
