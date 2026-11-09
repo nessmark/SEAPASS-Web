@@ -79,8 +79,9 @@ Following the root integration audit, all identified material defects in the bac
 | `get_advisories` | `passenger`, `staff`, `admin` | `immediate` | *(none)* | Returns active published travel advisories. |
 | `get_page_context` | `passenger`, `staff`, `admin` | `immediate` | *(none)* | Returns client screen snapshot (treated as untrusted reference data). |
 | `navigate_to` | `passenger`, `staff`, `admin` | `immediate` | `page` (required), `args` (object) | Prepares client navigation. Admin maps to actual routes (`/admin/user-management/profile`, `/admin/sms`, etc.). Supports passenger prefill (`trips?date=...&from=...`). |
-| `highlight_element` | `passenger`, `staff`, `admin` | `immediate` | `target`, `message` | Highlights a DOM element on the current screen. Target ID must exist in `context.targets`. |
-| `start_tour` | `passenger`, `staff`, `admin` | `immediate` | `preset` (must be `current_page`) | Starts interactive current-page guide. Full app tours are blocked to avoid disorienting page transitions. |
+| `highlight_element` | `passenger`, `staff`, `admin` | `immediate` | `target`, `message` | Admin: points at one console part by guide anchor id from `resources/assistant/guides.json`; unknown ids are refused with close matches. Passenger and staff (no console anchors): the target must exist in `context.targets`. Read only. |
+| `start_tour` | `passenger`, `staff`, `admin` | `immediate` | `preset`, or `title` + `steps[{target,title,body}]` (admin) | Admin: `current_page`, a preset (`getting_started`, `create_trip`, `verify_discount`, `publish_advisory`) or a custom tour of 1 to 14 anchor steps with unknown targets dropped. Multi-page tours move only on a user click. Passenger and staff: `current_page` only. Never saves or submits. |
+| `list_guide_targets` | `admin` | `immediate` | `page` (path or page name) | This account's guide anchors (id, label, description, page), current page first, plus the preset list. |
 | `update_profile` | `passenger`, `staff`, `admin` | `staged` | `name` (min 2, max 100) | Proposes updating user account display name. Identity-bound confirmation required. |
 | `start_booking` | `passenger` | `immediate` | `trip_id`, `date`, `route`, `seats` | Prepares passenger booking flow, validating trip is scheduled, future, and vessel is active. Returns `client_action` with `navigate` to `trips`. **Never charges or selects payment.** |
 | `get_bookings` | `passenger`, `admin` | `immediate` | `status`, `date`, `needs_attention`, `search`, `limit` | For passenger: strictly scoped to authenticated `passenger_id`; hides contact numbers, QR codes, and other users. For admin: filters by status, trip date, attention flag, or search term. |
@@ -198,7 +199,19 @@ OK (29 tests, 152 assertions)
 1. **File picker verification:** The official browser runtime rejected this session’s synthetic file-chooser population with “Not allowed.” That browser action was not retried through another mechanism. Backend attachment validation is covered separately; actual browser/native file selection remains unverified.
 2. **Microphone Permissions & AudioWorklet Requirements:** Web Audio capture downsamples mic audio to 16 kHz PCM16 mono. When embedded in an `<iframe>`, the hosting iframe **must explicitly specify `allow="microphone"`**.
 3. **Document attachments:** Attachments are submitted through authenticated text chat as validated inline data. Live voice and text attachment handling are separate paths; actual file selection on a physical phone remains unverified.
-4. **Current-Page Tour vs. Full-App Tours:** Interactive tours stay strictly confined to the currently active page (`preset: "current_page"`). Full application tours across multiple screens require root client coordination and explicit user navigation triggers.
+4. **Console tours:** The admin console has multi-page guided tours (section 7). The passenger app and the staff scanner keep the current-page guide; staff have no web console pages (every console route is `role:admin`), so there is no staff console tour.
+
+## 7. Console guide and tours (2026-11-09 parity)
+
+Ported from the DIELCO guide (`guide.js`, `guideAnchors.js`, `guideTours.js`, `GuideOverlay.vue`).
+
+- **Registry:** `resources/assistant/guides.json` holds console pages, anchors (id, label, description, page, optional fallback) and preset tours per role. Every anchor id is a `data-guide` attribute in the Blade templates, including repeated rows (manifest, seats, approve). `App\Services\Assistant\GuideRegistry` reads it for tool validation and the system prompt; the admin layout injects only the signed-in role's slice as `#sp-guide-registry`.
+- **Presets (admin):** `getting_started` (13 steps across the dashboard, trips, tickets, advisories, fares and reports), `create_trip`, `verify_discount`, `publish_advisory`. The model can also build a short custom tour from anchor ids; unknown ids are dropped, a tour with no valid step is refused.
+- **Engine:** `public/js/assistant/guide-engine.js` is DOM free (validation, step state, bounded lookup with fallbacks, about 4 s timeout, placement, sessionStorage resume). `guide-overlay.js` draws it: native modal dialog, dimmed cut-out, ring, arrow and a card with Back, Next or Done, and Skip tour. Right or Enter moves on, Left goes back, Esc exits, Tab stays in the card. The card flips to the side with room, stays inside a 360 px viewport and follows scroll and resize. Reduced motion turns off the pulse and smooth scrolling.
+- **Pages:** Laravel pages are full reloads. When Next or Back lands on another page, the tour saves its steps and index in sessionStorage (`seapass.guide.v1`, bound to the account identity and role, 30 minute limit, read once) and resumes on the next page. A tour the model starts never changes page by itself; a step on another page shows an Open page button.
+- **Safety:** Tours never click, type or submit. The modal layer blocks page input. A missing part shows a centred card with Next and Skip instead of hanging.
+- **No AI needed:** Take the tour in the sidebar account area and Show me around in the assistant empty state start `getting_started` without the AI connection.
+- **Tests:** `tests/Feature/AssistantGuideTest.php` (tool validation, role scoping, prompt, markup agreement) and `node --test tests/js/*.test.mjs` (engine validation, transitions, cancel, timeout, resume, placement).
 
 ## Root integration verification
 

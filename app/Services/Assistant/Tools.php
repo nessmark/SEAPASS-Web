@@ -25,6 +25,33 @@ class Tools
 
     public function identity(Authenticatable $user): string { return get_class($user).':'.$user->getAuthIdentifier(); }
 
+    public function guides(): GuideRegistry { return app(GuideRegistry::class); }
+
+    /** Console guide tools. Validated against this role's registry; the browser runs the tour without changing data. */
+    private function guideAction(string $role, string $name, array $args, array $context): array
+    {
+        $guides = $this->guides();
+        $anchors = $guides->forRole($role)['anchors'];
+        $target = $args['target'] ?? null;
+        // Older auto-generated page targets from the page context stay valid for a single highlight.
+        if ($name === 'highlight_element' && is_string($target) && !isset($anchors[$target]) && in_array($target, array_column($context['targets'] ?? [], 'id'), true)) {
+            return ['client_action' => ['type' => $name, 'args' => $args], 'status' => 'ready_for_client'];
+        }
+        $tour = $name === 'highlight_element' ? $guides->highlight($role, $args) : $guides->tour($role, $args, $context['path'] ?? null);
+        $current = $guides->pageOf($role, $context['path'] ?? null);
+        $first = $tour['steps'][0]['target'] ?? null;
+        $firstPage = $first ? ($anchors[$first]['page'] ?? null) : null;
+        $pages = $guides->forRole($role)['pages'];
+        return [
+            'client_action' => ['type' => $name, 'args' => $args, 'tour' => $tour],
+            'status' => 'ready_for_client',
+            'total' => count($tour['steps']),
+            'dropped' => $tour['dropped'],
+            'starts_on' => $firstPage === null || $firstPage === $current ? 'this page' : ($pages[$firstPage]['label'] ?? $firstPage),
+            'note' => 'The app shows this read-only guide on screen. It never saves or submits. A step on another page shows an Open page button.',
+        ];
+    }
+
     public function definitions(Authenticatable $user): array
     {
         $role = $this->role($user);
@@ -50,6 +77,16 @@ class Tools
             $spec['operator_needs_attention'] = ['Summary of items needing operator action: unverified discount IDs, payment reviews, pending bookings, and urgent trips.', ['limit' => 'integer']];
         }
 
+        if ($this->guides()->hasGuides($role)) {
+            // Console guides: anchors come from resources/assistant/guides.json for this role only.
+            $spec['list_guide_targets'] = ['List this account\'s guide anchors (id, label, description, page), current page first. Optional page (path or page name) lists one page. Read only.', ['page' => 'string']];
+            $spec['highlight_element'] = ['Point at one part of the console by guide anchor id from the system instruction or list_guide_targets, with a one or two sentence message. Read only; never clicks or saves. Unknown ids are refused with close matches.', ['target' => 'string', 'message' => 'string']];
+            $spec['start_tour'] = ['Start a read-only guided tour. Give preset (current_page, or a preset named in the system instruction), or a short custom tour with title and steps built only from anchor ids. Unknown step targets are dropped. Tours never save or submit.', [
+                'preset' => 'string', 'title' => 'string',
+                'steps' => ['type' => 'array', 'items' => ['type' => 'object', 'properties' => ['target' => ['type' => 'string'], 'title' => ['type' => 'string'], 'body' => ['type' => 'string']], 'required' => ['target']]],
+            ]];
+        }
+
         if ($role === 'admin') {
             $spec['get_bookings'] = ['Read authorized bookings. Optional filters: status, date, needs_attention (boolean), search text, limit.', ['status' => 'string', 'date' => 'string', 'needs_attention' => 'boolean', 'search' => 'string', 'limit' => 'integer']];
             $spec['get_booking'] = ['Read one authorized booking by reference or ID.', ['reference' => 'string']];
@@ -66,7 +103,7 @@ class Tools
         }
 
         return array_map(function ($name, $spec) {
-            $properties = []; foreach ($spec[1] as $key => $type) $properties[$key] = ['type' => $type];
+            $properties = []; foreach ($spec[1] as $key => $type) $properties[$key] = is_array($type) ? $type : ['type' => $type];
             return ['name' => $name, 'description' => $spec[0], 'parameters' => ['type' => 'object', 'properties' => $properties ?: (object) []]];
         }, array_keys($spec), array_values($spec));
     }
@@ -164,6 +201,12 @@ class Tools
                     'prefill' => $params,
                 ],
             ];
+        }
+
+        if ($name === 'list_guide_targets') return ['result' => $this->guides()->targets($role, $args['page'] ?? null, $context['path'] ?? null)];
+
+        if (in_array($name, ['highlight_element', 'start_tour']) && $this->guides()->hasGuides($role)) {
+            return $this->guideAction($role, $name, $args, $context);
         }
 
         if (in_array($name, ['highlight_element', 'start_tour'])) {

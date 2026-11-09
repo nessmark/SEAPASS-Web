@@ -32,7 +32,7 @@
         {{-- Sticky Top Header --}}
         <header class="header">
             <div class="header-left">
-                <button type="button" class="hamburger" id="sidebarToggle" role="button" tabindex="0" aria-label="Toggle sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+                <button type="button" class="hamburger" id="sidebarToggle" data-guide="shell.menu" role="button" tabindex="0" aria-label="Toggle sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
                 <div class="header-brand">
                     <span class="header-location">San Jose Port</span>
                     <span class="header-divider" aria-hidden="true">/</span>
@@ -40,11 +40,11 @@
                 </div>
             </div>
             <div class="header-right">
-                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark mode">
+                <button type="button" class="theme-toggle" id="themeToggle" data-guide="shell.theme" aria-label="Toggle theme" title="Toggle light/dark mode">
                     <span id="themeIcon"></span>
                 </button>
-                <a href="{{ route('admin.travel-advisory') }}" class="icon-btn" aria-label="Travel advisories" title="Travel advisories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></a>
-                <a href="{{ route('admin.user-management.profile') }}" class="user-avatar" aria-label="Your profile">{{ mb_substr(auth()->user()->name ?? 'Admin', 0, 1) }}</a>
+                <a href="{{ route('admin.travel-advisory') }}" class="icon-btn" data-guide="shell.advisories" aria-label="Travel advisories" title="Travel advisories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></a>
+                <a href="{{ route('admin.user-management.profile') }}" class="user-avatar" data-guide="shell.account" aria-label="Your profile">{{ mb_substr(auth()->user()->name ?? 'Admin', 0, 1) }}</a>
             </div>
         </header>
 

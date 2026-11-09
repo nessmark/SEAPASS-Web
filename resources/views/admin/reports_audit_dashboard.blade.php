@@ -18,13 +18,13 @@
                 </div>
 
                 {{-- Sales Report Section --}}
-                <section class="reports-section">
+                <section data-guide="reports.sales" class="reports-section">
                     <div class="reports-section-header">
                         <div>
                             <h2 class="reports-section-title">Sales Report</h2>
                         </div>
                         <div class="section-actions">
-                            <a href="{{ route('admin.reports-audit.export-sales', request()->query()) }}" class="btn btn-export" title="Download filtered sales transactions as CSV">
+                            <a href="{{ route('admin.reports-audit.export-sales', request()->query()) }}" class="btn btn-export" data-guide="reports.export" title="Download filtered sales transactions as CSV">
                                 <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10"/><path d="m8 11 4 4 4-4"/><path d="M5 18h14"/></svg> Export CSV
                             </a>
                             <button type="button" class="btn btn-print" onclick="window.print()" title="Print this sales report">
@@ -33,7 +33,7 @@
                         </div>
                     </div>
 
-                    <form method="GET" action="{{ route('admin.reports-audit') }}" class="reports-filters">
+                    <form method="GET" action="{{ route('admin.reports-audit') }}" class="reports-filters" data-guide="reports.filters">
                         <div class="filter-group">
                             <label for="filter_date">Date</label>
                             <input 
@@ -170,7 +170,7 @@
                 </section>
 
                 {{-- Passenger Count Report Section --}}
-                <section class="reports-section">
+                <section data-guide="reports.passengers" class="reports-section">
                     <div class="reports-section-header">
                         <div>
                             <h2 class="reports-section-title">Passenger Count Report</h2>
@@ -248,7 +248,7 @@
                 </section>
 
                 {{-- Audit Log Section --}}
-                <section class="reports-section">
+                <section data-guide="reports.audit" class="reports-section">
                     <div class="reports-section-header">
                         <div>
                             <h2 class="reports-section-title">Audit Log</h2>

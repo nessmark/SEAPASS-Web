@@ -23,7 +23,7 @@
 
                 <form class="fare-form" id="fareMatrixForm" method="POST" action="{{ route('admin.fare-management.store') }}">
                     @csrf
-                    <div class="fare-table-wrap">
+                    <div class="fare-table-wrap" data-guide="fares.matrix">
                         <table class="fare-table" aria-label="Fare matrix by route and passenger type">
                             <thead>
                                 <tr>
@@ -56,7 +56,7 @@
                         </table>
                     </div>
                     <div class="fare-form-actions">
-                        <button type="submit" class="fare-btn fare-btn-primary">Save All Fares</button>
+                        <button type="submit" class="fare-btn fare-btn-primary" data-guide="fares.save">Save All Fares</button>
                     </div>
                 </form>
             </section>

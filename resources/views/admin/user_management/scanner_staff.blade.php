@@ -101,7 +101,7 @@
                     <h1 class="workspace-page-title">Scanner Staff Accounts</h1>
                     <p class="page-description">Manage the staff who scan and validate boarding tickets.</p>
                 </div>
-                <button class="boats-button" type="button" id="openScannerModal">
+                <button class="boats-button" type="button" id="openScannerModal" data-guide="users.staffAdd">
                     <span>+ Add Scanner Staff</span>
                 </button>
             </div>
@@ -206,7 +206,7 @@
             </div>
 
             @if($scannerStaff->isEmpty())
-                <div class="empty-state" style="text-align: center; padding: 48px 20px; color: var(--text-2);">
+                <div class="empty-state" data-guide="users.staff" style="text-align: center; padding: 48px 20px; color: var(--text-2);">
                     <div style="font-size: 40px; margin-bottom: 12px;"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M9 7l1.2-2h3.6L15 7"/><circle cx="12" cy="13.5" r="3.2"/></svg></div>
                     <h3 style="margin: 0 0 6px 0; color: var(--text);">No Scanner Staff Accounts Found</h3>
                     <p style="margin: 0 0 18px 0; font-size: 14px;">Create scanner accounts for terminal staff to verify tickets and QR boarding passes in the mobile app.</p>
@@ -215,7 +215,7 @@
                     </button>
                 </div>
             @else
-                <table class="crew-table">
+                <table class="crew-table" data-guide="users.staff">
                     <thead>
                         <tr>
                             <th>Name</th>

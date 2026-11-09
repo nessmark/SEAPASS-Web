@@ -56,16 +56,16 @@
                 <div class="alert" style="margin-top: 15px;">{{ session('success') }}</div>
             @endif
 
-            <div class="search-filter">
+            <div class="search-filter" data-guide="users.search">
                 <input type="text" id="searchInput" placeholder="Search by name or email..." onkeyup="filterTable()">
             </div>
 
             @if($passengers->isEmpty())
-                <div class="empty-state">
+                <div class="empty-state" data-guide="users.passengers">
                     <p>No passengers found.</p>
                 </div>
             @else
-                <table class="passenger-table">
+                <table class="passenger-table" data-guide="users.passengers">
                     <thead>
                         <tr>
                             <th>Name</th>
