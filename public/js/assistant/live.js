@@ -203,6 +203,7 @@ export function createLiveConnection(options = {}) {
   let quotaDelay = 0;
   let audioQueue = [];
   let turnOpen = false;     // the model owes the user a reply
+  let turnSeq = 0;          // counts turns, so a goAway replacement can tell it fell behind
   const tools = new Map();  // key -> { rec, id, name, controller }
   let toolSeq = 0;
   let unsubscribeOnline = null;
@@ -229,6 +230,10 @@ export function createLiveConnection(options = {}) {
     rec.retired = true;
     rec.setupTimer = cancel(rec.setupTimer);
     try { rec.socket?.close(code, reason); } catch { /* already closed */ }
+  }
+
+  function openTurn() {
+    if (!turnOpen) { turnOpen = true; turnSeq += 1; }
   }
 
   function clearWatchdog() { watchdogTimer = cancel(watchdogTimer); }
@@ -373,6 +378,7 @@ export function createLiveConnection(options = {}) {
     rec.socket.addEventListener('open', () => {
       if (rec.retired) return;
       rec.opened = true;
+      rec.turnSeq = turnSeq;
       sendOn(rec, buildSetup(session, { resumeHandle: usedHandle, voiceName: cfg.voiceName }));
     });
     rec.socket.addEventListener('message', event => onFrame(rec, event?.data));
@@ -400,6 +406,20 @@ export function createLiveConnection(options = {}) {
     if (rec.kind === 'probe' && (state !== 'fallback' || !canSwitchBack())) {
       retire(rec);
       if (state === 'fallback') armProbe(cfg.busyProbeMs);
+      return;
+    }
+    // A goAway replacement resumed from the handle it had when its setup went
+    // out. If the user spoke on the old socket since then, that session is a
+    // turn behind: drop it and open a fresh one from the newer handle, at the
+    // next turn boundary (or now, if that turn already finished).
+    if (rec.kind === 'replacement' && (turnOpen || tools.size > 0 || rec.turnSeq !== turnSeq)) {
+      retire(rec, 1000, 'stale');
+      if (active) {
+        if (turnOpen || tools.size > 0) active.replaceAfterTurn = true;
+        else startReplacement();
+      } else {
+        attempt('primary');
+      }
       return;
     }
     adopt(rec);
@@ -581,13 +601,13 @@ export function createLiveConnection(options = {}) {
   function handleContent(rec, sc) {
     if (sc.interrupted) emit('interrupted', {});
     const heard = textOf(sc.inputTranscription);
-    if (heard) { turnOpen = true; emit('inputTranscript', { text: heard }); }
+    if (heard) { openTurn(); emit('inputTranscript', { text: heard }); }
     for (const part of Array.isArray(sc.modelTurn?.parts) ? sc.modelTurn.parts : []) {
       const data = part?.inlineData?.data;
-      if (typeof data === 'string' && data) { turnOpen = true; emit('audio', { data, mimeType: part.inlineData.mimeType }); }
+      if (typeof data === 'string' && data) { openTurn(); emit('audio', { data, mimeType: part.inlineData.mimeType }); }
     }
     const said = textOf(sc.outputTranscription);
-    if (said) { turnOpen = true; emit('outputTranscript', { text: said }); }
+    if (said) { openTurn(); emit('outputTranscript', { text: said }); }
     if (sc.turnComplete) {
       turnOpen = false;
       clearWatchdog();
@@ -607,7 +627,7 @@ export function createLiveConnection(options = {}) {
       tools.set(key, { rec, id: call.id, name: call.name, controller });
       // While our own tool runs the model is waiting on us, so the reply
       // watchdog pauses until every result has been sent.
-      turnOpen = true;
+      openTurn();
       clearWatchdog();
       emit('toolCall', { key, id: call.id, name: call.name, args: isObject(call.args) ? call.args : {}, signal: controller?.signal });
     }

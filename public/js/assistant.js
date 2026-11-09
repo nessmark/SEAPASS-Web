@@ -100,7 +100,7 @@ function init(){
   const mine=fn=>payload=>{if(live===conn)fn(payload);};
   conn.on('state',mine(({state:next})=>{liveState=next;if(next!=='ready'){playback?.flush();liveBubble=null;}if(next==='fallback'||next==='offline'||next==='unavailable'){mic?.stop();mic=null;}if(next==='unavailable')queueMicrotask(()=>{if(live===conn)stopVoice();});renderVoice();}));
   conn.on('notice',mine(({message})=>say(message)));
-  conn.on('ready',mine(async({recovered,replaced})=>{if(replaced){say('');return;}if(!await ensureMic(conn)||live!==conn)return;say(recovered?LIVE_COPY.back:LIVE_COPY.listening);}));
+  conn.on('ready',mine(async({recovered,replaced})=>{if(replaced){if(notice.textContent===LIVE_COPY.refreshing)say(LIVE_COPY.listening);return;}if(!await ensureMic(conn)||live!==conn)return;say(recovered?LIVE_COPY.back:LIVE_COPY.listening);}));
   conn.on('audio',mine(({data})=>{try{playback?.enqueue(data);}catch{}}));
   conn.on('interrupted',mine(()=>{playback?.flush();liveBubble=null;}));
   conn.on('inputTranscript',mine(({text})=>{userPart+=text;if(!voiceUserBubble)voiceUserBubble=bubble('user','',false);voiceUserBubble.textContent=userPart;}));

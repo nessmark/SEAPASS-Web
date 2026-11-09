@@ -347,6 +347,85 @@ test('if the old socket closes before the replacement is ready, audio waits for 
   h.conn.disconnect();
 });
 
+test('a turn that starts during the replacement handshake drops that replacement and redoes it after the turn', async () => {
+  const h = harness();
+  const old = await connectReady(h);
+  old.serverSend({ sessionResumptionUpdate: { newHandle: 'h1' } });
+  old.serverSend({ goAway: {} });
+  await flush();
+  const stale = h.sockets[1];
+  stale.serverOpen();
+  assert.deepEqual(stale.setup.sessionResumption, { handle: 'h1' });
+  old.serverSend({ serverContent: { inputTranscription: { text: 'Any trip at noon?' } } });
+  stale.serverSend({ setupComplete: {} });
+  await flush();
+  assert.equal(stale.closedByClient?.reason, 'stale', 'the replacement is a turn behind, so it is dropped');
+  assert.equal(old.closedByClient, null, 'the old socket keeps carrying the turn');
+  h.conn.sendAudio('to-old');
+  assert.ok(old.audio.includes('to-old'));
+  old.serverSend({ serverContent: { outputTranscription: { text: 'Yes, at 12:30.' } } });
+  old.serverSend({ sessionResumptionUpdate: { newHandle: 'h2' } });
+  old.serverSend({ serverContent: { turnComplete: true } });
+  await flush();
+  assert.equal(h.sockets.length, 3, 'a fresh replacement opens at the turn boundary');
+  await handshake(h.sockets[2]);
+  assert.deepEqual(h.sockets[2].setup.sessionResumption, { handle: 'h2' });
+  assert.ok(old.closedByClient, 'old socket retired after the handover');
+  assert.deepEqual(h.states(), ['connecting', 'ready'], 'never left ready');
+  assert.deepEqual(h.of('turnComplete'), [{ ok: true }], 'the turn on the old socket finished normally');
+  assert.deepEqual(h.of('ready').at(-1), { resumed: true, recovered: false, replaced: true });
+  h.conn.disconnect();
+});
+
+test('a turn that finished during the replacement handshake redoes it at once from the newer handle', async () => {
+  const h = harness();
+  const old = await connectReady(h);
+  old.serverSend({ sessionResumptionUpdate: { newHandle: 'h1' } });
+  old.serverSend({ goAway: {} });
+  await flush();
+  const stale = h.sockets[1];
+  stale.serverOpen();
+  old.serverSend({ serverContent: { inputTranscription: { text: 'Fare to San Jose?' } } });
+  old.serverSend({ serverContent: { outputTranscription: { text: 'It is 250 pesos.' } } });
+  old.serverSend({ sessionResumptionUpdate: { newHandle: 'h2' } });
+  old.serverSend({ serverContent: { turnComplete: true } });
+  stale.serverSend({ setupComplete: {} });
+  await flush();
+  assert.equal(stale.closedByClient?.reason, 'stale');
+  assert.equal(h.sockets.length, 3);
+  await handshake(h.sockets[2]);
+  assert.deepEqual(h.sockets[2].setup.sessionResumption, { handle: 'h2' });
+  assert.equal(h.conn.state, 'ready');
+  assert.deepEqual(h.states(), ['connecting', 'ready']);
+  h.conn.disconnect();
+});
+
+test('if the old socket closed after a newer turn, a stale replacement gives way to a resumed reconnect', async () => {
+  const h = harness();
+  const old = await connectReady(h);
+  old.serverSend({ sessionResumptionUpdate: { newHandle: 'h1' } });
+  old.serverSend({ goAway: {} });
+  await flush();
+  const stale = h.sockets[1];
+  stale.serverOpen();
+  old.serverSend({ serverContent: { inputTranscription: { text: 'Is the 7 AM trip full?' } } });
+  old.serverSend({ sessionResumptionUpdate: { newHandle: 'h2' } });
+  old.serverSend({ serverContent: { turnComplete: true } });
+  old.serverDrop(1000);
+  await flush();
+  assert.equal(h.conn.state, 'reconnecting');
+  h.conn.sendAudio('held');
+  stale.serverSend({ setupComplete: {} });
+  await flush();
+  assert.equal(stale.closedByClient?.reason, 'stale');
+  assert.equal(h.sockets.length, 3);
+  await handshake(h.sockets[2]);
+  assert.deepEqual(h.sockets[2].setup.sessionResumption, { handle: 'h2' });
+  assert.equal(h.conn.state, 'ready');
+  assert.deepEqual(h.sockets[2].audio, ['held'], 'audio held during the gap goes to the new session');
+  h.conn.disconnect();
+});
+
 test('the per-turn watchdog ends a stuck turn with a friendly line', async () => {
   const h = harness();
   const socket = await connectReady(h);
