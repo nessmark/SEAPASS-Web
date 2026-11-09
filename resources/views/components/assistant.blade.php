@@ -12,5 +12,5 @@
   <footer>AI can make mistakes. Confirm important travel and payment details.</footer>
 </section>
 <div id="sp-guide" hidden role="dialog" aria-labelledby="sp-guide-title"><strong id="sp-guide-title"></strong><p></p><button type="button" data-guide="next">Next</button><button type="button" data-guide="close">Done</button></div>
-<script type="module" src="{{ asset('js/assistant.js') }}?v={{ filemtime(public_path('js/assistant.js')) }}"></script>
+<script type="module" src="{{ asset('js/assistant.js') }}?v=20261109-parity"></script>
 @endauth
