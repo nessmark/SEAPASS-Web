@@ -108,8 +108,9 @@ class OperationsTools
 
     public function normalizePort(string $port): string
     {
-        $port = trim((string) preg_replace('/\(\s*dinagat\s*\)/i', '', $port));
-        $port = trim((string) preg_replace('/\s+(City\s+)?Port$/i', '', $port));
+        $port = trim((string) preg_replace('/\(\s*dinagat(?:\s+islands)?\s*\)/i', '', $port));
+        $port = trim((string) preg_replace('/^(?:City\s+)?Port$|\s+(?:City\s+)?Port$/i', '', $port));
+        if (preg_match('/^(?:all(?:\s+ports.*)?|not\s+set|unassigned|none)$/i', $port)) return '';
         // SeaPass has two ports. Free-text assignments such as "Port of San Jose, Dinagat" still map.
         if (stripos($port, 'surigao') !== false) return 'Surigao';
         if (stripos($port, 'san jose') !== false || stripos($port, 'dinagat') !== false) return 'San Jose';
@@ -129,7 +130,7 @@ class OperationsTools
         return $origin !== '' && strcasecmp($origin, $port) === 0;
     }
 
-    private function routeLike($query, string $port): void
+    public function routeLike($query, string $port): void
     {
         $query->where(function ($q) use ($port) {
             $q->where('route', 'like', '%'.$port.'%');
@@ -158,7 +159,8 @@ class OperationsTools
 
     private function category(Booking $booking, int $index): string
     {
-        $raw = strtolower((string) (($booking->seat_breakdown[$index] ?? [])['category'] ?? 'regular'));
+        $item = $booking->seat_breakdown[$index] ?? [];
+        $raw = strtolower((string) ($item['category'] ?? $item['type'] ?? 'regular'));
         if (str_contains($raw, 'student')) return 'student';
         if (str_contains($raw, 'senior') || str_contains($raw, 'pwd')) return 'senior_pwd';
         return 'regular';
@@ -208,7 +210,7 @@ class OperationsTools
         if (in_array($status, ['cancelled', 'canceled'], true)) return ['code' => 'CANCELLED', 'message' => 'This booking was cancelled. The ticket cannot board.'];
         if ($status === 'to_be_confirmed') return ['code' => 'ID_CHECK_PENDING', 'message' => 'Payment is recorded but the discount ID check is not finished. The ticket cannot board yet.'];
         if ($status !== 'confirmed') return ['code' => 'NOT_CONFIRMED', 'message' => 'Only confirmed bookings can board. This booking is '.$status.'.'];
-        if ($seats && count($boarded) >= count($seats)) return ['code' => 'ALREADY_BOARDED', 'message' => 'Every seat on this ticket has already boarded.'];
+        if ($booking->is_boarded || !empty($booking->boarded_at) || ($seats && count($boarded) >= count($seats))) return ['code' => 'ALREADY_BOARDED', 'message' => 'Every seat on this ticket has already boarded.'];
         if ($tripDate && $tripDate < $today) return ['code' => 'EXPIRED_TRIP_DATE', 'message' => 'This ticket was for an earlier date ('.$tripDate.').'];
         if ($tripDate && $tripDate > $today) return ['code' => 'FUTURE_TRIP_DATE', 'message' => 'This ticket is for a later date ('.$tripDate.'), not today.'];
         if ($now->lt($departure->copy()->subHours(2))) return ['code' => 'TOO_EARLY', 'message' => 'Boarding opens at '.$departure->copy()->subHours(2)->format('h:i A').'.'];
@@ -263,7 +265,7 @@ class OperationsTools
             ->whereDate('departure_time', $day->format('Y-m-d'))
             ->orderBy('departure_time');
         if ($port) $this->routeLike($query, $port);
-        $trips = $query->limit(80)->get(['id', 'boat_id', 'route', 'departure_time', 'status', 'available_seats']);
+        $trips = $query->get(['id', 'boat_id', 'route', 'departure_time', 'status', 'available_seats']);
         if ($port) $trips = $trips->filter(fn ($t) => $this->departsFrom((string) $t->route, $port))->values();
 
         $bookings = Booking::whereIn('trip_schedule_id', $trips->pluck('id'))->get($this->bookingColumns())->groupBy('trip_schedule_id');
@@ -365,7 +367,8 @@ class OperationsTools
     private function lookupTicket(Authenticatable $user, string $role, array $args): array
     {
         $data = Validator::make($args, ['reference' => 'required|string|max:50'])->validate();
-        $ref = trim($data['reference'], " \t\n\r\0\x0B\"'");
+        $ref = ltrim(trim($data['reference'], " \t\n\r\0\x0B\"'"), '#');
+        abort_if($ref === '', 422, 'Provide a ticket reference number.');
         $booking = Booking::with('tripSchedule.boat:id,name')
             ->where(fn ($q) => $q->where('reference_number', $ref)->orWhere('reference_number', strtoupper($ref)))
             ->first($this->bookingColumns());
@@ -482,7 +485,7 @@ class OperationsTools
             ->latest()->limit($limit)->get(['id', 'deduplication_key', 'to', 'status', 'error_message', 'created_at'])
             ->map(fn (SmsMessage $m) => [
                 'id' => $m->id,
-                'to' => $m->masked_to,
+                'to' => strlen((string) $m->to) >= 8 ? $m->masked_to : '••••',
                 'purpose' => str_replace('-', ' ', strtok((string) $m->deduplication_key, ':') ?: 'message'),
                 'status' => $m->status,
                 'error' => $m->error_message,
@@ -505,23 +508,26 @@ class OperationsTools
 
     private function staffAccounts(array $args): array
     {
-        $data = Validator::make($args, ['role' => 'nullable|in:admin,staff,scanner,all', 'port' => 'nullable|string|max:60', 'active' => 'nullable|boolean', 'limit' => 'nullable|integer'])->validate();
+        $data = Validator::make($args, ['role' => 'nullable|in:admin,staff,scanner,scanner_staff,all', 'port' => 'nullable|string|max:60', 'active' => 'nullable|boolean', 'limit' => 'nullable|integer'])->validate();
         $limit = min(max((int) ($data['limit'] ?? 25), 1), 50);
         $query = User::query()->orderBy('name');
         $role = $data['role'] ?? 'all';
-        if ($role === 'staff') $query->whereIn(DB::raw('LOWER(role)'), self::STAFF_ROLES);
+        if (in_array($role, ['staff', 'scanner', 'scanner_staff'], true)) $query->whereRaw('LOWER(role) IN (?, ?, ?)', self::STAFF_ROLES);
         elseif ($role !== 'all') $query->whereRaw('LOWER(role) = ?', [$role]);
-        if (array_key_exists('active', $data) && $data['active'] !== null) $query->where('is_active', (bool) $data['active']);
         $rows = $query->get(['id', 'name', 'email', 'role', 'assigned_port', 'is_active', 'created_at']);
+        if (array_key_exists('active', $data) && $data['active'] !== null) {
+            $wantActive = (bool) $data['active'];
+            $rows = $rows->filter(fn (User $u) => ($u->is_active !== false) === $wantActive)->values();
+        }
         if (!empty($data['port'])) {
             $port = $this->normalizePort($data['port']);
-            $rows = $rows->filter(fn ($u) => strcasecmp($this->normalizePort((string) $u->assigned_port), $port) === 0)->values();
+            if ($port !== '') $rows = $rows->filter(fn ($u) => strcasecmp($this->normalizePort((string) $u->assigned_port), $port) === 0)->values();
         }
 
         return ['result' => [
             'total' => $rows->count(),
-            'active' => $rows->where('is_active', true)->count(),
-            'inactive' => $rows->where('is_active', false)->count(),
+            'active' => $rows->filter(fn (User $u) => $u->is_active !== false)->count(),
+            'inactive' => $rows->filter(fn (User $u) => $u->is_active === false)->count(),
             'accounts' => $rows->take($limit)->map(fn (User $u) => [
                 'id' => $u->id,
                 'name' => $u->name,
@@ -547,10 +553,10 @@ class OperationsTools
             ->where('passenger_id', $passenger->id)
             ->whereRaw('LOWER(status) IN (?, ?, ?)', ['pending', 'to_be_confirmed', 'confirmed'])
             ->whereDate('trip_date', '>=', $now->format('Y-m-d'))
-            ->orderBy('trip_date')->orderBy('departure_time_slot')
-            ->limit(20)
+            ->orderBy('trip_date')->orderBy('departure_time_slot')->orderBy('id')
             ->get(array_merge($this->bookingColumns(), ['passenger_id', 'reservation_expires_at']))
             ->filter(fn (Booking $b) => $this->departureAt($b)->gt($now))
+            ->sortBy(fn (Booking $b) => $this->departureAt($b)->timestamp)
             ->values();
     }
 
@@ -635,6 +641,23 @@ class OperationsTools
         return $this->visibleAdvisories($passenger)->whereNotIn('id', $read)->pluck('id');
     }
 
+    /** Extracts plain advisory message text when Advisory::content holds rendered email HTML. */
+    public function plainAdvisoryText(?string $content): string
+    {
+        $raw = trim((string) $content);
+        if ($raw === '') return '';
+        if (preg_match('/<div[^>]*class=["\'][^"\']*message-box[^"\']*["\'][^>]*>(.*?)<\/div>/is', $raw, $m)
+            || preg_match('/<div[^>]*border-left:\s*4px\s+solid\s+#10B981[^>]*>(.*?)<\/div>/is', $raw, $m)) {
+            $raw = $m[1];
+        } elseif (str_contains($raw, '<')) {
+            $raw = (string) preg_replace('/<(?:head|style|script)\b[^>]*>.*?<\/(?:head|style|script)>/is', ' ', $raw);
+        }
+        if (str_contains($raw, '<') || str_contains($raw, '&')) {
+            $raw = html_entity_decode(strip_tags(preg_replace('/<br\s*\/?>/i', "\n", $raw)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+        return trim((string) preg_replace('/[ \t]+/', ' ', $raw));
+    }
+
     private function notifications(Authenticatable $user, string $role, array $args): array
     {
         $data = Validator::make($args, ['unread_only' => 'nullable|boolean', 'limit' => 'nullable|integer'])->validate();
@@ -660,8 +683,13 @@ class OperationsTools
         $result = ['in_app' => $inApp, 'unread_in_app' => $unreadInApp, 'limit' => $limit];
 
         if ($role === 'passenger' && $user instanceof Passenger) {
-            $advisories = $this->visibleAdvisories($user)->orderByDesc('published_at')->orderByDesc('id')->limit(50)->get(['id', 'title', 'content', 'severity', 'route', 'affected_route', 'effective_from', 'until', 'published_at', 'created_at']);
-            $read = AdvisoryUserRead::where('user_id', $user->id)->whereIn('advisory_id', $advisories->pluck('id'))->pluck('advisory_id')->flip();
+            $readIds = AdvisoryUserRead::where('user_id', $user->id)->pluck('advisory_id');
+            $read = $readIds->flip();
+            $advisories = $this->visibleAdvisories($user)
+                ->when($unreadOnly, fn ($q) => $q->whereNotIn('id', $readIds))
+                ->orderByDesc('published_at')->orderByDesc('id')
+                ->limit($limit)
+                ->get(['id', 'title', 'content', 'severity', 'route', 'affected_route', 'effective_from', 'until', 'published_at', 'created_at']);
             $ports = collect($this->upcomingBookings($user)->pluck('route'))->flatMap(function ($route) {
                 $parts = preg_split('/\s*(?:\x{2192}|->|\x{2014}|\x{2013})\s*/u', (string) $route, 2) ?: [];
                 return array_map(fn ($p) => $this->normalizePort($p), $parts);
@@ -670,7 +698,7 @@ class OperationsTools
             $rows = $advisories->map(fn (Advisory $a) => [
                 'id' => $a->id,
                 'title' => $a->title,
-                'message' => mb_substr((string) $a->content, 0, 400),
+                'message' => mb_substr($this->plainAdvisoryText($a->content), 0, 400),
                 'severity' => $a->severity,
                 'route' => $a->route,
                 'effective_from' => $a->effective_from,
@@ -678,8 +706,8 @@ class OperationsTools
                 'is_read' => isset($read[$a->id]),
                 'affects_your_trip' => $this->advisoryMatches((string) $a->route, $ports),
             ]);
-            $result['unread_advisories'] = $rows->where('is_read', false)->count();
-            $result['advisories'] = $rows->when($unreadOnly, fn ($c) => $c->where('is_read', false))->take($limit)->values()->all();
+            $result['unread_advisories'] = $this->unreadAdvisoryIds($user)->count();
+            $result['advisories'] = $rows->values()->all();
         }
 
         return ['result' => $result];
@@ -749,6 +777,7 @@ class OperationsTools
         if ($name === 'set_staff_active') {
             $staff = User::lockForUpdate()->findOrFail($a['staff_id']);
             $this->assertStaffChange($user, $staff, (bool) $a['active']);
+            $staff->is_active = $staff->is_active !== false;
             // Canonical admin action used by the Scanner Staff page.
             app(UserManagementController::class)->toggleScannerStaff($staff);
             $staff->refresh();

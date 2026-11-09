@@ -649,4 +649,87 @@ class AssistantOperationsToolsTest extends TestCase
         $this->assertSame(1, $this->tools()->confirm($staff, $staged['confirmation']['token'], true)['result']['marked_notifications']);
         $this->assertSame(1, $this->tools()->execute($other, 'get_notifications')['result']['unread_in_app']);
     }
+
+    public function test_attention_and_analytics_strip_booking_appends_and_keep_exact_urgent_counts(): void
+    {
+        $out = $this->trip(self::SURIGAO_OUT, '2026-11-09 10:30');
+        $fullA = $this->trip(self::SURIGAO_OUT, '2026-11-09 13:30');
+        $fullA->update(['available_seats' => 0]);
+        $fullB = $this->trip(self::SAN_JOSE_OUT, '2026-11-09 17:00');
+        $fullB->update(['available_seats' => 0]);
+
+        $this->booking($out, 'SP-DISC-1', ['status' => 'to_be_confirmed']);
+        $this->booking($out, 'SP-REV-1', ['payment_review_required' => true]);
+        $this->booking($out, 'SP-PEND-1', ['status' => 'pending']);
+
+        $admin = $this->admin();
+        $attention = $this->tools()->execute($admin, 'operator_needs_attention', ['limit' => 1])['result'];
+        $this->assertSame(2, $attention['summary']['urgent_trips_count'], 'Summary count is exact even when sample limit is 1.');
+        $this->assertCount(1, $attention['urgent_trips']);
+
+        $analytics = $this->tools()->execute($admin, 'get_analytics')['result'];
+        $json = json_encode([$attention, $analytics]);
+        foreach (['boarding_token', 'qr_payload', 'passenger_tickets', 'passenger_breakdown', 'seat_map'] as $leaked) {
+            $this->assertStringNotContainsString($leaked, $json);
+        }
+    }
+
+    public function test_staff_search_trips_and_attention_stay_within_origin_port_and_dropdown_labels(): void
+    {
+        $surigaoOut1 = $this->trip(self::SURIGAO_OUT, '2026-11-09 10:30');
+        $surigaoOut2 = $this->trip(self::SURIGAO_OUT, '2026-11-09 13:30');
+        $sanJoseOut = $this->trip(self::SAN_JOSE_OUT, '2026-11-09 17:00');
+
+        $surigaoStaff = $this->staff('Surigao City Port', 'sur@example.test');
+        $sanJoseDropdownStaff = $this->staff('San Jose Port (Dinagat)', 'sjd@example.test');
+
+        $surigaoSearch = $this->tools()->execute($surigaoStaff, 'search_trips')['result'];
+        $this->assertSame([$surigaoOut1->id, $surigaoOut2->id], array_column($surigaoSearch, 'id'));
+
+        $sanJoseSearch = $this->tools()->execute($sanJoseDropdownStaff, 'search_trips')['result'];
+        $this->assertSame([$sanJoseOut->id], array_column($sanJoseSearch, 'id'));
+
+        $surigaoAttention = $this->tools()->execute($surigaoStaff, 'operator_needs_attention', ['limit' => 1])['result'];
+        $this->assertSame('Port of Surigao', $surigaoAttention['scope']);
+        $this->assertSame(2, $surigaoAttention['total_trips_today']);
+        $this->assertCount(1, $surigaoAttention['trips_today']);
+        $this->assertSame($surigaoOut1->id, $surigaoAttention['trips_today'][0]['id']);
+
+        $sanJoseAttention = $this->tools()->execute($sanJoseDropdownStaff, 'operator_needs_attention')['result'];
+        $this->assertSame('Port of San Jose', $sanJoseAttention['scope']);
+        $this->assertSame([$sanJoseOut->id], array_column($sanJoseAttention['trips_today'], 'id'));
+
+        $floating = $this->staff('All Ports (Floating Crew)', 'float@example.test');
+        $this->actingAs($floating, 'api')->postJson('/api/assistant/tool', ['name' => 'get_port_departures'])->assertForbidden();
+    }
+
+    public function test_advisory_tools_extract_plain_message_from_rendered_email_html(): void
+    {
+        $juan = $this->passenger();
+        Carbon::setTestNow(now()->addMinute());
+        $html = Advisory::renderEmailHtml([
+            'title' => 'Rough seas advisory',
+            'type' => 'Weather',
+            'route' => 'All Routes',
+            'effectiveFrom' => 'Immediate',
+            'until' => 'Until Further Notice',
+            'severity' => 'Warning',
+            'message' => 'Small craft trips are delayed by 45 minutes until swells subside.',
+        ]);
+        Advisory::create([
+            'title' => 'Rough seas advisory',
+            'content' => $html,
+            'severity' => 'warning',
+            'route' => 'All Routes',
+            'is_published' => true,
+            'published_at' => now(),
+        ]);
+
+        $notifications = $this->tools()->execute($juan, 'get_notifications')['result'];
+        $this->assertSame('Small craft trips are delayed by 45 minutes until swells subside.', $notifications['advisories'][0]['message']);
+        $this->assertStringNotContainsString('<!DOCTYPE', $notifications['advisories'][0]['message']);
+
+        $advisories = $this->tools()->execute($juan, 'get_advisories')['result'];
+        $this->assertSame('Small craft trips are delayed by 45 minutes until swells subside.', $advisories[0]['content']);
+    }
 }
