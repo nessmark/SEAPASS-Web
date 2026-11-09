@@ -10,7 +10,7 @@
 @media(max-width:600px){.sp-assistant button,.sp-assistant .sp-attachment{min-height:44px}.sp-assistant header button{min-width:44px}.sp-assistant-compose{min-height:44px}}
 
 /* Console guide overlay (public/js/assistant/guide-overlay.js). Tokens only; the scrim is a neutral dim. */
-.sp-tour{position:fixed;inset:0;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:transparent;overflow:hidden;color:var(--text);font:14px/1.5 system-ui}
+.sp-tour{position:fixed;inset:0;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:transparent;overflow:hidden;color:var(--text);font:14px/1.5 var(--font-sans,system-ui)}
 .sp-tour::backdrop{background:transparent}
 .sp-tour-shade{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .sp-tour-dim{fill:rgba(0,0,0,.62)}
