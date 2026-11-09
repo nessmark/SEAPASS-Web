@@ -163,6 +163,7 @@ export function createGuide({ registry, env, timeoutMs = 4000, pollMs = 100, fal
   let state = initialGuide();
   let seq = 0;
   let timer = null;
+  let pending = null;
   const listeners = new Set();
   const meta = () => ({ identity: env.identity, role: registry.role, now: env.now() });
   function emit(action) {
@@ -171,7 +172,12 @@ export function createGuide({ registry, env, timeoutMs = 4000, pollMs = 100, fal
     for (const fn of listeners) fn(state);
     if (was && !state.active) onClose();
   }
-  function stopLookup() { seq++; if (timer !== null) { env.clearTimeout(timer); timer = null; } }
+  // A cancelled lookup still settles, so a caller awaiting begin() (a Live tool call) never hangs.
+  function stopLookup() {
+    seq++;
+    if (timer !== null) { env.clearTimeout(timer); timer = null; }
+    if (pending) { const settle = pending; pending = null; settle(); }
+  }
   function stepPage(step) { return step?.target ? registry.anchor(step.target)?.page || null : null; }
   // A hidden part points at the next best visible one: a row at its table, a sidebar link at the menu button.
   function fallbackChain(id) {
@@ -199,18 +205,20 @@ export function createGuide({ registry, env, timeoutMs = 4000, pollMs = 100, fal
     const started = env.now();
     const fallbacks = fallbackChain(step.target);
     return new Promise(resolve => {
+      const settle = () => { if (pending === settle) pending = null; resolve(state); };
+      pending = settle;
       const check = () => {
         timer = null;
-        if (mine !== seq || !state.active) return resolve(state);
+        if (mine !== seq || !state.active) return settle();
         const elapsed = env.now() - started;
         let el = env.find(step);
         if (!el && elapsed >= fallbackAfterMs) for (const id of fallbacks) { el = env.find({ target: id }); if (el) break; }
         if (el) {
           env.scrollIntoView?.(el);
           emit({ type: 'found', target: el });
-          return resolve(state);
+          return settle();
         }
-        if (elapsed >= timeoutMs) { emit({ type: 'missing' }); return resolve(state); }
+        if (elapsed >= timeoutMs) { emit({ type: 'missing' }); return settle(); }
         timer = env.setTimeout(check, pollMs);
       };
       check();

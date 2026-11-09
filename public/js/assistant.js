@@ -69,8 +69,11 @@ function init(){
   if(a.type==='navigate'&&embeddedConfig){hostEvent({type:'navigate',page:a.page,path:a.path,args:a.args||{}});return;}
   if((a.type==='highlight_element'||a.type==='start_tour')&&embeddedConfig){hostEvent({type:'guide',action:a});return;}
   if(a.type==='navigate'){const link=document.createElement('button');link.type='button';link.textContent='Open '+a.page;link.onclick=()=>{if(a.path.startsWith('/admin/')){save();location.assign(a.path);}};log.append(link);}
-  if(a.type==='highlight_element'){if(a.tour)consoleGuide.showTour(a.tour).catch(e=>say(e.message));else guide(a.args.target,a.args.message);}
-  if(a.type==='start_tour')consoleGuide.showTour(a.tour||{preset:'current_page'}).catch(e=>say(e.message));
+  // Settles once the first step is shown, missing or on another page (about 4s at most). The tour then runs on its own.
+  // result.guide rides back on a Live tool response: shown, started, not_found, elsewhere or cancelled.
+  const run=async p=>{try{result.guide=await p;}catch(e){say(e.message);result.guide={status:'error',message:e.message};}};
+  if(a.type==='highlight_element'){if(a.tour)await run(consoleGuide.showTour(a.tour));else guide(a.args.target,a.args.message);}
+  if(a.type==='start_tour')await run(consoleGuide.showTour(a.tour||{preset:'current_page'}));
  }
  function setBusy(value){busy=value;panel.querySelectorAll('nav button,#sp-assistant-history button').forEach(b=>b.disabled=value);if(value)$('sp-assistant-history').hidden=true;$('sp-assistant-send').disabled=value;state(value?'Thinking…':voice?'Live voice connected':'Trips, tickets and a little guidance');}
  async function send(text){if(busy||!text.trim())return;if(voice)stopVoice();const previous=current.messages.slice(-16);bubble('user',text);input.value='';setBusy(true);say('');const files=attachments;attachments=[];renderFiles();try{const r=await api('chat',{message:text,messages:previous,context:context(),attachments:files});bubble('assistant',r.message);for(const item of r.effects||[])await effect(item);}catch(e){say(e.message);const retry=document.createElement('button');retry.type='button';retry.textContent='Retry';retry.onclick=()=>{retry.remove();send(text);};log.append(retry);}finally{setBusy(false);}}
