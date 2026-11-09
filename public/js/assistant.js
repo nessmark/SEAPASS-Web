@@ -79,7 +79,7 @@ function init(){
  function setBusy(value){busy=value;panel.querySelectorAll('nav button,#sp-assistant-history button').forEach(b=>b.disabled=value);if(value)$('sp-assistant-history').hidden=true;$('sp-assistant-send').disabled=value;state(statusLine());}
  // Typing ends live voice, except in Text mode, where the background probe keeps
  // waiting for a turn boundary to bring voice back. Offline, the message waits.
- async function send(text){if(busy||!text.trim())return;if(voiceWanted&&liveState!=='fallback')stopVoice();const previous=current.messages.slice(-16);bubble('user',text);input.value='';const files=attachments;attachments=[];renderFiles();const item={text,previous,files,chat:current.id};if(navigator.onLine===false){say(outbox.push(item)?'You are offline. Your message will send when you are back online.':'You are offline. Try again when you are back online.');return;}await deliver(item);}
+ async function send(text){if(busy||!text.trim())return;if(voiceWanted&&liveState!=='fallback')stopVoice();if(navigator.onLine===false&&outbox.size>=5){say('You are offline. Try again when you are back online.');return;}const previous=current.messages.slice(-16);bubble('user',text);input.value='';const files=attachments;attachments=[];renderFiles();const item={text,previous,files,chat:current.id};if(navigator.onLine===false){say(outbox.push(item)?'You are offline. Your message will send when you are back online.':'You are offline. Try again when you are back online.');return;}await deliver(item);}
  async function deliver({text,previous,files,chat}){if(chat!==current?.id)return;for(let i=0;busy&&i<400;i++)await new Promise(r=>setTimeout(r,250));if(busy)return;setBusy(true);say('');try{const r=await api('chat',{message:text,messages:previous,context:context(),attachments:files});bubble('assistant',r.message);for(const item of r.effects||[])await effect(item);}catch(e){say(e.message);const retry=document.createElement('button');retry.type='button';retry.textContent='Retry';retry.onclick=()=>{retry.remove();send(text);};log.append(retry);}finally{setBusy(false);}}
  const outbox=createOutbox({deliver});
  $('sp-assistant-form').onsubmit=e=>{e.preventDefault();send(input.value);};input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('sp-assistant-form').requestSubmit();}};
@@ -93,16 +93,16 @@ function init(){
  function stopVoice(){voiceWanted=false;liveState='idle';const conn=live;live=null;conn?.disconnect();mic?.stop();mic=null;playback?.close();playback=null;liveBubble=null;voiceUserBubble=null;userPart='';modelPart='';renderVoice();}
  async function micPermission(){try{return (await navigator.permissions.query({name:'microphone'})).state;}catch{return 'unknown';}}
  // Mic problems are said once per tap on Voice; text chat keeps working.
- function micFailed(error){mic=null;micBlocked=true;stopVoice();if(!micNoticeShown){micNoticeShown=true;say(error?.message||MIC_DENIED);}}
+ function micFailed(error){if(!voiceWanted)return;mic=null;micBlocked=true;stopVoice();if(!micNoticeShown){micNoticeShown=true;say(error?.message||MIC_DENIED);}}
  async function ensureMic(conn){if(mic)return true;if(micBlocked||live!==conn)return false;const capture=createMicCapture({onChunk:data=>conn.sendAudio(data),onError:micFailed});mic=capture;await capture.start();if(mic!==capture||live!==conn){capture.stop();return false;}if(!capture.active){mic=null;return false;}return true;}
  async function runLiveTool(conn,{key,name,args,signal}){if(signal?.aborted)return;let result;try{result=await api('tool',{name,args,context:context()},signal);if(signal?.aborted)return;await effect(result);}catch(e){if(signal?.aborted)return;result={error:e.message};}conn.respondTool(key,result);}
  function wireLive(conn){
   const mine=fn=>payload=>{if(live===conn)fn(payload);};
-  conn.on('state',mine(({state:next})=>{liveState=next;if(next!=='ready'){playback?.flush();liveBubble=null;}if(next==='fallback'||next==='offline'||next==='unavailable'){mic?.stop();mic=null;}if(next==='unavailable')queueMicrotask(()=>{if(live===conn)stopVoice();});renderVoice();}));
+  conn.on('state',mine(({state:next})=>{liveState=next;if(next!=='ready'){playback?.flush();modelPart='';liveBubble=null;}if(next==='fallback'||next==='offline'||next==='unavailable'){mic?.stop();mic=null;}if(next==='unavailable')queueMicrotask(()=>{if(live===conn)stopVoice();});renderVoice();}));
   conn.on('notice',mine(({message})=>say(message)));
-  conn.on('ready',mine(async({recovered,replaced})=>{if(replaced){if(notice.textContent===LIVE_COPY.refreshing)say(LIVE_COPY.listening);return;}if(!await ensureMic(conn)||live!==conn)return;say(recovered?LIVE_COPY.back:LIVE_COPY.listening);}));
+  conn.on('ready',mine(async({recovered,replaced})=>{if(replaced){if(notice.textContent===LIVE_COPY.refreshing)say(LIVE_COPY.listening);return;}if(!await ensureMic(conn)||live!==conn||conn.state!=='ready')return;say(recovered?LIVE_COPY.back:LIVE_COPY.listening);}));
   conn.on('audio',mine(({data})=>{try{playback?.enqueue(data);}catch{}}));
-  conn.on('interrupted',mine(()=>{playback?.flush();liveBubble=null;}));
+  conn.on('interrupted',mine(()=>{playback?.flush();modelPart='';liveBubble=null;}));
   conn.on('inputTranscript',mine(({text})=>{userPart+=text;if(!voiceUserBubble)voiceUserBubble=bubble('user','',false);voiceUserBubble.textContent=userPart;}));
   conn.on('outputTranscript',mine(({text})=>{modelPart+=text;if(!liveBubble)liveBubble=bubble('assistant','',false);liveBubble.textContent=modelPart;log.scrollTop=log.scrollHeight;}));
   conn.on('turnComplete',mine(({ok})=>finishLiveTurn(ok)));

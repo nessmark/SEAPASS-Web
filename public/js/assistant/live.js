@@ -60,7 +60,7 @@ const QUEUE_STATES = new Set(['connecting', 'reconnecting', 'ready']);
 // Error text. Only short, plain sentences reach the user; anything that looks
 // like a stack trace, SQL, a path, a URL or a credential becomes the fallback.
 // ---------------------------------------------------------------------------
-const TECHNICAL = /(sqlstate|exception|stack ?trace|traceback|\bat [\w$.<>]+ ?\(|\/home\/|\/var\/|\/usr\/|\\app\\|vendor\/|\.php\b|https?:\/\/|wss?:\/\/|api[_ -]?key|aiza[0-9a-z_-]{8,}|bearer\s|access_token|token=|<\/?[a-z][^>]*>|[{}[\]]|undefined|\bnull\b|syntax error|cannot read propert)/i;
+const TECHNICAL = /(sqlstate|exception|stack ?trace|traceback|\bat [\w$.<>]+ ?\(|\/home\/|\/var\/|\/usr\/|\\app\\|vendor\/|\.php\b|\bcurl\b|googleapis|https?:\/\/|wss?:\/\/|api[_ -]?key|aiza[0-9a-z_-]{8,}|bearer\s|access_token|token=|<\/?[a-z][^>]*>|[{}[\]]|undefined|\bnull\b|syntax error|cannot read propert)/i;
 
 export function cleanMessage(text, max = 200) {
   if (typeof text !== 'string') return '';
@@ -195,6 +195,7 @@ export function createLiveConnection(options = {}) {
   let epoch = 0;            // bumped by every hard transition; stale async work checks it
   let active = null;        // socket record carrying the conversation
   let pending = null;       // socket record still handshaking
+  let replacing = false;    // goAway replacement minting a session token
   let resumeHandle = null;
   let failures = [];
   let reconnectTimer = null;
@@ -248,13 +249,20 @@ export function createLiveConnection(options = {}) {
     }, cfg.turnWatchdogMs);
   }
 
+  function clearTools() {
+    for (const slot of tools.values()) {
+      try { slot.controller?.abort(); } catch { /* noop */ }
+    }
+    tools.clear();
+  }
+
   // Ends whatever turn is in flight as failed. Tool calls still running can
-  // no longer be answered on this connection, so their slots are dropped.
+  // no longer be answered on this connection, so their slots are aborted and dropped.
   function failTurn(message) {
     const had = turnOpen || tools.size > 0;
     turnOpen = false;
     clearWatchdog();
-    tools.clear();
+    clearTools();
     if (had) emit('turnComplete', { ok: false, error: message });
   }
 
@@ -271,13 +279,14 @@ export function createLiveConnection(options = {}) {
     if (closed) return;
     closed = true;
     epoch += 1;
+    replacing = false;
     reconnectTimer = cancel(reconnectTimer);
     probeTimer = cancel(probeTimer);
     clearWatchdog();
     if (unsubscribeOnline) { try { unsubscribeOnline(); } catch { /* noop */ } unsubscribeOnline = null; }
     retire(pending); pending = null;
     retire(active); active = null;
-    tools.clear();
+    clearTools();
     turnOpen = false;
     audioQueue = [];
     setState('closed');
@@ -318,19 +327,23 @@ export function createLiveConnection(options = {}) {
   // while the old socket still works), 'probe' (from Text mode, in background).
   async function attempt(kind) {
     const myEpoch = kind === 'replacement' ? epoch : ++epoch;
-    if (kind !== 'replacement') { retire(pending); pending = null; }
+    if (kind === 'replacement') replacing = true;
+    else { replacing = false; retire(pending); pending = null; }
     let session;
     try {
       session = await mintSession();
     } catch (err) {
+      if (myEpoch === epoch && kind === 'replacement') replacing = false;
       if (myEpoch !== epoch || closed) return;
       mintFailed(kind, err);
       return;
     }
+    if (myEpoch === epoch && kind === 'replacement') replacing = false;
     if (myEpoch !== epoch || closed) return;
     if (kind === 'probe' && state !== 'fallback') return;
     if (kind === 'replacement') {
       if (pending || (state !== 'ready' && state !== 'reconnecting')) return;
+      if (active && (turnOpen || tools.size > 0)) { active.replaceAfterTurn = true; return; }
       // The old socket already closed and a plain reconnect was booked: this
       // replacement is further along, so it takes that job over.
       reconnectTimer = cancel(reconnectTimer);
@@ -357,7 +370,7 @@ export function createLiveConnection(options = {}) {
 
   function openSocket(kind, session) {
     const usedHandle = kind === 'probe' ? null : resumeHandle;
-    const rec = { kind, session, socket: null, opened: false, settled: false, retired: false, usedHandle, setupTimer: null, goingAway: false, replaceAfterTurn: false, chain: Promise.resolve(), waiting: 0 };
+    const rec = { kind, session, socket: null, opened: false, settled: false, retired: false, usedHandle, turnSeq, setupTimer: null, goingAway: false, replaceAfterTurn: false, chain: Promise.resolve(), waiting: 0 };
     pending = rec;
     try {
       rec.socket = wsFactory(liveSocketUrl(session));
@@ -381,7 +394,6 @@ export function createLiveConnection(options = {}) {
     rec.socket.addEventListener('open', () => {
       if (rec.retired) return;
       rec.opened = true;
-      rec.turnSeq = turnSeq;
       sendOn(rec, buildSetup(session, { resumeHandle: usedHandle, voiceName: cfg.voiceName }));
     });
     rec.socket.addEventListener('message', event => onFrame(rec, event?.data));
@@ -415,7 +427,7 @@ export function createLiveConnection(options = {}) {
     // out. If the user spoke on the old socket since then, that session is a
     // turn behind: drop it and open a fresh one from the newer handle, at the
     // next turn boundary (or now, if that turn already finished).
-    if (rec.kind === 'replacement' && (turnOpen || tools.size > 0 || rec.turnSeq !== turnSeq)) {
+    if (rec.kind === 'replacement' && (turnOpen || tools.size > 0 || rec.turnSeq !== turnSeq || rec.usedHandle !== resumeHandle)) {
       retire(rec, 1000, 'stale');
       if (active) {
         if (turnOpen || tools.size > 0) active.replaceAfterTurn = true;
@@ -464,7 +476,7 @@ export function createLiveConnection(options = {}) {
     if (isQuotaClose(event)) { quotaHit('primary'); return; }
     if (midTurn) failTurn(LIVE_COPY.dropped);
     if (!online.isOnline()) { goOffline(); return; }
-    if (rec.goingAway && pending && pending.kind === 'replacement') {
+    if (rec.goingAway && (replacing || (pending && pending.kind === 'replacement'))) {
       // The announced close beat the replacement: audio waits in the queue.
       setState('reconnecting');
       return;
@@ -500,6 +512,8 @@ export function createLiveConnection(options = {}) {
   // ---- Text mode ------------------------------------------------------------
   function toFallback(reason, probeDelay = cfg.probeMs) {
     epoch += 1;
+    replacing = false;
+    failures = [];
     reconnectTimer = cancel(reconnectTimer);
     retire(pending); pending = null;
     const old = active; active = null;
@@ -531,6 +545,7 @@ export function createLiveConnection(options = {}) {
 
   function toUnavailable(message) {
     epoch += 1;
+    replacing = false;
     reconnectTimer = cancel(reconnectTimer);
     probeTimer = cancel(probeTimer);
     retire(pending); pending = null;
@@ -545,6 +560,7 @@ export function createLiveConnection(options = {}) {
   function goOffline() {
     if (closed) return;
     epoch += 1;
+    replacing = false;
     reconnectTimer = cancel(reconnectTimer);
     probeTimer = cancel(probeTimer);
     retire(pending); pending = null;
@@ -662,7 +678,7 @@ export function createLiveConnection(options = {}) {
   }
 
   function startReplacement() {
-    if (closed || pending || state !== 'ready') return;
+    if (closed || pending || replacing || state !== 'ready') return;
     attempt('replacement');
   }
 

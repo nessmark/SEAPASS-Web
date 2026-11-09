@@ -444,6 +444,41 @@ test('if the old socket closed after a newer turn, a stale replacement gives way
   h.conn.disconnect();
 });
 
+test('a turn that starts while the goAway replacement token is minting defers handover, and an early close waits for the mint', async () => {
+  let resolveMint;
+  const h = harness({
+    mint: n => n === 2 ? new Promise(r => { resolveMint = () => r(SESSION(n)); }) : Promise.resolve(SESSION(n))
+  });
+  const old = await connectReady(h);
+  old.serverSend({ sessionResumptionUpdate: { newHandle: 'h1' } });
+  old.serverSend({ goAway: {} });
+  // Turn starts on old while mint #2 is still in flight
+  old.serverSend({ serverContent: { inputTranscription: { text: 'Hold on' } } });
+  resolveMint();
+  await flush();
+  assert.equal(h.sockets.length, 1, 'did not open a stale replacement mid-turn');
+  old.serverSend({ sessionResumptionUpdate: { newHandle: 'h2' } });
+  old.serverSend({ serverContent: { turnComplete: true } });
+  await flush();
+  assert.equal(h.sockets.length, 2, 'replacement opened after the turn completed');
+  await handshake(h.sockets[1]);
+  assert.deepEqual(h.sockets[1].setup.sessionResumption, { handle: 'h2' });
+
+  // Now test old closing while replacement mint is still in flight
+  let resolveMint4;
+  h.setMint(n => n === 4 ? new Promise(r => { resolveMint4 = () => r(SESSION(n)); }) : Promise.resolve(SESSION(n)));
+  h.sockets[1].serverSend({ goAway: {} });
+  h.sockets[1].serverDrop(1000);
+  await flush();
+  assert.equal(h.conn.state, 'reconnecting');
+  assert.equal(h.clock.pending(), 0, 'no competing reconnect timer booked while replacement mint is in flight');
+  resolveMint4();
+  await flush();
+  await handshake(h.sockets[2]);
+  assert.equal(h.conn.state, 'ready');
+  h.conn.disconnect();
+});
+
 test('the per-turn watchdog ends a stuck turn with a friendly line', async () => {
   const h = harness();
   const socket = await connectReady(h);
@@ -486,6 +521,26 @@ test('a tool call the model cancels is aborted and never answered', async () => 
   assert.equal(h.conn.respondTool(call.key, { ok: true }), false);
   assert.equal(socket.sent.length, sentBefore);
   h.conn.disconnect();
+});
+
+test('in-flight tool calls are aborted when the socket drops or the connection disconnects', async () => {
+  const h = harness();
+  const first = await connectReady(h);
+  first.serverSend({ toolCall: { functionCalls: [{ id: 'drop-1', name: 'search_trips', args: {} }] } });
+  const droppedCall = h.of('toolCall')[0];
+  assert.equal(droppedCall.signal.aborted, false);
+  first.serverDrop(1006);
+  await flush();
+  assert.equal(droppedCall.signal.aborted, true, 'aborted on drop so the panel stops awaiting the tool');
+  assert.equal(h.conn.respondTool(droppedCall.key, { ok: true }), false);
+
+  await h.clock.advance(LIVE_DEFAULTS.reconnectBaseMs);
+  const second = await handshake(h.sockets[1]).then(() => h.sockets[1]);
+  second.serverSend({ toolCall: { functionCalls: [{ id: 'disc-1', name: 'search_trips', args: {} }] } });
+  const discCall = h.of('toolCall')[1];
+  assert.equal(discCall.signal.aborted, false);
+  h.conn.disconnect();
+  assert.equal(discCall.signal.aborted, true, 'aborted on disconnect');
 });
 
 test('malformed and unknown frames are ignored and the next valid one still works', async () => {
@@ -632,6 +687,8 @@ test('friendlyError keeps plain server messages and hides technical ones', () =>
   assert.equal(friendlyError(new Error("Cannot read properties of undefined (reading 'x')")), LIVE_COPY.generic);
   assert.equal(friendlyError(null, 'Fallback.'), 'Fallback.');
   assert.equal(cleanMessage('Error in /home/app/vendor/x.php line 4'), '');
+  assert.equal(cleanMessage('cURL error 28: Operation timed out after 10000 milliseconds'), '');
+  assert.equal(cleanMessage('Upstream googleapis quota error'), '');
   assert.equal(cleanMessage('x'.repeat(300)).length, 200);
   assert.equal(cleanMessage('  Two\n lines  '), 'Two lines');
 });
