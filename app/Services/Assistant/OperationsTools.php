@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\{DB, Validator};
 class OperationsTools
 {
     /** Tools in this class that change data. They are staged behind the one-time token. */
-    public const STAGED = ['set_staff_active'];
+    public const STAGED = ['set_staff_active', 'mark_notifications_read'];
 
     /** Booking statuses the manifest counts as travelling passengers (Booking::scopeEarning). */
     private const EARNING = ['confirmed', 'completed', 'approved'];
@@ -38,6 +38,9 @@ class OperationsTools
                     : 'Read your own in-app notifications with read state. Optional unread_only and limit (max 20).',
                 ['unread_only' => 'boolean', 'limit' => 'integer'],
             ],
+            'mark_notifications_read' => $role === 'passenger'
+                ? ['Propose marking your own unread notifications and travel advisories as read: all of them, or one advisory by advisory_id from get_notifications. Requires confirmation.', ['advisory_id' => 'integer']]
+                : ['Propose marking your own unread in-app notifications as read. Requires confirmation.', []],
         ];
 
         if ($role === 'passenger') {
@@ -608,13 +611,37 @@ class OperationsTools
         ])];
     }
 
+    /** The signed-in account's own rows in the notifications table, matched the way FcmPushService writes them. */
+    private function ownNotifications(Authenticatable $user)
+    {
+        return DB::table('notifications')->where('notifiable_type', get_class($user))->where('notifiable_id', $user->getAuthIdentifier());
+    }
+
+    /** Same visibility rule as AdvisoryController::index: published, and published after the account was created. */
+    private function visibleAdvisories(Passenger $passenger)
+    {
+        $query = Advisory::published();
+        if ($passenger->created_at) {
+            $since = $passenger->created_at;
+            $query->where(fn ($q) => $q->where('published_at', '>=', $since)->orWhere(fn ($s) => $s->whereNull('published_at')->where('created_at', '>=', $since)));
+        }
+        return $query;
+    }
+
+    /** IDs of visible advisories this passenger has not read yet. */
+    private function unreadAdvisoryIds(Passenger $passenger): Collection
+    {
+        $read = AdvisoryUserRead::where('user_id', $passenger->id)->pluck('advisory_id');
+        return $this->visibleAdvisories($passenger)->whereNotIn('id', $read)->pluck('id');
+    }
+
     private function notifications(Authenticatable $user, string $role, array $args): array
     {
         $data = Validator::make($args, ['unread_only' => 'nullable|boolean', 'limit' => 'nullable|integer'])->validate();
         $limit = min(max((int) ($data['limit'] ?? 10), 1), 20);
         $unreadOnly = !empty($data['unread_only']);
 
-        $base = DB::table('notifications')->where('notifiable_type', get_class($user))->where('notifiable_id', $user->getAuthIdentifier());
+        $base = $this->ownNotifications($user);
         $unreadInApp = (clone $base)->whereNull('read_at')->count();
         $inApp = (clone $base)->when($unreadOnly, fn ($q) => $q->whereNull('read_at'))->orderByDesc('created_at')->limit($limit)->get(['data', 'read_at', 'created_at'])
             ->map(function ($row) {
@@ -633,13 +660,7 @@ class OperationsTools
         $result = ['in_app' => $inApp, 'unread_in_app' => $unreadInApp, 'limit' => $limit];
 
         if ($role === 'passenger' && $user instanceof Passenger) {
-            // Same visibility rule as AdvisoryController::index: advisories published after the account was created.
-            $query = Advisory::published()->orderByDesc('published_at')->orderByDesc('id');
-            if ($user->created_at) {
-                $since = $user->created_at;
-                $query->where(fn ($q) => $q->where('published_at', '>=', $since)->orWhere(fn ($s) => $s->whereNull('published_at')->where('created_at', '>=', $since)));
-            }
-            $advisories = $query->limit(50)->get(['id', 'title', 'content', 'severity', 'route', 'affected_route', 'effective_from', 'until', 'published_at', 'created_at']);
+            $advisories = $this->visibleAdvisories($user)->orderByDesc('published_at')->orderByDesc('id')->limit(50)->get(['id', 'title', 'content', 'severity', 'route', 'affected_route', 'effective_from', 'until', 'published_at', 'created_at']);
             $read = AdvisoryUserRead::where('user_id', $user->id)->whereIn('advisory_id', $advisories->pluck('id'))->pluck('advisory_id')->flip();
             $ports = collect($this->upcomingBookings($user)->pluck('route'))->flatMap(function ($route) {
                 $parts = preg_split('/\s*(?:\x{2192}|->|\x{2014}|\x{2013})\s*/u', (string) $route, 2) ?: [];
@@ -672,6 +693,7 @@ class OperationsTools
     {
         return match ($name) {
             'set_staff_active' => ['staff_id' => 'required|integer|exists:users,id', 'active' => 'required|boolean'],
+            'mark_notifications_read' => ['advisory_id' => 'nullable|integer|min:1'],
         };
     }
 
@@ -688,7 +710,30 @@ class OperationsTools
                 'active' => (bool) $valid['active'],
             ];
         }
+        if ($name === 'mark_notifications_read') {
+            return $this->readTargets($user, $valid['advisory_id'] ?? null);
+        }
         return $valid;
+    }
+
+    /**
+     * What mark_notifications_read would change for this account. Checked when staging and again at
+     * confirmation, so the card never promises more than the account owns.
+     */
+    private function readTargets(Authenticatable $user, ?int $advisoryId): array
+    {
+        if ($advisoryId !== null) {
+            abort_unless($user instanceof Passenger, 422, 'Travel advisories are marked as read in the passenger app.');
+            $advisory = $this->visibleAdvisories($user)->whereKey($advisoryId)->first(['id', 'title']);
+            abort_unless($advisory, 404, 'That advisory is not in your list.');
+            abort_unless($this->unreadAdvisoryIds($user)->contains($advisory->id), 422, 'That advisory is already marked as read.');
+            return ['advisory_id' => $advisory->id, 'advisory' => $advisory->title];
+        }
+
+        $targets = ['scope' => 'all', 'unread_notifications' => $this->ownNotifications($user)->whereNull('read_at')->count()];
+        if ($user instanceof Passenger) $targets['unread_advisories'] = $this->unreadAdvisoryIds($user)->count();
+        abort_if(array_sum(array_filter($targets, 'is_int')) === 0, 422, 'You have no unread notifications.');
+        return $targets;
     }
 
     private function assertStaffChange(Authenticatable $user, User $staff, bool $active): void
@@ -709,6 +754,15 @@ class OperationsTools
             $staff->refresh();
             AuditLog::record('user', $staff->is_active ? 'Staff Account Activated' : 'Staff Account Deactivated', "Staff account {$staff->name} (#{$staff->id}) ".($staff->is_active ? 'activated' : 'deactivated').' via SeaPass Assistant.', $user->name);
             return ['staff_id' => $staff->id, 'is_active' => (bool) $staff->is_active];
+        }
+        if ($name === 'mark_notifications_read') {
+            $this->readTargets($user, $a['advisory_id'] ?? null);
+            $now = now();
+            $advisories = !empty($a['advisory_id']) ? collect([(int) $a['advisory_id']]) : ($user instanceof Passenger ? $this->unreadAdvisoryIds($user) : collect());
+            // Same write as AdvisoryController::markAsRead, so the app badge drops too.
+            foreach ($advisories as $id) AdvisoryUserRead::updateOrCreate(['user_id' => $user->getAuthIdentifier(), 'advisory_id' => $id], ['read_at' => $now]);
+            $notifications = !empty($a['advisory_id']) ? 0 : $this->ownNotifications($user)->whereNull('read_at')->update(['read_at' => $now, 'updated_at' => $now]);
+            return ['marked_notifications' => $notifications, 'marked_advisories' => $advisories->count()];
         }
         abort(422);
     }
