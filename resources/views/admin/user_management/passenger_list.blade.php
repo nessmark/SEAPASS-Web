@@ -61,7 +61,7 @@
             </div>
 
             @if($passengers->isEmpty())
-                <div class="empty-state">
+                <div class="empty-state" data-guide="users.passengers">
                     <p>No passengers found.</p>
                 </div>
             @else

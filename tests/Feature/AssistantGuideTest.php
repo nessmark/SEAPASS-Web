@@ -12,9 +12,9 @@ class AssistantGuideTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function admin(): User { return User::create(['name' => 'Port admin', 'email' => 'admin@example.test', 'password' => 'test-password', 'role' => 'admin', 'is_active' => true]); }
-    private function staff(): User { return User::create(['name' => 'Scanner', 'email' => 'scanner@example.test', 'password' => 'test-password', 'role' => 'scanner', 'assigned_port' => 'Surigao City Port', 'is_active' => true]); }
-    private function passenger(): Passenger { return Passenger::create(['name' => 'Passenger', 'email' => 'passenger@example.test', 'password' => 'test-password']); }
+    private function admin(): User { return User::firstOrCreate(['email' => 'admin@example.test'], ['name' => 'Port admin', 'password' => 'test-password', 'role' => 'admin', 'is_active' => true]); }
+    private function staff(): User { return User::firstOrCreate(['email' => 'scanner@example.test'], ['name' => 'Scanner', 'password' => 'test-password', 'role' => 'scanner', 'assigned_port' => 'Surigao City Port', 'is_active' => true]); }
+    private function passenger(): Passenger { return Passenger::firstOrCreate(['email' => 'passenger@example.test'], ['name' => 'Passenger', 'password' => 'test-password']); }
     private function tool(User $u, string $name, array $args = [], array $context = []): \Illuminate\Testing\TestResponse
     {
         return $this->actingAs($u)->postJson('/assistant/tool', ['name' => $name, 'args' => $args, 'context' => $context]);
