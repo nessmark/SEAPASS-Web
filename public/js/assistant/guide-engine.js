@@ -173,6 +173,12 @@ export function createGuide({ registry, env, timeoutMs = 4000, pollMs = 100, fal
   }
   function stopLookup() { seq++; if (timer !== null) { env.clearTimeout(timer); timer = null; } }
   function stepPage(step) { return step?.target ? registry.anchor(step.target)?.page || null : null; }
+  // A hidden part points at the next best visible one: a row at its table, a sidebar link at the menu button.
+  function fallbackChain(id) {
+    const chain = [];
+    for (let next = registry.anchor(id)?.fallback; next && !chain.includes(next) && next !== id && chain.length < 4; next = registry.anchor(next)?.fallback) chain.push(next);
+    return chain;
+  }
   function persistAndGo(path) {
     try { env.storage.set(STORAGE_KEY, serializeGuide(state, meta())); } catch { /* storage blocked: the tour ends on this page */ }
     emit({ type: 'navigating' });
@@ -191,14 +197,14 @@ export function createGuide({ registry, env, timeoutMs = 4000, pollMs = 100, fal
     }
     const mine = seq;
     const started = env.now();
-    const fallback = step.target ? registry.anchor(step.target)?.fallback : null;
+    const fallbacks = fallbackChain(step.target);
     return new Promise(resolve => {
       const check = () => {
         timer = null;
         if (mine !== seq || !state.active) return resolve(state);
         const elapsed = env.now() - started;
         let el = env.find(step);
-        if (!el && fallback && elapsed >= fallbackAfterMs) el = env.find({ target: fallback });
+        if (!el && elapsed >= fallbackAfterMs) for (const id of fallbacks) { el = env.find({ target: id }); if (el) break; }
         if (el) {
           env.scrollIntoView?.(el);
           emit({ type: 'found', target: el });
@@ -242,7 +248,8 @@ export function createGuide({ registry, env, timeoutMs = 4000, pollMs = 100, fal
     refresh() {
       const step = currentStep(state);
       if (!step || state.status !== 'shown') return null;
-      const el = env.find(step) || (step.target && registry.anchor(step.target)?.fallback ? env.find({ target: registry.anchor(step.target).fallback }) : null);
+      let el = env.find(step);
+      if (!el) for (const id of fallbackChain(step.target)) { el = env.find({ target: id }); if (el) break; }
       if (el && el !== state.target) emit({ type: 'found', target: el });
       return el;
     },

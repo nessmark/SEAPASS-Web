@@ -5,12 +5,12 @@
         <div><h1>SMS delivery</h1><p class="page-description">Check whether passenger text messages were accepted by the sending service.</p></div>
         <a href="{{ route('admin.sms') }}" class="btn-secondary">Refresh status</a>
     </div>
-    <section class="card" style="margin-bottom:24px" aria-labelledby="sms-connection-heading">
+    <section class="card" style="margin-bottom:24px" aria-labelledby="sms-connection-heading" data-guide="sms.connection">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap"><h2 class="card-title" id="sms-connection-heading">{{ $smsProvider ?? 'TextLink' }} connection</h2><span class="badge {{ $smsConfigured ? 'success' : 'warning' }}">{{ $smsConfigured ? 'Configured' : 'Not configured' }}</span></div>
         <p class="page-description">{{ $smsConfigured ? 'SeaPass can submit messages to the SMS provider. The linked Android phone needs power, internet and a working SIM text allowance.' : 'SMS is not connected yet. Passenger messages cannot be sent until the provider and sending phone are configured.' }}</p>
         <p class="page-description">“Sent” means the provider accepted the message. It does not confirm that the passenger's phone received it.</p>
     </section>
-    <section class="card" aria-labelledby="sms-log-heading">
+    <section class="card" aria-labelledby="sms-log-heading" data-guide="sms.log">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px"><h2 class="card-title" id="sms-log-heading">Message activity</h2><span class="muted" style="font-size:12px">Latest first</span></div>
         <table><thead><tr><th>Recipient</th><th>Status</th><th>Submitted</th><th>Details</th></tr></thead><tbody>
         @forelse($smsMessages ?? [] as $message)

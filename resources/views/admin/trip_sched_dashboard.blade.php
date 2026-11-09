@@ -18,7 +18,7 @@
                     <h1 class="workspace-page-title">Trip &amp; Schedule Management</h1>
                     <p class="page-description">Plan departures, manage seats and prepare passenger manifests.</p>
                 </div>
-                <button class="trip-button" type="button" id="openScheduleModal">Add Schedule</button>
+                <button class="trip-button" type="button" id="openScheduleModal" data-guide="trips.add">Add Schedule</button>
             </div>
 
             @if (session('success'))
@@ -148,13 +148,13 @@
             </div>
 
             {{-- Tabs --}}
-            <div class="trip-tabs"
+            <div class="trip-tabs" data-guide="trips.tabs"
                  data-manila-now="{{ $manilaNow }}"
                  data-live-fingerprint="{{ $liveFingerprint }}">
                 <button class="trip-tab active" data-tab="scheduled">Scheduled Trips</button>
                 <button class="trip-tab" data-tab="active">Active Trips</button>
                 <button class="trip-tab" data-tab="completed">Recent Completed</button>
-                <button class="trip-tab" data-tab="recurring">
+                <button class="trip-tab" data-tab="recurring" data-guide="trips.recurring">
                     Recurring Rules
                     @if(isset($scheduleTemplates) && $scheduleTemplates->isNotEmpty())
                         <span class="tab-badge">{{ $scheduleTemplates->count() }}</span>
@@ -164,7 +164,7 @@
 
             {{-- Scheduled Trips Tab --}}
             <div class="trip-tab-content active" id="tab-scheduled">
-                <div class="trip-grid" id="scheduled-trip-grid"
+                <div class="trip-grid" id="scheduled-trip-grid" data-guide="trips.list"
                      data-live-grid="scheduled">
                     @include('admin.partials.trip_tab_grid', [
                         'trips' => $scheduledTrips,

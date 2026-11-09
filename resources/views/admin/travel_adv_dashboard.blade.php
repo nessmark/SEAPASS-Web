@@ -24,7 +24,7 @@
 
             <div class="adv-layout">
                 {{-- Create Advisory --}}
-                <section class="adv-section">
+                <section data-guide="adv.form" class="adv-section">
                     <div class="adv-section-header">
                         <h2>Create Advisory</h2>
                     </div>
@@ -81,14 +81,14 @@
                             </div>
                         </div>
                         <div class="adv-form-actions">
-                            <button type="button" class="adv-btn-secondary" id="adv_save_draft">Save as Draft</button>
-                            <button type="submit" class="adv-btn-primary">Publish Advisory</button>
+                            <button type="button" class="adv-btn-secondary" id="adv_save_draft" data-guide="adv.draft">Save as Draft</button>
+                            <button type="submit" class="adv-btn-primary" data-guide="adv.publish">Publish Advisory</button>
                         </div>
                     </form>
                 </section>
 
                 {{-- Manage Alerts --}}
-                <section class="adv-section">
+                <section data-guide="adv.list" class="adv-section">
                     <div class="adv-section-header">
                         <h2>Manage Alerts</h2>
                     </div>

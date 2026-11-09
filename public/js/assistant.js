@@ -1,7 +1,8 @@
-import {renderReply} from './assistant/reply.js?v=20261020-completion';
-import {pageGuide} from './assistant/guides.js?v=20261020-completion';
-import {downloadReportPdf} from './assistant/report.js?v=20261020-completion';
-import {createMicCapture, createPlaybackQueue, AUDIO_INPUT_MIME_TYPE} from './assistant/audio.js?v=20261020-completion';
+import {renderReply} from './assistant/reply.js?v=20261109-parity';
+import {pageGuide} from './assistant/guides.js?v=20261109-parity';
+import {downloadReportPdf} from './assistant/report.js?v=20261109-parity';
+import {createMicCapture, createPlaybackQueue, AUDIO_INPUT_MIME_TYPE} from './assistant/audio.js?v=20261109-parity';
+import {mountConsoleGuide, readRegistry} from './assistant/guide-overlay.js?v=20261109-parity';
 
 const panel=document.getElementById('sp-assistant');
 let embeddedConfig=null;
@@ -41,7 +42,7 @@ function init(){
   }catch(e){if(e.name==='AbortError')throw new Error('The assistant took too long. Try again.');throw e;}finally{clearTimeout(timer);}
  }
  function newChat(){stopVoice();current={id:globalThis.crypto?.randomUUID?.()||String(Date.now()),title:'New conversation',messages:[]};chats.unshift(current);chats=chats.slice(0,20);log.replaceChildren();$('sp-assistant-history').hidden=true;save();welcome();}
- function welcome(){if(!current.messages.length){const el=document.createElement('p');el.className='sp-welcome';el.textContent='Ask about trips, fares or bookings, or let me show you this page.';log.append(el);}}
+ function welcome(){if(!current.messages.length){const el=document.createElement('div');el.className='sp-welcome';const p=document.createElement('p');p.textContent='Ask about trips, fares or bookings, or let me show you this page.';el.append(p);if(consoleGuide?.hasPreset('getting_started')){const b=document.createElement('button');b.type='button';b.className='sp-welcome-tour';b.textContent='Show me around';b.onclick=()=>consoleGuide.startPreset('getting_started',{gesture:true}).catch(e=>say(e.message));el.append(b);}log.append(el);}}
  function bubble(role,text,record=true){
   log.querySelector('.sp-welcome')?.remove(); const el=document.createElement('article');el.className='sp-message';el.dataset.role=role;
   const label=document.createElement('small');label.textContent=role==='user'?'You':'SeaPass';el.append(label);
@@ -58,19 +59,18 @@ function init(){
   const seen=new Set();return candidates.filter(el=>{const label=(el.getAttribute('aria-label')||el.textContent||el.getAttribute('placeholder')||'').trim();if(!label||label.length>170||seen.has(label))return false;seen.add(label);return true;}).slice(0,24).map((el,i)=>{if(!el.dataset.spGuide)el.dataset.spGuide='target-'+i;const label=(el.getAttribute('aria-label')||el.textContent||el.getAttribute('placeholder')||'').trim().slice(0,150);let message='This control opens '+label.toLowerCase()+'.';if(el.matches('h1'))message='You are on '+label+'. '+(el.nextElementSibling?.matches('p')?el.nextElementSibling.textContent.trim():'This walkthrough stays on the current page.');if(el.matches('h2'))message='This section contains '+label.toLowerCase()+'. Review its details before making changes.';if(el.matches('input,select'))message='Use '+label.toLowerCase()+' to set this value. Changes are applied only after you use the page save control.';if(el.matches('button'))message='Use '+label.toLowerCase()+' to apply or open this action. Review the values first.';return {id:el.dataset.spGuide,label,message,el};});
  }
  function context(){if(embeddedConfig)return embeddedConfig.context||{};const main=document.querySelector('main')||document.body;return{path:location.pathname,label:document.querySelector('main h1,h1')?.textContent?.trim()||document.title,text:(main.innerText||'').slice(0,6000),targets:targets().map(({id,label})=>({id,label}))};}
- let guideItems=[],guideIndex=0;
- function closeGuide(){document.querySelectorAll('.sp-guide-target').forEach(e=>e.classList.remove('sp-guide-target'));$('sp-guide').hidden=true;panel.classList.remove('sp-guiding');}
- function showStep(){closeGuide();const item=guideItems[guideIndex];if(!item)return;item.el.classList.add('sp-guide-target');item.el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});$('sp-guide-title').textContent=item.label;$('sp-guide').querySelector('p').textContent=item.message||`Step ${guideIndex+1} of ${guideItems.length}. This is ${item.label.toLowerCase()}.`;$('sp-guide').hidden=false;panel.classList.add('sp-guiding');$('sp-guide').querySelector('[data-guide=next]').hidden=guideIndex>=guideItems.length-1;}
- function guide(target,message){if(embeddedConfig){hostEvent({type:'guide',target,message});return true;}const available=targets();guideItems=target?available.filter(t=>t.id===target):pageGuide(location.pathname).flatMap(([selector,label,explanation])=>{const el=document.querySelector(selector);return el&&el.getClientRects().length?[{el,label,message:explanation}]:[];});guideIndex=0;if(!guideItems.length){say('No guide targets are visible on this page.');return false;}guideItems=guideItems.map(t=>({...t,message:message||t.message}));showStep();return true;}
- $('sp-guide').onclick=e=>{if(e.target.dataset.guide==='close')closeGuide();if(e.target.dataset.guide==='next'){guideIndex++;showStep();}};
+ // Console guide (public/js/assistant/guide-*.js): read-only tours that also work without the AI connection.
+ const consoleGuide=embeddedConfig?null:mountConsoleGuide({registryData:readRegistry(),identity:panel.dataset.user,panel,launcher:$('sp-assistant-launch'),say,legacyPageSteps:()=>pageGuide(location.pathname).filter(([selector])=>document.querySelector(selector)?.getClientRects().length).map(([selector,title,body])=>({selector,title,body}))});
+ function closeGuide(){consoleGuide?.exit();}
+ function guide(target,message){if(embeddedConfig){hostEvent({type:'guide',target,message});return;}(target?consoleGuide.highlight({target,message,label:targets().find(t=>t.id===target)?.label}):consoleGuide.currentPage({gesture:true})).catch(e=>say(e.message));}
  async function effect(result){
   if(result.confirmation){const c=result.confirmation,card=document.createElement('div');card.className='sp-confirm';const p=document.createElement('p');p.textContent='Confirm '+c.tool.replaceAll('_',' ')+'?\n'+Object.entries(c.args).map(([k,v])=>k.replaceAll('_',' ')+': '+v).join('\n');card.append(p);for(const [approved,label]of[[true,'Confirm change'],[false,'Cancel']]){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=async()=>{card.querySelectorAll('button').forEach(x=>x.disabled=true);try{const r=await api('tool',{confirmation_token:c.token,approved});p.textContent=r.status==='confirmed'?'Change saved.':'Change cancelled.';current.messages.push({role:'assistant',text:p.textContent});save();}catch(e){p.textContent=e.message;}};card.append(b);}log.append(card);log.scrollTop=log.scrollHeight;}
   const a=result.client_action;if(!a)return;
   if(a.type==='navigate'&&embeddedConfig){hostEvent({type:'navigate',page:a.page,path:a.path,args:a.args||{}});return;}
   if((a.type==='highlight_element'||a.type==='start_tour')&&embeddedConfig){hostEvent({type:'guide',action:a});return;}
   if(a.type==='navigate'){const link=document.createElement('button');link.type='button';link.textContent='Open '+a.page;link.onclick=()=>{if(a.path.startsWith('/admin/')){save();location.assign(a.path);}};log.append(link);}
-  if(a.type==='highlight_element')guide(a.args.target,a.args.message);
-  if(a.type==='start_tour')guide();
+  if(a.type==='highlight_element'){if(a.tour)consoleGuide.showTour(a.tour).catch(e=>say(e.message));else guide(a.args.target,a.args.message);}
+  if(a.type==='start_tour')consoleGuide.showTour(a.tour||{preset:'current_page'}).catch(e=>say(e.message));
  }
  function setBusy(value){busy=value;panel.querySelectorAll('nav button,#sp-assistant-history button').forEach(b=>b.disabled=value);if(value)$('sp-assistant-history').hidden=true;$('sp-assistant-send').disabled=value;state(value?'Thinking…':voice?'Live voice connected':'Trips, tickets and a little guidance');}
  async function send(text){if(busy||!text.trim())return;if(voice)stopVoice();const previous=current.messages.slice(-16);bubble('user',text);input.value='';setBusy(true);say('');const files=attachments;attachments=[];renderFiles();try{const r=await api('chat',{message:text,messages:previous,context:context(),attachments:files});bubble('assistant',r.message);for(const item of r.effects||[])await effect(item);}catch(e){say(e.message);const retry=document.createElement('button');retry.type='button';retry.textContent='Retry';retry.onclick=()=>{retry.remove();send(text);};log.append(retry);}finally{setBusy(false);}}
@@ -90,4 +90,5 @@ function init(){
  function open(value){if(embeddedConfig&&!value){stopVoice();hostEvent({type:'close'});return;}panel.hidden=!value;$('sp-assistant-launch').setAttribute('aria-expanded',String(value));if(value)input.focus();else{stopVoice();closeGuide();$('sp-assistant-launch').focus();}}
  panel.addEventListener('click',e=>{const action=e.target.closest('[data-sp]')?.dataset.sp;if(action==='close')open(false);if(action==='new'&&!busy)newChat();if(action==='history'&&!busy)history();if(action==='tour')guide();if(action==='voice')startVoice();});$('sp-assistant-launch').onclick=()=>open(panel.hidden);document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGuide();open(false);}});window.addEventListener('pagehide',()=>{stopVoice();save();});
  current=chats[0];if(!current)newChat();else{current.messages.forEach(m=>bubble(m.role,m.text,false));welcome();}api('status').then(s=>{if(!s.configured)say('The AI provider is not connected yet. Page guidance still works.');}).catch(e=>say(e.message));
+ consoleGuide?.resume();
 }

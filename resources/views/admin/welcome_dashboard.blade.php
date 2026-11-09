@@ -15,12 +15,12 @@
             <h1>Port overview</h1>
             <p class="page-description">The day's departures, passenger bookings and updates in one place.</p>
         </div>
-        <a href="{{ route('admin.tickets.index') }}" class="btn-primary">Open booking counter <span aria-hidden="true">↗</span></a>
+        <a href="{{ route('admin.tickets.index') }}" class="btn-primary" data-guide="dash.counter">Open booking counter <span aria-hidden="true">↗</span></a>
     </div>
 
     <div class="port-overview">
         <div class="overview-primary">
-            <section class="operation-panel" id="needs-attention" aria-labelledby="attention-heading">
+            <section class="operation-panel" id="needs-attention" data-guide="dash.attention" aria-labelledby="attention-heading">
                 <div class="operation-panel-heading"><h2 id="attention-heading">Things to do</h2><span class="section-note">Start here</span></div>
                 <a class="operation-row" href="{{ route('admin.tickets.index') }}?tab=pending">
                     <span class="operation-symbol"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M8 12h8M8 16h5"/></svg></span>
@@ -39,20 +39,20 @@
                 </a>
             </section>
 
-            <section class="operation-panel" id="upcoming-departures" aria-labelledby="departures-heading">
+            <section class="operation-panel" id="upcoming-departures" data-guide="dash.departures" aria-labelledby="departures-heading">
                 <div class="operation-panel-heading"><div><h2 id="departures-heading">Upcoming departures</h2><p>Next sailings, in departure order</p></div><a class="text-action" href="{{ route('admin.trip-schedules') }}">All trips <span aria-hidden="true">›</span></a></div>
                 @forelse($upcomingTrips ?? [] as $trip)
                     <div class="departure-row">
                         <div class="departure-time"><strong>{{ \Carbon\Carbon::parse($trip->departure_time)->format('g:i') }}<small>{{ \Carbon\Carbon::parse($trip->departure_time)->format('A') }}</small></strong><span>{{ \Carbon\Carbon::parse($trip->departure_time)->format('M j') }}</span></div>
                         <div class="departure-copy"><strong>{{ $trip->route }}</strong><small>{{ $trip->boat?->name ?? 'Vessel pending' }} <span aria-hidden="true">·</span> {{ ucfirst($trip->status) }}</small></div>
-                        <a class="text-action manifest-link" href="{{ url('/admin/trip-schedules/'.$trip->id.'/manifest') }}?format=csv">Manifest <span aria-hidden="true">↓</span></a>
+                        <a class="text-action manifest-link" data-guide="dash.manifest" href="{{ url('/admin/trip-schedules/'.$trip->id.'/manifest') }}?format=csv">Manifest <span aria-hidden="true">↓</span></a>
                     </div>
                 @empty
                     <div class="panel-empty"><strong>No upcoming departures</strong><p>New sailings will appear here once they are scheduled.</p><a class="text-action" href="{{ route('admin.trip-schedules') }}">Manage schedules <span aria-hidden="true">›</span></a></div>
                 @endforelse
             </section>
 
-            <section class="operation-panel" id="recent-bookings" aria-labelledby="bookings-heading">
+            <section class="operation-panel" id="recent-bookings" data-guide="dash.bookings" aria-labelledby="bookings-heading">
                 <div class="operation-panel-heading"><h2 id="bookings-heading">Recent bookings</h2><a class="text-action" href="{{ route('admin.tickets.index') }}">View all <span aria-hidden="true">›</span></a></div>
                 <div class="overview-booking-table"><table><thead><tr><th>Passenger / reference</th><th>Journey</th><th>Amount</th><th>Status</th></tr></thead><tbody>
                 @forelse($recentBookings ?? [] as $booking)
@@ -66,12 +66,12 @@
         </div>
 
         <aside class="overview-secondary" aria-label="Port context">
-            <section class="operation-panel port-day-summary">
+            <section class="operation-panel port-day-summary" data-guide="dash.today">
                 <div class="operation-panel-heading"><h2>Today at the port</h2><span class="today-dot" aria-hidden="true"></span></div>
                 <div class="day-revenue"><span>Collected today</span><strong>₱{{ number_format($todayRevenue ?? 0, 2) }}</strong><a class="text-action" href="{{ route('admin.reports-audit') }}">View sales report <span aria-hidden="true">›</span></a></div>
                 <dl class="port-facts"><div><dt>Departures today</dt><dd>{{ $tripsTodayCount ?? 0 }}</dd></div><div><dt>Active vessels</dt><dd>{{ $activeBoatsCount ?? 0 }} <span>/ {{ $totalBoatsCount ?? 0 }}</span></dd></div><div><dt>Awaiting payment</dt><dd>{{ $paymentCount }}</dd></div></dl>
             </section>
-            <section class="operation-panel" aria-labelledby="fleet-heading">
+            <section class="operation-panel" aria-labelledby="fleet-heading" data-guide="dash.fleet">
                 <div class="operation-panel-heading"><h2 id="fleet-heading">Your fleet</h2><a class="text-action" href="{{ route('admin.boats') }}">Manage <span aria-hidden="true">›</span></a></div>
                 @forelse($boats ?? [] as $boat)
                     <a class="context-row" href="{{ route('admin.boats') }}"><span class="vessel-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 12 8-3 8 3-3 6H7l-3-6ZM7 11V6h10v5M12 6V3M3 21c2-2 4 2 6 0s4 2 6 0 4 2 6 0"/></svg></span><span class="context-copy"><strong>{{ $boat->name }}</strong><small>{{ $boat->passenger_capacity }} passenger capacity</small></span><span class="state-dot {{ strtolower($boat->status) === 'active' ? 'is-active' : '' }}" title="{{ $boat->status }}"></span><span class="sr-only">{{ $boat->status }}</span></a>
@@ -79,7 +79,7 @@
                     <div class="panel-empty">No vessels registered.</div>
                 @endforelse
             </section>
-            <section class="operation-panel" aria-labelledby="updates-heading">
+            <section class="operation-panel" aria-labelledby="updates-heading" data-guide="dash.updates">
                 <div class="operation-panel-heading"><h2 id="updates-heading">Port updates</h2><a class="text-action" href="{{ route('admin.travel-advisory') }}">View all <span aria-hidden="true">›</span></a></div>
                 @forelse($activeAdvisories ?? [] as $adv)
                     <a class="update-row" href="{{ route('admin.travel-advisory') }}"><small>{{ $adv->created_at->diffForHumans() }}</small><strong>{{ $adv->title }}</strong><p>{{ \Illuminate\Support\Str::limit($adv->message, 105) }}</p></a>

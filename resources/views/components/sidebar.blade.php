@@ -14,47 +14,48 @@
             'scanner'   => '<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M4 12h16"/>',
             'logout'    => '<path d="M14 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 16l-4-4 4-4"/><path d="M6 12h10"/>',
             'chevron'   => '<path d="m6 9 6 6 6-6"/>',
+            'tour'      => '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z"/>',
         ];
         return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">' . ($paths[$name] ?? '') . '</svg>';
     };
 @endphp
-<nav class="sidebar" id="sidebar" aria-label="Main navigation">
+<nav class="sidebar" id="sidebar" data-guide="shell.nav" aria-label="Main navigation">
     <a class="sidebar-logo" href="{{ route('admin.dashboard') }}">SeaPass</a>
     <div class="sidebar-workspace"><span class="workspace-mark">SJ</span><span><strong>San Jose Port</strong><small>Operations workspace</small></span></div>
-    <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+    <a href="{{ route('admin.dashboard') }}" data-guide="nav.dashboard" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('dashboard') !!}</span>
         <span>Dashboard</span>
     </a>
     <div class="nav-group-label">Port operations</div>
-    <a href="{{ route('admin.boats') }}" class="nav-item {{ request()->routeIs('admin.boats') ? 'active' : '' }}">
+    <a href="{{ route('admin.boats') }}" data-guide="nav.fleet" class="nav-item {{ request()->routeIs('admin.boats') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('fleet') !!}</span>
         <span>Fleet Management</span>
     </a>
-    <a href="{{ route('admin.trip-schedules') }}" class="nav-item {{ request()->routeIs('admin.trip-schedules*') ? 'active' : '' }}">
+    <a href="{{ route('admin.trip-schedules') }}" data-guide="nav.trips" class="nav-item {{ request()->routeIs('admin.trip-schedules*') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('schedule') !!}</span>
         <span>Trip &amp; Schedule</span>
     </a>
-    <a href="{{ route('admin.tickets.index') }}" class="nav-item {{ request()->routeIs('admin.tickets*') ? 'active' : '' }}">
+    <a href="{{ route('admin.tickets.index') }}" data-guide="nav.tickets" class="nav-item {{ request()->routeIs('admin.tickets*') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('ticket') !!}</span>
         <span>Ticketing &amp; Booking</span>
     </a>
-    <a href="{{ route('admin.travel-advisory') }}" class="nav-item {{ request()->routeIs('admin.travel-advisory') ? 'active' : '' }}">
+    <a href="{{ route('admin.travel-advisory') }}" data-guide="nav.advisories" class="nav-item {{ request()->routeIs('admin.travel-advisory') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('advisory') !!}</span>
         <span>Travel Advisory</span>
     </a>
-    <a href="{{ route('admin.sms') }}" class="nav-item {{ request()->routeIs('admin.sms') ? 'active' : '' }}"><span class="nav-icon">{!! $icon('advisory') !!}</span><span>SMS delivery</span></a>
+    <a href="{{ route('admin.sms') }}" data-guide="nav.sms" class="nav-item {{ request()->routeIs('admin.sms') ? 'active' : '' }}"><span class="nav-icon">{!! $icon('advisory') !!}</span><span>SMS delivery</span></a>
     <div class="nav-group-label">Management</div>
-    <a href="{{ route('admin.fare-management') }}" class="nav-item {{ request()->routeIs('admin.fare-management*') ? 'active' : '' }}">
+    <a href="{{ route('admin.fare-management') }}" data-guide="nav.fares" class="nav-item {{ request()->routeIs('admin.fare-management*') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('fare') !!}</span>
         <span>Fare Management</span>
     </a>
-    <a href="{{ route('admin.reports-audit') }}" class="nav-item {{ request()->routeIs('admin.reports-audit*') ? 'active' : '' }}">
+    <a href="{{ route('admin.reports-audit') }}" data-guide="nav.reports" class="nav-item {{ request()->routeIs('admin.reports-audit*') ? 'active' : '' }}">
         <span class="nav-icon">{!! $icon('reports') !!}</span>
         <span>Reports &amp; Audit</span>
     </a>
     {{-- User Management Dropdown --}}
     <div class="nav-dropdown">
-        <button type="button" aria-controls="userManagementMenu" aria-expanded="{{ request()->routeIs('admin.user-management.*') ? 'true' : 'false' }}" class="nav-item nav-dropdown-toggle {{ request()->routeIs('admin.user-management.*') ? 'active' : '' }}" id="userManagementToggle">
+        <button type="button" aria-controls="userManagementMenu" aria-expanded="{{ request()->routeIs('admin.user-management.*') ? 'true' : 'false' }}" data-guide="nav.users" class="nav-item nav-dropdown-toggle {{ request()->routeIs('admin.user-management.*') ? 'active' : '' }}" id="userManagementToggle">
             <span class="nav-icon">{!! $icon('users') !!}</span>
             <span>User Management</span>
             <span class="dropdown-arrow">{!! $icon('chevron') !!}</span>
@@ -72,9 +73,13 @@
     </div>
     <div class="sidebar-account">
     <a class="account-profile" href="{{ route('admin.user-management.profile') }}"><span class="user-avatar">{{ mb_substr(auth()->user()->name ?? 'Admin', 0, 1) }}</span><span><strong>{{ auth()->user()->name ?? 'Administrator' }}</strong><small>{{ ucfirst(auth()->user()->role ?? 'Admin') }}</small></span></a>
+    <button type="button" class="nav-item sp-tour-launch" data-sp-tour="getting_started" data-guide="account.tour">
+        <span class="nav-icon">{!! $icon('tour') !!}</span>
+        <span>Take the tour</span>
+    </button>
     <form method="POST" action="{{ route('logout') }}" style="margin: 0; width: 100%;">
         @csrf
-        <button type="submit" class="nav-item logout-btn">
+        <button type="submit" class="nav-item logout-btn" data-guide="account.signout">
             <span class="nav-icon">{!! $icon('logout') !!}</span>
             <span>Logout</span>
         </button>

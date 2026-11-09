@@ -56,7 +56,7 @@
 
     "tickets.date": { "label": "Trip date filter", "description": "Choose a trip date to list its bookings.", "roles": ["admin"], "page": "/admin/tickets" },
     "tickets.tabs": { "label": "Booking tabs", "description": "Switch between pending, confirmed and cancelled bookings. Only confirmed tickets can board.", "roles": ["admin"], "page": "/admin/tickets" },
-    "tickets.pending": { "label": "Pending bookings", "description": "Unpaid reservations, late payment reviews and paid discounted tickets waiting for an ID check.", "roles": ["admin"], "page": "/admin/tickets" },
+    "tickets.pending": { "label": "Pending bookings", "description": "Unpaid reservations, late payment reviews and paid discounted tickets waiting for an ID check.", "roles": ["admin"], "page": "/admin/tickets", "fallback": "tickets.tabs" },
     "tickets.details": { "label": "Passenger details", "description": "Opens the passengers on a booking with their fare type and the uploaded discount ID photo.", "roles": ["admin"], "page": "/admin/tickets", "fallback": "tickets.pending" },
     "tickets.approve": { "label": "Approve", "description": "Approves a student, senior or PWD ID after you check the photo, then issues the boarding pass.", "roles": ["admin"], "page": "/admin/tickets", "fallback": "tickets.pending" },
     "tickets.counter": { "label": "Counter booking", "description": "Book seats for a walk-in passenger. Choose the departure and fare categories, then check the amount and seats.", "roles": ["admin"], "page": "/admin/tickets" },

@@ -19,7 +19,7 @@
                     <p class="page-description">Vessels, capacity and availability for every sailing.</p>
                 </div>
 
-                <button class="boats-button" type="button" id="openBoatModal">Add Boat</button>
+                <button class="boats-button" type="button" id="openBoatModal" data-guide="fleet.add">Add Boat</button>
             </div>
 
             @if (session('success'))
@@ -146,7 +146,7 @@
                 </div>
             </div>
 
-            <div class="boats-grid">
+            <div class="boats-grid" data-guide="fleet.list">
                 @forelse ($boats as $boat)
                     @php
                         $status = $boat->status ?? 'Active';
@@ -203,7 +203,7 @@
                         </div>
 
                         <div class="boat-actions">
-                            <form method="POST" action="{{ route('admin.boats.updateStatus', $boat) }}" class="boat-status-form">
+                            <form method="POST" action="{{ route('admin.boats.updateStatus', $boat) }}" class="boat-status-form" data-guide="fleet.status">
                                 @csrf
                                 @method('PATCH')
                                 <select name="status" onchange="this.form.submit()" class="boat-status-select" aria-label="Status for {{ $boat->name }}">

@@ -28,7 +28,7 @@
                         <div>
                             <h2>Manage Bookings</h2>
                         </div>
-                        <div class="ticket-filter">
+                        <div class="ticket-filter" data-guide="tickets.date">
                             <form method="GET" action="{{ route('admin.tickets.index') }}">
                                 <label for="ticket_filter_date">Trip date</label>
                                 <input
@@ -42,7 +42,7 @@
                         </div>
                     </div>
 
-                    <div class="ticket-tabs" data-ticket-tabs data-requires-date>
+                    <div class="ticket-tabs" data-ticket-tabs data-requires-date data-guide="tickets.tabs">
                         <button class="ticket-tab active" data-tab="pending">
                             Pending
                             @if(isset($toBeConfirmedCount) && $toBeConfirmedCount > 0)
@@ -53,7 +53,7 @@
                         <button class="ticket-tab" data-tab="cancelled">Cancelled</button>
                     </div>
 
-                    <div class="ticket-tab-content active" id="tab-pending">
+                    <div class="ticket-tab-content active" id="tab-pending" data-guide="tickets.pending">
                         <table class="ticket-table">
                             <thead>
                                 <tr>
@@ -94,7 +94,7 @@
                                                 <span class="passenger-primary-name">{{ $primaryName }}</span>
                                                 <button 
                                                     type="button" 
-                                                    class="passenger-badge-btn btn-view-passengers" 
+                                                    class="passenger-badge-btn btn-view-passengers" data-guide="tickets.details" 
                                                     data-booking-id="{{ $booking->id }}"
                                                     data-booking-ref="{{ $bookingRef }}"
                                                     data-route="{{ $booking->route }}"
@@ -123,7 +123,7 @@
                                                         <span class="badge warning">{{ ucfirst($booking->refund_status ?: 'Needs review') }}</span>
                                                     @endif
                                                 @elseif($isVerificationRequired)
-                                                    <button type="button" class="btn-approve-booking-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" title="Approve discounted ID and issue boarding pass QR">
+                                                    <button type="button" class="btn-approve-booking-action" data-guide="tickets.approve" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" title="Approve discounted ID and issue boarding pass QR">
                                                         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Approve
                                                     </button>
                                                     <button type="button" class="btn-reject-refund-action" data-booking-id="{{ $booking->id }}" data-booking-ref="{{ $bookingRef }}" data-amount="₱{{ number_format((float) $booking->amount_collected, 2) }}" title="Reject ID and automatically refund via PayMongo">
@@ -296,7 +296,7 @@
                 </section>
 
                 {{-- Override / Counter Booking --}}
-                <section class="ticket-section">
+                <section data-guide="tickets.counter" class="ticket-section">
                     <div class="ticket-section-header">
                         <h2>Override / Counter Booking</h2>
                     </div>
@@ -450,7 +450,7 @@
                 </section>
 
                 {{-- Refund Requests --}}
-                <section class="ticket-section full-width-section">
+                <section class="ticket-section full-width-section" data-guide="tickets.refunds">
                     <div class="ticket-section-header">
                         <h2>Refund Requests</h2>
                         <p>Handle cancellation and refund requests from passengers.</p>

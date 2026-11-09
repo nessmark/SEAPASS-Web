@@ -101,7 +101,7 @@
                     <h1 class="workspace-page-title">Scanner Staff Accounts</h1>
                     <p class="page-description">Manage the staff who scan and validate boarding tickets.</p>
                 </div>
-                <button class="boats-button" type="button" id="openScannerModal">
+                <button class="boats-button" type="button" id="openScannerModal" data-guide="users.staffAdd">
                     <span>+ Add Scanner Staff</span>
                 </button>
             </div>
@@ -215,7 +215,7 @@
                     </button>
                 </div>
             @else
-                <table class="crew-table">
+                <table class="crew-table" data-guide="users.staff">
                     <thead>
                         <tr>
                             <th>Name</th>
