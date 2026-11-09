@@ -46,7 +46,7 @@ class OperationsTools
 
         if ($role !== 'passenger') {
             $scope = $role === 'admin' ? 'Optional port (Surigao or San Jose) narrows the list.' : 'Only trips leaving your assigned port.';
-            $spec['get_port_departures'] = ["Read departures for one day (default today, Asia/Manila) with confirmed, boarded and not yet boarded seat counts, seats still awaiting payment or ID check, and the boarding window. {$scope}", ['date' => 'string', 'port' => 'string']];
+            $spec['get_port_departures'] = ["Read departures for one day (date YYYY-MM-DD, default today in Asia/Manila) with confirmed, boarded and not yet boarded seat counts, seats still awaiting payment or ID check, and the boarding window. {$scope}", $role === 'admin' ? ['date' => 'string', 'port' => 'string'] : ['date' => 'string']];
             $spec['get_trip_manifest'] = [
                 $role === 'admin'
                     ? 'Read the passenger manifest of one trip: totals by category, boarded and not boarded seats, and passenger rows without contact details. Set export true to show a download button for the CSV manifest.'
@@ -259,9 +259,8 @@ class OperationsTools
             ->whereDate('departure_time', $day->format('Y-m-d'))
             ->orderBy('departure_time');
         if ($port) $this->routeLike($query, $port);
-        $trips = $query->limit(60)->get(['id', 'boat_id', 'route', 'departure_time', 'status', 'available_seats']);
+        $trips = $query->limit(80)->get(['id', 'boat_id', 'route', 'departure_time', 'status', 'available_seats']);
         if ($port) $trips = $trips->filter(fn ($t) => $this->departsFrom((string) $t->route, $port))->values();
-        $trips = $trips->take(30);
 
         $bookings = Booking::whereIn('trip_schedule_id', $trips->pluck('id'))->get($this->bookingColumns())->groupBy('trip_schedule_id');
         $totals = ['trips' => 0, 'confirmed_seats' => 0, 'boarded_seats' => 0, 'not_boarded_seats' => 0, 'awaiting_payment_seats' => 0, 'awaiting_id_check_seats' => 0];
@@ -284,7 +283,7 @@ class OperationsTools
             'date' => $day->format('Y-m-d'),
             'scope' => $port ? 'Departures from '.$port : 'All departures',
             'totals' => $totals,
-            'trips' => $rows,
+            'trips' => array_slice($rows, 0, 30),
             'note' => 'Boarded counts come from scanned tickets. Seats awaiting payment or ID check cannot board yet.',
         ]];
     }
